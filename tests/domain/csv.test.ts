@@ -1,0 +1,64 @@
+import { describe, expect, test } from 'vitest'
+import { filasAMediciones, medicionesACsv, parseCsv, sugerirAsignacion } from '../../src/domain/csv'
+import { m } from './helpers'
+
+describe('CSV exportado desde Excel en español', () => {
+  const texto = '﻿Fecha;Peso;"Cintura";Nota\r\n05/11/2026;72,5;88;"dijo ""bien"""\r\n\r\n12/11/2026;72;87,5;\r\n'
+  const { columnas, filas } = parseCsv(texto)
+
+  test('quita el BOM y separa por punto y coma', () => {
+    expect(columnas).toEqual(['Fecha', 'Peso', 'Cintura', 'Nota'])
+    expect(filas).toHaveLength(2)
+  })
+  test('respeta comillas y comillas escapadas', () => {
+    expect(filas[0][3]).toBe('dijo "bien"')
+  })
+  test('sugiere la asignación por nombre de columna', () => {
+    expect(sugerirAsignacion(columnas)).toMatchObject({ fecha: 0, pesoKg: 1, cinturaCm: 2, nota: 3, caderaCm: null })
+  })
+  test('convierte filas en mediciones', () => {
+    const r = filasAMediciones(filas, sugerirAsignacion(columnas), 'p1')
+    expect(r.errores).toEqual([])
+    expect(r.mediciones[0]).toEqual({
+      id: 'p1_2026-11-05', personaId: 'p1', fecha: '2026-11-05', pesoKg: 72.5, cinturaCm: 88, nota: 'dijo "bien"', origen: 'csv',
+    })
+    expect(r.mediciones[1]).toEqual({
+      id: 'p1_2026-11-12', personaId: 'p1', fecha: '2026-11-12', pesoKg: 72, cinturaCm: 87.5, origen: 'csv',
+    })
+  })
+})
+
+test('separador coma y encabezados en inglés con tildes y mayúsculas', () => {
+  const { columnas, filas } = parseCsv('Date,Weight,Body Fat,MÚSCULO\n2026-11-05,72.5,21.3,34\n')
+  const r = filasAMediciones(filas, sugerirAsignacion(columnas), 'p1')
+  expect(r.mediciones[0]).toMatchObject({ fecha: '2026-11-05', pesoKg: 72.5, grasaPct: 21.3, musculoKg: 34 })
+})
+
+test('las filas inválidas se informan con su número y no se importan', () => {
+  const { columnas, filas } = parseCsv('fecha;peso\n05/11/2026;\n06/11/2026;900\nayer;70\n07/11/2026;70\n')
+  const r = filasAMediciones(filas, sugerirAsignacion(columnas), 'p1')
+  expect(r.mediciones.map((x) => x.fecha)).toEqual(['2026-11-07'])
+  expect(r.errores.map((e) => e.fila)).toEqual([2, 3, 4])
+  expect(r.errores[0].motivo).toContain('peso')
+  expect(r.errores[2].motivo).toContain('fecha')
+})
+
+test('sin columna de fecha o de peso asignada, todas las filas fallan', () => {
+  const { columnas, filas } = parseCsv('a;b\n1;2\n')
+  const r = filasAMediciones(filas, sugerirAsignacion(columnas), 'p1')
+  expect(r.mediciones).toEqual([])
+  expect(r.errores).toHaveLength(1)
+})
+
+test('exportar e importar reproduce las mediciones', () => {
+  const ms = [
+    m('2026-11-01', { pesoKg: 72.5, grasaPct: 21.3, cinturaCm: 88, nota: 'con ; y "comillas", ok', origen: 'csv' }),
+    m('2026-11-08', { pesoKg: 72, origen: 'csv' }),
+  ]
+  const { columnas, filas } = parseCsv(medicionesACsv(ms))
+  expect(filasAMediciones(filas, sugerirAsignacion(columnas), 'p1').mediciones).toEqual(ms)
+})
+
+test('texto vacío no rompe', () => {
+  expect(parseCsv('')).toEqual({ columnas: [], filas: [] })
+})
