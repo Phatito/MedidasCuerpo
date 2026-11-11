@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 
 async function agregarAna(page: Page) {
   await page.goto('./')
@@ -111,4 +113,84 @@ test('con una sola medición la evolución invita a seguir', async ({ page }) =>
   await expect(page.getByText('Registra otra medición para ver la línea.')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Primera medición registrada' })).toBeVisible()
   await expect(page.locator('svg.chart circle.dot')).toHaveCount(1)
+})
+
+const CSV_EXCEL = fileURLToPath(new URL('./fixtures/excel.csv', import.meta.url))
+
+async function importarCsv(page: Page) {
+  await ir(page, 'Datos')
+  await page.getByLabel('Archivo CSV').setInputFiles(CSV_EXCEL)
+}
+
+test('importar un CSV de Excel en español', async ({ page }) => {
+  await agregarAna(page)
+  await importarCsv(page)
+  await expect(page.getByLabel('Columna para Peso')).toHaveValue('1')
+  await expect(page.getByLabel('Columna para Grasa corporal')).toHaveValue('2')
+  await expect(page.getByText('3 nuevas, 0 reemplazan, 1 omitida')).toBeVisible()
+  await expect(page.getByText('Fila 4: Falta el peso')).toBeVisible()
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await expect(page.getByText('Se importaron 3 mediciones para Ana.')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(3)
+  await expect(filas(page).first()).toContainText('26/10/2025')
+  await expect(filas(page).first()).toContainText('72,6')
+
+  // Importar de nuevo avisa que reemplaza.
+  await importarCsv(page)
+  await expect(page.getByText('0 nuevas, 3 reemplazan, 1 omitida')).toBeVisible()
+})
+
+test('respaldo: descargar, rechazar un archivo ajeno y restaurar', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72,5', '88')
+  await ir(page, 'Familia')
+  await expect(page.getByText('Todavía no has hecho un respaldo de tus datos.')).toBeVisible()
+
+  await ir(page, 'Datos')
+  const [descarga] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Descargar respaldo' }).click()])
+  expect(descarga.suggestedFilename()).toMatch(/^medidascuerpo-\d{4}-\d{2}-\d{2}\.json$/)
+  const contenido = await readFile(await descarga.path(), 'utf8')
+  expect(JSON.parse(contenido)).toMatchObject({ app: 'MedidasCuerpo', version: 1, personas: [{ nombre: 'Ana' }], mediciones: [{ pesoKg: 72.5 }] })
+
+  // Un archivo que no es un respaldo se rechaza y no toca los datos.
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'otro.json', mimeType: 'application/json', buffer: Buffer.from('{"hola":1}') })
+  await expect(page.getByText('El archivo no es un respaldo de MedidasCuerpo')).toBeVisible()
+  await ir(page, 'Familia')
+  await expect(page.getByRole('heading', { name: 'Ana' })).toBeVisible()
+  await expect(page.getByText('Todavía no has hecho un respaldo de tus datos.')).toBeHidden()
+
+  // Se agrega otra medición y luego se restaura el respaldo: vuelve a haber una sola.
+  await medir(page, haceDias(1), '73', '89')
+  await ir(page, 'Datos')
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'respaldo.json', mimeType: 'application/json', buffer: Buffer.from(contenido) })
+  await expect(page.getByText('El archivo contiene 1 persona y 1 medición. Reemplazará todos los datos actuales.')).toBeVisible()
+  await page.getByRole('button', { name: 'Sí, restaurar' }).click()
+  await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+})
+
+test('exportar CSV y descargar el recordatorio de calendario', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72,5', '88')
+  await ir(page, 'Datos')
+
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar CSV' }).click()])
+  expect(csv.suggestedFilename()).toBe('medidas-Ana.csv')
+  expect(await readFile(await csv.path(), 'utf8')).toContain(`${haceDias(0)},72.5`)
+
+  await page.getByLabel('Día del recordatorio').selectOption('3')
+  await page.getByLabel('Hora del recordatorio').fill('20:30')
+  const [ics] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Descargar evento de calendario' }).click()])
+  expect(ics.suggestedFilename()).toBe('recordatorio-medidas.ics')
+  const texto = await readFile(await ics.path(), 'utf8')
+  expect(texto).toContain('RRULE:FREQ=WEEKLY;BYDAY=WE')
+  expect(texto).toMatch(/DTSTART:\d{8}T203000/)
+
+  // El día y la hora elegidos se recuerdan.
+  await page.reload()
+  await ir(page, 'Datos')
+  await expect(page.getByLabel('Día del recordatorio')).toHaveValue('3')
+  await expect(page.getByLabel('Hora del recordatorio')).toHaveValue('20:30')
 })

@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import type { Persona } from '../domain/types'
 import { db, listarPersonas } from '../storage/db'
+import { Datos } from './Datos'
 import { Evolucion } from './Evolucion'
 import { Familia } from './Familia'
 import { Historial } from './Historial'
@@ -89,6 +90,7 @@ export function App() {
             {visible === 'familia' && (
               <Familia
                 personas={personas}
+                onIrDatos={() => setPantalla('datos')}
                 onMedir={(id) => {
                   elegirPersona(id)
                   setPantalla('medir')
@@ -126,7 +128,7 @@ export function App() {
               />
             )}
             {visible === 'evolucion' && persona && <Evolucion persona={persona} onMedir={() => setPantalla('medir')} />}
-            {visible === 'datos' && <p className="muted">Sección en construcción.</p>}
+            {visible === 'datos' && <Datos personas={personas} personaActual={persona} />}
           </>
         )}
       </main>

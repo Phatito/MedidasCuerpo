@@ -1,17 +1,21 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
-import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
+import { diasEntre, fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { estadoMedicion } from '../domain/reminders'
 import type { Medicion, Persona } from '../domain/types'
-import { borrarPersona, guardarPersona, listarTodasLasMediciones } from '../storage/db'
+import { borrarPersona, guardarPersona, leerAjustes, listarTodasLasMediciones } from '../storage/db'
 import { PersonaForm } from './PersonaForm'
 
 interface Props {
   personas: Persona[]
   onMedir: (personaId: string) => void
+  onIrDatos: () => void
 }
 
-export function Familia({ personas, onMedir }: Props) {
+const DIAS_SIN_RESPALDO = 30
+
+export function Familia({ personas, onMedir, onIrDatos }: Props) {
+  const ajustes = useLiveQuery(leerAjustes, [])
   const mediciones = useLiveQuery(listarTodasLasMediciones, [], [] as Medicion[])
   const [editando, setEditando] = useState<Persona | 'nueva' | null>(null)
   const [porBorrar, setPorBorrar] = useState<string | null>(null)
@@ -20,6 +24,15 @@ export function Familia({ personas, onMedir }: Props) {
   const porPersona = new Map<string, Medicion[]>()
   for (const m of mediciones) porPersona.set(m.personaId, [...(porPersona.get(m.personaId) ?? []), m])
   const ultima = (id: string) => (porPersona.get(id) ?? []).reduce<Medicion | null>((u, m) => (!u || m.fecha > u.fecha ? m : u), null)
+
+  const avisoRespaldo =
+    ajustes == null || mediciones.length === 0
+      ? null
+      : ajustes.ultimoRespaldo == null
+        ? 'Todavía no has hecho un respaldo de tus datos.'
+        : diasEntre(ajustes.ultimoRespaldo, hoy) > DIAS_SIN_RESPALDO
+          ? 'Hace más de 30 días que no respaldas tus datos.'
+          : null
 
   async function guardar(p: Persona) {
     await guardarPersona(p)
@@ -34,6 +47,13 @@ export function Familia({ personas, onMedir }: Props) {
           <button className="btn primary" onClick={() => setEditando('nueva')}>Agregar persona</button>
         )}
       </div>
+
+      {avisoRespaldo && (
+        <div className="notice warn row">
+          <span>{avisoRespaldo} Viven solo en este navegador.</span>
+          <button className="btn" onClick={onIrDatos}>Hacer respaldo</button>
+        </div>
+      )}
 
       {editando != null && (
         <PersonaForm persona={editando === 'nueva' ? undefined : editando} onGuardar={guardar} onCancelar={() => setEditando(null)} />
