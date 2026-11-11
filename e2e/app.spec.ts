@@ -202,3 +202,58 @@ test('es instalable: tiene manifiesto y service worker', async ({ page, request 
   expect(await manifiesto.json()).toMatchObject({ name: 'MedidasCuerpo', display: 'standalone', start_url: '/MedidasCuerpo/' })
   await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration()) != null)).toBe(true)
 })
+
+test('cambiar la fecha en Medir no borra lo ya escrito', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await page.getByLabel('Cintura (cm)').fill('88')
+  await page.getByLabel('Fecha').fill(haceDias(1))
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
+  await expect(page.getByLabel('Cintura (cm)')).toHaveValue('88')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+  const [a, mes, d] = haceDias(1).split('-')
+  await expect(filas(page).first()).toContainText(`${d}/${mes}/${a}`)
+})
+
+test('una pantalla Medir que quedó abierta pasa al día de hoy al volver a ella', async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2026, 10, 4, 10, 0))
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+
+  // Una semana después la ventana sigue abierta y la persona vuelve a ella.
+  await page.clock.setFixedTime(new Date(2026, 10, 11, 10, 0))
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByLabel('Fecha')).toHaveValue('2026-11-11')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
+  await page.getByLabel('Peso (kg)').fill('72')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(2)
+})
+
+test('tras restaurar un respaldo con otras personas, exportar sigue funcionando', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Agregar persona' }).click()
+  await page.getByLabel('Nombre').fill('Prueba')
+  await page.getByLabel('Estatura (cm)').fill('170')
+  await page.getByRole('button', { name: 'Guardar persona' }).click()
+  await ir(page, 'Datos')
+  const respaldo = {
+    app: 'MedidasCuerpo', version: 1, exportadoEn: '2026-11-01T00:00:00.000Z',
+    personas: [{ id: 'ana', nombre: 'Ana', sexo: 'mujer', fechaNacimiento: '', estaturaCm: 165, objetivo: 'mantener', creadaEn: '2026-01-01T00:00:00.000Z' }],
+    mediciones: [{ id: 'ana_2026-10-01', personaId: 'ana', fecha: '2026-10-01', pesoKg: 60, origen: 'manual' }],
+    ajustes: { diaRecordatorio: 0, horaRecordatorio: '09:00' },
+  }
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'r.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(respaldo)) })
+  await page.getByRole('button', { name: 'Sí, restaurar' }).click()
+  await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar CSV' }).click()])
+  expect(csv.suggestedFilename()).toBe('medidas-Ana.csv')
+})

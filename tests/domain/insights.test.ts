@@ -137,3 +137,66 @@ test('la nota de orientación es la acordada', () => {
     'Orientación general, no diagnóstico médico. Las cifras de bioimpedancia son estimaciones: lo que importa es la tendencia.',
   )
 })
+
+describe('hallazgos de la revisión final', () => {
+  const texto = (ms: Medicion[], codigo: string, quien = p) => {
+    const x = interpretar(quien, ms).find((r) => r.codigo === codigo)
+    return x ? x.titulo + ' ' + x.texto : null
+  }
+
+  test('ganancia muscular sin cintura medida no afirma nada sobre la cintura', () => {
+    const t = texto([m(A, { pesoKg: 80, musculoKg: 35 }), m(B, { pesoKg: 80.8, musculoKg: 35.4 })], 'gana_musculo')
+    expect(t).not.toBeNull()
+    expect(t).not.toContain('cintura')
+  })
+
+  test('el umbral de 0,3 kg de músculo se cumple aunque la resta en coma flotante dé 0,2999…', () => {
+    expect(codigos([m(A, { pesoKg: 80, musculoKg: 35, cinturaCm: 90 }), m(B, { pesoKg: 80.8, musculoKg: 35.3, cinturaCm: 90 })])).toContain('gana_musculo')
+  })
+
+  test('el umbral de 1 cm de cintura se cumple con decimales no exactos', () => {
+    expect(codigos([m(A, { pesoKg: 80, cinturaCm: 90.3 }), m(B, { pesoKg: 80.1, cinturaCm: 89.3 })])).toContain('recomposicion')
+  })
+
+  test('bajar de peso con la grasa medida subiendo no se celebra', () => {
+    const r = codigos([m(A, { pesoKg: 80, cinturaCm: 90, grasaPct: 25 }), m(B, { pesoKg: 79, cinturaCm: 89.9, grasaPct: 27 })])
+    expect(r).not.toContain('baja_peso_grasa')
+    expect(r).toContain('baja_sin_grasa')
+  })
+
+  test('bajar de peso con 0,1 cm menos de cintura no cuenta como bajar grasa', () => {
+    expect(codigos([m(A, { pesoKg: 80, cinturaCm: 90 }), m('2026-12-01', { pesoKg: 79, cinturaCm: 89.9 })])).not.toContain('baja_peso_grasa')
+  })
+
+  test('bajar de peso con la cintura subiendo no dice que faltan datos', () => {
+    const ms = [m(A, { pesoKg: 80, cinturaCm: 90 }), m('2026-12-01', { pesoKg: 79, cinturaCm: 92 })]
+    expect(codigos(ms)).not.toContain('baja_sin_datos')
+    expect(texto(ms, 'baja_sin_grasa')).toContain('cintura subió 2,0 cm')
+  })
+
+  test('la grasa estimada por perímetros se nombra como estimada', () => {
+    const ms = [m(A, { pesoKg: 80, cuelloCm: 40, cinturaCm: 92 }), m(B, { pesoKg: 79, cuelloCm: 40, cinturaCm: 90 })]
+    expect(texto(ms, 'baja_peso_grasa')).toContain('grasa corporal estimada')
+  })
+
+  describe('menores de edad', () => {
+    const nina = persona({ sexo: 'mujer', estaturaCm: 115, fechaNacimiento: '2020-06-01' })
+    const ms = [m(A, { pesoKg: 20, cinturaCm: 60 }), m(B, { pesoKg: 20.6, cinturaCm: 61 })]
+    const cod = (quien: typeof nina) => interpretar(quien, ms).map((x) => x.codigo)
+
+    test('no reciben categoría de IMC ni reglas de adultos', () => {
+      expect(cod(nina)).toContain('menor')
+      for (const c of ['imc', 'gana_grasa', 'alerta_cintura', 'sube_sin_datos', 'ritmo_rapido']) expect(cod(nina)).not.toContain(c)
+    })
+    test('sin fecha de nacimiento y con estatura bajo 140 cm se tratan como menores', () => {
+      expect(cod(persona({ estaturaCm: 115, fechaNacimiento: '' }))).toContain('menor')
+    })
+    test('un adulto con fecha de nacimiento sigue recibiendo el IMC', () => {
+      expect(interpretar(persona({ fechaNacimiento: '1990-01-01' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('imc')
+    })
+    test('cumple 18 justo antes de la última medición: adulto', () => {
+      expect(interpretar(persona({ fechaNacimiento: '2008-11-08' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('imc')
+      expect(interpretar(persona({ fechaNacimiento: '2008-11-09' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('menor')
+    })
+  })
+})

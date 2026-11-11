@@ -62,3 +62,18 @@ test('exportar e importar reproduce las mediciones', () => {
 test('texto vacío no rompe', () => {
   expect(parseCsv('')).toEqual({ columnas: [], filas: [] })
 })
+
+describe('codificación del archivo', () => {
+  test('un CSV guardado por Excel en Windows-1252 conserva tildes', async () => {
+    const { decodificarTexto } = await import('../../src/domain/csv')
+    const latin1 = Uint8Array.from('Fecha;Peso;Músculo;Nota\r\n05/11/2026;72,5;34;después de almorzar\r\n', (c) => c.charCodeAt(0))
+    const { columnas, filas } = parseCsv(decodificarTexto(latin1))
+    expect(columnas[2]).toBe('Músculo')
+    expect(sugerirAsignacion(columnas).musculoKg).toBe(2)
+    expect(filas[0][3]).toBe('después de almorzar')
+  })
+  test('un CSV en UTF-8 se lee igual que antes', async () => {
+    const { decodificarTexto } = await import('../../src/domain/csv')
+    expect(decodificarTexto(new TextEncoder().encode('Músculo;ñandú'))).toBe('Músculo;ñandú')
+  })
+})

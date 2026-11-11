@@ -8,6 +8,7 @@ export type Codigo =
   | 'recomposicion'
   | 'baja_peso_grasa'
   | 'baja_sin_datos'
+  | 'baja_sin_grasa'
   | 'pierde_musculo'
   | 'ritmo_rapido'
   | 'gana_musculo'
@@ -19,6 +20,7 @@ export type Codigo =
   | 'alerta_cintura'
   | 'alerta_visceral'
   | 'imc'
+  | 'menor'
 
 export interface Mensaje {
   tono: Tono
@@ -33,7 +35,9 @@ export const NOTA_ORIENTACION =
 const CINTURA_RELEVANTE = 1
 const MUSCULO_SUBE = 0.3
 const MUSCULO_BAJA = 0.5
-const GRASA_SUBE = 0.5
+const GRASA_RELEVANTE = 0.5
+const EDAD_ADULTA = 18
+const ESTATURA_MINIMA_SIN_EDAD = 140
 const RITMO_RAPIDO_PCT = 1
 const VISCERAL_ALTA = 10
 
@@ -45,14 +49,27 @@ const NOMBRE_IMC = {
 } as const
 
 const abs = (n: number, decimales = 1) => formatear(Math.abs(n), decimales)
-const delta = (a: number | undefined, b: number | undefined) => (a == null || b == null ? null : b - a)
+// Las restas en coma flotante dan 0,2999… donde la persona ve 0,3: se redondea antes de comparar con un umbral.
+const redondear = (n: number) => Math.round(n * 100) / 100
+const delta = (a: number | undefined, b: number | undefined) => (a == null || b == null ? null : redondear(b - a))
 const subioBajo = (d: number) => (d > 0 ? 'subió' : 'bajó')
 
-function deltaGrasa(p: Persona, a: Medicion, b: Medicion): number | null {
+function deltaGrasa(p: Persona, a: Medicion, b: Medicion): { cambio: number; nombre: string } | null {
   const da = derivar(p, a)
   const db = derivar(p, b)
   if (da.grasaPct == null || db.grasaPct == null || da.grasaEstimada !== db.grasaEstimada) return null
-  return db.grasaPct - da.grasaPct
+  return { cambio: redondear(db.grasaPct - da.grasaPct), nombre: da.grasaEstimada ? 'grasa corporal estimada' : 'grasa corporal' }
+}
+
+/** Las reglas y categorías de esta app son para adultos. Sin fecha de nacimiento, una estatura baja indica un niño. */
+function esMenor(p: Persona, fechaReferencia: string): boolean {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(p.fechaNacimiento)) {
+    const [an, mn, dn] = p.fechaNacimiento.split('-').map(Number)
+    const [ar, mr, dr] = fechaReferencia.split('-').map(Number)
+    const edad = ar - an - (mr < mn || (mr === mn && dr < dn) ? 1 : 0)
+    return edad < EDAD_ADULTA
+  }
+  return p.estaturaCm < ESTATURA_MINIMA_SIN_EDAD
 }
 
 function promedio(valores: (number | undefined | null)[]): number | null {
@@ -62,19 +79,26 @@ function promedio(valores: (number | undefined | null)[]): number | null {
 
 function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
   const out: Mensaje[] = []
-  const dPeso = ult.pesoKg - ant.pesoKg
+  const dPeso = redondear(ult.pesoKg - ant.pesoKg)
   const estable = Math.abs(dPeso) < Math.max(0.4, ant.pesoKg * 0.005)
   const dCintura = delta(ant.cinturaCm, ult.cinturaCm)
   const dMusculo = delta(ant.musculoKg, ult.musculoKg)
-  const dGrasa = deltaGrasa(p, ant, ult)
+  const grasa = deltaGrasa(p, ant, ult)
+  const dGrasa = grasa?.cambio ?? null
+  const bajaCintura = dCintura != null && dCintura <= -CINTURA_RELEVANTE
+  const subeCintura = dCintura != null && dCintura >= CINTURA_RELEVANTE
+  const bajaGrasa = dGrasa != null && dGrasa <= -GRASA_RELEVANTE
+  const subeGrasa = dGrasa != null && dGrasa >= GRASA_RELEVANTE
+  const cambioDe = (nombre: string, d: number, unidad: string, relevante: boolean) =>
+    relevante ? `tu ${nombre} ${subioBajo(d)} ${abs(d)} ${unidad}` : `tu ${nombre} casi no cambió`
 
   if (estable) {
-    if (dCintura != null && dCintura <= -CINTURA_RELEVANTE) {
+    if (bajaCintura) {
       out.push({
         tono: 'bien',
         codigo: 'recomposicion',
         titulo: 'Mismo peso, menos cintura',
-        texto: `Tu peso casi no cambió (${formatear(ult.pesoKg)} kg) pero tu cintura bajó ${abs(dCintura)} cm. Lo más probable es que hayas perdido grasa y mantenido o ganado masa muscular.`,
+        texto: `Tu peso casi no cambió (${formatear(ult.pesoKg)} kg) pero tu cintura bajó ${abs(dCintura!)} cm. Lo más probable es que hayas perdido grasa y mantenido o ganado masa muscular.`,
       })
     } else {
       const cintura =
@@ -94,11 +118,9 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
   }
 
   if (dPeso < 0) {
-    const bajaGrasa = dGrasa != null && dGrasa < 0
-    const bajaCintura = dCintura != null && dCintura < 0
-    if (bajaGrasa || bajaCintura) {
+    if ((bajaGrasa || bajaCintura) && !subeGrasa && !subeCintura) {
       const detalles = [
-        bajaGrasa ? `tu grasa corporal bajó ${abs(dGrasa!)} puntos` : null,
+        bajaGrasa ? `tu ${grasa!.nombre} bajó ${abs(dGrasa!)} puntos` : null,
         bajaCintura ? `tu cintura bajó ${abs(dCintura!)} cm` : null,
       ].filter(Boolean)
       out.push({
@@ -107,12 +129,23 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
         titulo: 'Bajaste peso y grasa',
         texto: `Bajaste ${abs(dPeso)} kg y ${detalles.join(' y ')}. Lo que estás haciendo funciona.`,
       })
-    } else {
+    } else if (dCintura == null && dGrasa == null) {
       out.push({
         tono: 'neutro',
         codigo: 'baja_sin_datos',
         titulo: `Bajaste ${abs(dPeso)} kg`,
         texto: 'Registra también la cintura o el % de grasa para saber si lo que bajaste fue grasa.',
+      })
+    } else {
+      const detalles = [
+        dCintura != null ? cambioDe('cintura', dCintura, 'cm', bajaCintura || subeCintura) : null,
+        dGrasa != null ? cambioDe(grasa!.nombre, dGrasa, 'puntos', bajaGrasa || subeGrasa) : null,
+      ].filter(Boolean)
+      out.push({
+        tono: 'neutro',
+        codigo: 'baja_sin_grasa',
+        titulo: `Bajaste ${abs(dPeso)} kg, pero no se ve una baja clara de grasa`,
+        texto: `En este período ${detalles.join(' y ')}. Lo que bajaste puede ser agua o músculo más que grasa; mira si se repite en la próxima medición.`,
       })
     }
     if (dMusculo != null && dMusculo <= -MUSCULO_BAJA) {
@@ -137,19 +170,17 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
   }
 
   const subeMusculo = dMusculo != null && dMusculo >= MUSCULO_SUBE
-  const subeCintura = dCintura != null && dCintura >= CINTURA_RELEVANTE
-  const subeGrasa = dGrasa != null && dGrasa >= GRASA_SUBE
   if (subeMusculo && !subeCintura) {
     out.push({
       tono: 'bien',
       codigo: 'gana_musculo',
       titulo: 'Subiste de peso, probablemente músculo',
-      texto: `Subiste ${abs(dPeso)} kg y tu masa muscular subió ${abs(dMusculo!)} kg sin que aumentara tu cintura.`,
+      texto: `Subiste ${abs(dPeso)} kg y tu masa muscular subió ${abs(dMusculo!)} kg${dCintura != null ? ' sin que aumentara tu cintura' : ''}.`,
     })
   } else if (subeCintura || subeGrasa) {
     const detalles = [
       subeCintura ? `tu cintura subió ${abs(dCintura!)} cm` : null,
-      subeGrasa ? `tu grasa corporal subió ${abs(dGrasa!)} puntos` : null,
+      subeGrasa ? `tu ${grasa!.nombre} subió ${abs(dGrasa!)} puntos` : null,
     ].filter(Boolean)
     out.push({
       tono: 'atencion',
@@ -197,7 +228,7 @@ function desdeInicio(p: Persona, primera: Medicion, ult: Medicion): Mensaje {
   const dC = delta(primera.cinturaCm, ult.cinturaCm)
   if (dC != null) partes.push(`cintura ${subioBajo(dC)} ${abs(dC)} cm`)
   const dG = deltaGrasa(p, primera, ult)
-  if (dG != null) partes.push(`grasa ${subioBajo(dG)} ${abs(dG)} puntos`)
+  if (dG != null) partes.push(`${dG.nombre} ${subioBajo(dG.cambio)} ${abs(dG.cambio)} puntos`)
   return {
     tono: 'neutro',
     codigo: 'desde_inicio',
@@ -220,10 +251,20 @@ export function interpretar(p: Persona, mediciones: Medicion[]): Mensaje[] {
     ]
   }
   const ult = ms[ms.length - 1]
-  const out = compararUltimas(p, ms[ms.length - 2], ult)
+  const menor = esMenor(p, ult.fecha)
+  const out = menor ? [] : compararUltimas(p, ms[ms.length - 2], ult)
   const t = tendencia(p, ms)
   if (t) out.push(t)
   if (ms.length >= 3) out.push(desdeInicio(p, ms[0], ult))
+  if (menor) {
+    out.push({
+      tono: 'neutro',
+      codigo: 'menor',
+      titulo: 'Las interpretaciones de esta app son para adultos',
+      texto: 'En niños y adolescentes subir de peso y de medidas es parte de crecer, y el IMC se evalúa con curvas por edad. Usa estos registros como historial y revísalos con su pediatra.',
+    })
+    return out
+  }
 
   const d = derivar(p, ult)
   if (d.cinturaEstatura != null && d.cinturaEstatura > 0.5) {

@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState, type ChangeEvent } from 'react'
-import { CAMPOS_CSV, filasAMediciones, medicionesACsv, nombreCampoCsv, parseCsv, sugerirAsignacion, type Asignacion, type CampoCsv } from '../domain/csv'
+import { CAMPOS_CSV, decodificarTexto, filasAMediciones, medicionesACsv, nombreCampoCsv, parseCsv, sugerirAsignacion, type Asignacion, type CampoCsv } from '../domain/csv'
 import { hoyIso } from '../domain/numbers'
 import { DIAS_SEMANA, generarIcs } from '../domain/reminders'
 import type { Persona } from '../domain/types'
@@ -25,7 +25,8 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
 export function Datos({ personas, personaActual }: Props) {
   const ajustes = useLiveQuery(leerAjustes, [])
   const [personaId, setPersonaId] = useState(personaActual?.id ?? personas[0]?.id ?? '')
-  const persona = personas.find((p) => p.id === personaId) ?? null
+  // Tras restaurar un respaldo la persona elegida puede ya no existir: se usa la primera disponible.
+  const persona = personas.find((p) => p.id === personaId) ?? personas[0] ?? null
 
   const [csv, setCsv] = useState<Csv | null>(null)
   const [existentes, setExistentes] = useState(0)
@@ -52,7 +53,7 @@ export function Datos({ personas, personaActual }: Props) {
     const archivo = e.target.files?.[0]
     if (!archivo) return
     setAvisoCsv(null)
-    const { columnas, filas } = parseCsv(await archivo.text())
+    const { columnas, filas } = parseCsv(decodificarTexto(new Uint8Array(await archivo.arrayBuffer())))
     if (columnas.length === 0 || filas.length === 0) {
       setCsv(null)
       setAvisoCsv({ tipo: 'bad', texto: 'El archivo está vacío o no tiene filas de datos bajo el encabezado.' })
@@ -106,7 +107,7 @@ export function Datos({ personas, personaActual }: Props) {
   const selectorPersona = (id: string) => (
     <div className="field" style={{ maxWidth: 260 }}>
       <label htmlFor={id}>Persona</label>
-      <select id={id} value={personaId} onChange={(e) => setPersonaId(e.target.value)}>
+      <select id={id} value={persona?.id ?? ''} onChange={(e) => setPersonaId(e.target.value)}>
         {personas.map((p) => (
           <option key={p.id} value={p.id}>{p.nombre}</option>
         ))}

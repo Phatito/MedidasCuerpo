@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { fechaLegible, formatear, hoyIso, idMedicion, parseNumero } from '../domain/numbers'
 import { CAMPOS_BASCULA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
@@ -22,6 +22,11 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
   const [nota, setNota] = useState('')
   const [errores, setErrores] = useState<Partial<Record<CampoNumerico | 'fecha', string>>>({})
   const [guardada, setGuardada] = useState(false)
+  // "Sucio": la persona escribió algo que aún no se guarda. Mientras lo esté, nada reemplaza lo escrito.
+  const sucio = useRef(false)
+  const diaVisto = useRef(hoyIso())
+  const fechaActual = useRef(fecha)
+  fechaActual.current = fecha
 
   const cargadas = mediciones != null
   const existente = mediciones?.find((m) => m.fecha === fecha)
@@ -29,12 +34,32 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
 
   // Al cambiar de persona o de fecha, el formulario muestra lo que ya hay guardado ese día.
   useEffect(() => {
-    if (!cargadas) return
+    if (!cargadas || sucio.current) return
     setTextos(existente ? (Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, aTexto(existente[c])])) as Textos) : VACIO)
     setNota(existente?.nota ?? '')
     setErrores({})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persona.id, fecha, cargadas])
+
+  // Si la ventana quedó abierta de un día para otro, al volver a ella el formulario pasa al día de hoy
+  // (salvo que haya algo sin guardar o que la persona haya elegido otra fecha).
+  useEffect(() => {
+    function alVolver() {
+      const hoy = hoyIso()
+      if (hoy === diaVisto.current) return
+      if (!sucio.current && fechaActual.current === diaVisto.current) {
+        setFecha(hoy)
+        setGuardada(false)
+      }
+      diaVisto.current = hoy
+    }
+    window.addEventListener('focus', alVolver)
+    document.addEventListener('visibilitychange', alVolver)
+    return () => {
+      window.removeEventListener('focus', alVolver)
+      document.removeEventListener('visibilitychange', alVolver)
+    }
+  }, [])
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
@@ -61,6 +86,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
     setErrores(err)
     if (Object.keys(err).length > 0) return
     await guardarMedicion(medicion)
+    sucio.current = false
     setGuardada(true)
   }
 
@@ -78,6 +104,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
           autoComplete="off"
           value={textos[c]}
           onChange={(e) => {
+            sucio.current = true
             setTextos({ ...textos, [c]: e.target.value })
             setGuardada(false)
           }}
@@ -105,7 +132,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
             {errores.fecha && <span className="error">{errores.fecha}</span>}
           </div>
         </div>
-        {existente && <p className="muted small">Ya hay una medición del {fechaLegible(fecha)}; al guardar se actualizará.</p>}
+        {existente && <p className="notice warn small">Ya hay una medición del {fechaLegible(fecha)}; al guardar se reemplazará.</p>}
         {anterior && <p className="muted small">Medición anterior: {fechaLegible(anterior.fecha)}.</p>}
       </div>
       <div className="card">
@@ -125,7 +152,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
       <div className="card">
         <div className="field">
           <label htmlFor="medir-nota">Nota (opcional)</label>
-          <input id="medir-nota" value={nota} onChange={(e) => setNota(e.target.value)} />
+          <input id="medir-nota" value={nota} onChange={(e) => { sucio.current = true; setNota(e.target.value) }} />
         </div>
       </div>
       <div className="row">

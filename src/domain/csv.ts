@@ -59,6 +59,15 @@ function partirLinea(linea: string, sep: string): string[] {
   return celdas
 }
 
+/** Lee UTF-8 y, si los bytes no lo son (Excel suele guardar en Windows-1252), los lee como Windows-1252. */
+export function decodificarTexto(bytes: Uint8Array): string {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch {
+    return new TextDecoder('windows-1252').decode(bytes)
+  }
+}
+
 export function parseCsv(texto: string): { columnas: string[]; filas: string[][] } {
   const lineas = texto
     .replace(/^﻿/, '')
