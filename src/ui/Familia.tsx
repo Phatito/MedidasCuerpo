@@ -82,7 +82,8 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
                   <div className="big num">{formatear(u.pesoKg)} kg</div>
                   <div className="muted small">
                     Última medición: {fechaLegible(u.fecha)}
-                    {estado.diasDesde != null && ` (hace ${estado.diasDesde} ${estado.diasDesde === 1 ? 'día' : 'días'})`}
+                    {estado.diasDesde === 0 && ' (hoy)'}
+                    {estado.diasDesde != null && estado.diasDesde > 0 && ` (hace ${estado.diasDesde} ${estado.diasDesde === 1 ? 'día' : 'días'})`}
                   </div>
                 </div>
               ) : (

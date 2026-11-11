@@ -70,7 +70,7 @@ nav.tabs button {
   border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600;
   padding: 8px 12px; border-radius: 8px; cursor: pointer;
 }
-nav.tabs button:hover:not(:disabled) { background: var(--neutral-bg); color: var(--ink); }
+nav.tabs button:hover:not(:disabled):not([aria-current]) { background: var(--neutral-bg); color: var(--ink); }
 nav.tabs button[aria-current='page'] { background: var(--accent); color: var(--accent-ink); }
 nav.tabs button:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -80,7 +80,7 @@ main.wrap { padding-block: 24px 64px; display: flex; flex-direction: column; gap
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
-.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
 .person { display: flex; flex-direction: column; gap: 10px; }
 .person .big { font-size: 1.75rem; font-weight: 700; line-height: 1.1; }
 .empty { text-align: center; padding: 40px 16px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
@@ -133,7 +133,8 @@ th { font-size: 0.8125rem; color: var(--muted); font-weight: 600; }
 .pill.atencion { background: var(--warn-bg); color: var(--warn); }
 .pill.neutro { background: var(--neutral-bg); color: var(--muted); }
 
-.chart { width: 100%; height: auto; display: block; }
+.chart-scroll { overflow-x: auto; }
+.chart { width: 100%; min-width: 560px; height: auto; display: block; }
 .chart .grid-line { stroke: var(--line); stroke-width: 1; }
 .chart .axis { fill: var(--muted); font-size: 12px; font-family: var(--font); }
 .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }

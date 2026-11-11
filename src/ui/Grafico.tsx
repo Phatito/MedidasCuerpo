@@ -36,6 +36,7 @@ export function Grafico({ puntos, unidad }: Props) {
 
   return (
     <div className="stack">
+      <div className="chart-scroll">
       <svg className="chart" viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={`Evolución en ${unidad}, ${puntos.length} mediciones`}>
         {marcas.map((v) => (
           <g key={v}>
@@ -61,6 +62,7 @@ export function Grafico({ puntos, unidad }: Props) {
         ))}
         <text className="last" x={x(ultimo.fecha) + 10} y={y(ultimo.valor) + 4}>{formatear(ultimo.valor)}</text>
       </svg>
+      </div>
       {puntos.length === 1 ? (
         <p className="muted small">Registra otra medición para ver la línea.</p>
       ) : (

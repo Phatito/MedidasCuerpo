@@ -194,3 +194,11 @@ test('exportar CSV y descargar el recordatorio de calendario', async ({ page }) 
   await expect(page.getByLabel('Día del recordatorio')).toHaveValue('3')
   await expect(page.getByLabel('Hora del recordatorio')).toHaveValue('20:30')
 })
+
+test('es instalable: tiene manifiesto y service worker', async ({ page, request }) => {
+  await page.goto('./')
+  const manifiesto = await request.get('manifest.webmanifest')
+  expect(manifiesto.ok()).toBe(true)
+  expect(await manifiesto.json()).toMatchObject({ name: 'MedidasCuerpo', display: 'standalone', start_url: '/MedidasCuerpo/' })
+  await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration()) != null)).toBe(true)
+})
