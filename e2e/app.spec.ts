@@ -73,3 +73,42 @@ test('el formulario exige el peso', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.getByText('El peso es obligatorio', { exact: true })).toBeVisible()
 })
+
+function haceDias(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+async function medir(page: Page, fecha: string, peso: string, cintura: string) {
+  await ir(page, 'Medir')
+  await page.getByLabel('Fecha').fill(fecha)
+  await page.getByLabel('Peso (kg)').fill(peso)
+  await page.getByLabel('Cintura (cm)').fill(cintura)
+  await page.getByRole('button', { name: /Guardar medición|Actualizar medición/ }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+}
+
+test('la evolución interpreta dos mediciones', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await medir(page, haceDias(0), '72,4', '86,5')
+  await ir(page, 'Evolución')
+  await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
+  await expect(page.getByText('Orientación general, no diagnóstico médico.')).toBeVisible()
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
+  await expect(page.locator('svg.chart')).toContainText('72,4')
+  await page.getByLabel('Métrica').selectOption('cinturaCm')
+  await expect(page.locator('svg.chart')).toContainText('86,5')
+  // Solo se ofrecen métricas con datos.
+  await expect(page.getByLabel('Métrica').locator('option')).toHaveText(['Peso', 'Cintura', 'IMC'])
+})
+
+test('con una sola medición la evolución invita a seguir', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72,5', '88')
+  await ir(page, 'Evolución')
+  await expect(page.getByText('Registra otra medición para ver la línea.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Primera medición registrada' })).toBeVisible()
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(1)
+})
