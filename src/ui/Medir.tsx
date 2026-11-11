@@ -91,6 +91,10 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
     )
   }
 
+  // Hasta que carguen las mediciones guardadas no se muestra el formulario:
+  // así nada de lo que la persona escriba se pierde cuando llegan los datos.
+  if (!cargadas) return <p className="muted">Cargando…</p>
+
   return (
     <form className="stack" onSubmit={enviar} noValidate>
       <div className="card stack">
