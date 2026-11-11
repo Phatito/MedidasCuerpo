@@ -40,6 +40,7 @@ const EDAD_ADULTA = 18
 const ESTATURA_MINIMA_SIN_EDAD = 140
 const RITMO_RAPIDO_PCT = 1
 const VISCERAL_ALTA = 10
+const DIAS_MINIMOS_PARA_RITMO = 4
 
 const NOMBRE_IMC = {
   bajo_peso: 'bajo peso',
@@ -53,6 +54,9 @@ const abs = (n: number, decimales = 1) => formatear(Math.abs(n), decimales)
 const redondear = (n: number) => Math.round(n * 100) / 100
 const delta = (a: number | undefined, b: number | undefined) => (a == null || b == null ? null : redondear(b - a))
 const subioBajo = (d: number) => (d > 0 ? 'subió' : 'bajó')
+/** "peso bajó 1,3 kg", o "peso sin cambio" si la diferencia redondea a cero. */
+const cambio = (nombre: string, d: number, unidad: string) =>
+  Math.abs(d) < 0.05 ? `${nombre} sin cambio` : `${nombre} ${subioBajo(d)} ${abs(d)} ${unidad}`
 
 function deltaGrasa(p: Persona, a: Medicion, b: Medicion): { cambio: number; nombre: string } | null {
   const da = derivar(p, a)
@@ -106,11 +110,11 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
           ? ''
           : Math.abs(dCintura) < CINTURA_RELEVANTE
             ? ' y tu cintura tampoco cambió de forma relevante'
-            : ` aunque tu cintura ${subioBajo(dCintura)} ${abs(dCintura)} cm; mira si se repite la próxima semana`
+            : ` aunque tu cintura ${subioBajo(dCintura)} ${abs(dCintura)} cm; mira si se repite en la próxima medición`
       out.push({
         tono: 'neutro',
         codigo: 'sin_cambios',
-        titulo: 'Sin cambios esta semana',
+        titulo: 'Sin cambios desde la última medición',
         texto: `Tu peso se mantuvo en ${formatear(ult.pesoKg)} kg${cintura}.`,
       })
     }
@@ -127,7 +131,11 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
         tono: 'bien',
         codigo: 'baja_peso_grasa',
         titulo: 'Bajaste peso y grasa',
-        texto: `Bajaste ${abs(dPeso)} kg y ${detalles.join(' y ')}. Lo que estás haciendo funciona.`,
+        texto: `Bajaste ${abs(dPeso)} kg y ${detalles.join(' y ')}. ${
+          p.objetivo === 'ganar_musculo'
+            ? 'Como tu objetivo es ganar músculo, revisa que estés comiendo lo suficiente.'
+            : 'Lo que estás haciendo funciona.'
+        }`,
       })
     } else if (dCintura == null && dGrasa == null) {
       out.push({
@@ -156,9 +164,10 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
         texto: `Tu masa muscular bajó ${abs(dMusculo)} kg. Revisa que estés comiendo suficiente proteína y haciendo ejercicio de fuerza.`,
       })
     }
+    // Con pocos días entre mediciones, el agua de un día se extrapolaría a una semana entera.
     const dias = Math.max(1, diasEntre(ant.fecha, ult.fecha))
     const ritmo = ((-dPeso / ant.pesoKg) * 100 * 7) / dias
-    if (ritmo > RITMO_RAPIDO_PCT) {
+    if (dias >= DIAS_MINIMOS_PARA_RITMO && ritmo > RITMO_RAPIDO_PCT) {
       out.push({
         tono: 'atencion',
         codigo: 'ritmo_rapido',
@@ -193,7 +202,7 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
       tono: 'neutro',
       codigo: 'sube_sin_datos',
       titulo: `Subiste ${abs(dPeso)} kg`,
-      texto: 'Una semana sola no dice mucho: el agua, la sal o el ciclo menstrual mueven el peso. Mira la tendencia de varias semanas.',
+      texto: 'Una sola medición no dice mucho: el agua, la sal o el ciclo menstrual mueven el peso. Mira la tendencia de varias mediciones.',
     })
   }
   return out
@@ -206,15 +215,15 @@ function tendencia(p: Persona, ms: Medicion[]): Mensaje | null {
   const previas = ms.slice(-2 * k, -k)
   const partes: string[] = []
   const dPeso = promedio(recientes.map((x) => x.pesoKg))! - promedio(previas.map((x) => x.pesoKg))!
-  partes.push(`peso ${subioBajo(dPeso)} ${abs(dPeso)} kg`)
+  partes.push(cambio('peso', dPeso, 'kg'))
   const cR = promedio(recientes.map((x) => x.cinturaCm))
   const cP = promedio(previas.map((x) => x.cinturaCm))
-  if (cR != null && cP != null) partes.push(`cintura ${subioBajo(cR - cP)} ${abs(cR - cP)} cm`)
+  if (cR != null && cP != null) partes.push(cambio('cintura', cR - cP, 'cm'))
   const medida = (x: Medicion) => derivar(p, x)
   const soloMedida = [...recientes, ...previas].every((x) => !medida(x).grasaEstimada)
   const gR = promedio(recientes.map((x) => medida(x).grasaPct))
   const gP = promedio(previas.map((x) => medida(x).grasaPct))
-  if (soloMedida && gR != null && gP != null) partes.push(`grasa ${subioBajo(gR - gP)} ${abs(gR - gP)} puntos`)
+  if (soloMedida && gR != null && gP != null) partes.push(cambio('grasa', gR - gP, 'puntos'))
   return {
     tono: 'neutro',
     codigo: 'tendencia',
@@ -224,11 +233,11 @@ function tendencia(p: Persona, ms: Medicion[]): Mensaje | null {
 }
 
 function desdeInicio(p: Persona, primera: Medicion, ult: Medicion): Mensaje {
-  const partes = [`peso ${subioBajo(ult.pesoKg - primera.pesoKg)} ${abs(ult.pesoKg - primera.pesoKg)} kg`]
+  const partes = [cambio('peso', ult.pesoKg - primera.pesoKg, 'kg')]
   const dC = delta(primera.cinturaCm, ult.cinturaCm)
-  if (dC != null) partes.push(`cintura ${subioBajo(dC)} ${abs(dC)} cm`)
+  if (dC != null) partes.push(cambio('cintura', dC, 'cm'))
   const dG = deltaGrasa(p, primera, ult)
-  if (dG != null) partes.push(`${dG.nombre} ${subioBajo(dG.cambio)} ${abs(dG.cambio)} puntos`)
+  if (dG != null) partes.push(cambio(dG.nombre, dG.cambio, 'puntos'))
   return {
     tono: 'neutro',
     codigo: 'desde_inicio',

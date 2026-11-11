@@ -37,7 +37,7 @@ export function Datos({ personas, personaActual }: Props) {
   const [avisoRespaldo, setAvisoRespaldo] = useState<{ tipo: 'ok' | 'bad'; texto: string } | null>(null)
   const [claveRespaldo, setClaveRespaldo] = useState(0)
 
-  const resultado = csv && persona ? filasAMediciones(csv.filas, csv.asignacion, persona.id) : null
+  const resultado = csv && persona ? filasAMediciones(csv.filas, csv.asignacion, persona.id, { hoy: hoyIso(), columnas: csv.columnas.length }) : null
   const ids = resultado?.mediciones.map((m) => m.id).join('|') ?? ''
 
   useEffect(() => {
@@ -64,7 +64,12 @@ export function Datos({ personas, personaActual }: Props) {
 
   async function confirmarImportacion() {
     if (!resultado || !persona || resultado.mediciones.length === 0) return
-    await guardarMediciones(resultado.mediciones)
+    try {
+      await guardarMediciones(resultado.mediciones)
+    } catch {
+      setAvisoCsv({ tipo: 'bad', texto: 'No se pudieron guardar las mediciones. Puede que el navegador se haya quedado sin espacio; no se importó nada.' })
+      return
+    }
     setAvisoCsv({ tipo: 'ok', texto: `Se importaron ${plural(resultado.mediciones.length, 'medición', 'mediciones')} para ${persona.nombre}.` })
     setCsv(null)
     setClaveCsv((k) => k + 1)
@@ -97,7 +102,12 @@ export function Datos({ personas, personaActual }: Props) {
 
   async function restaurar() {
     if (!pendiente) return
-    await restaurarRespaldo(pendiente)
+    try {
+      await restaurarRespaldo(pendiente)
+    } catch {
+      setAvisoRespaldo({ tipo: 'bad', texto: 'No se pudo restaurar el respaldo; tus datos actuales no cambiaron.' })
+      return
+    }
     await guardarAjustes({ ...(await leerAjustes()), ultimoRespaldo: hoyIso() })
     setPendiente(null)
     setClaveRespaldo((k) => k + 1)

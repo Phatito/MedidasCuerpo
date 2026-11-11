@@ -77,3 +77,46 @@ describe('codificación del archivo', () => {
     expect(decodificarTexto(new TextEncoder().encode('Músculo;ñandú'))).toBe('Músculo;ñandú')
   })
 })
+
+describe('pendientes menores de la revisión', () => {
+  const importar = (texto: string, hoy = '2026-11-11') => {
+    const { columnas, filas } = parseCsv(texto)
+    return filasAMediciones(filas, sugerirAsignacion(columnas), 'p1', { hoy, columnas: columnas.length })
+  }
+
+  test('una fila con más celdas que el encabezado se rechaza en vez de truncar el decimal', () => {
+    const r = importar('Fecha,Peso\n05/11/2026,72,5\n06/11/2026,72\n')
+    expect(r.mediciones.map((x) => x.pesoKg)).toEqual([72])
+    expect(r.errores).toEqual([{ fila: 2, motivo: expect.stringContaining('más columnas') }])
+  })
+
+  test('fechas repetidas en el archivo: queda la última y se informa la anterior', () => {
+    const r = importar('fecha;peso\n05/11/2026;72\n05/11/2026;73\n')
+    expect(r.mediciones).toHaveLength(1)
+    expect(r.mediciones[0].pesoKg).toBe(73)
+    expect(r.errores).toEqual([{ fila: 2, motivo: expect.stringContaining('repetida') }])
+  })
+
+  test('las fechas futuras se rechazan', () => {
+    const r = importar('fecha;peso\n12/11/2026;72\n11/11/2026;72\n')
+    expect(r.mediciones.map((x) => x.fecha)).toEqual(['2026-11-11'])
+    expect(r.errores[0].motivo).toContain('futura')
+  })
+
+  test('un archivo con fechas mes/día/año se reconoce por sus días mayores a 12', () => {
+    const r = importar('date,weight\n10/05/2026,72\n10/25/2026,71\n')
+    expect(r.errores).toEqual([])
+    expect(r.mediciones.map((x) => x.fecha)).toEqual(['2026-10-05', '2026-10-25'])
+  })
+
+  test('la sugerencia de columnas no confunde masas ni palabras parecidas', () => {
+    const a = sugerirAsignacion(['Date', 'Weight', 'Fat Free Mass', 'Masa grasa (kg)', 'Body Fat (%)', 'Warm up', 'Championship'])
+    expect(a).toMatchObject({ fecha: 0, pesoKg: 1, grasaPct: 4, brazoCm: null, caderaCm: null })
+  })
+
+  test('el CSV exportado se abre bien en Excel en español: BOM, punto y coma y coma decimal', () => {
+    const texto = medicionesACsv([m('2026-11-01', { pesoKg: 72.5, cinturaCm: 88 })])
+    expect(texto.startsWith('﻿')).toBe(true)
+    expect(texto).toContain('2026-11-01;72,5;')
+  })
+})

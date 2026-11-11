@@ -22,6 +22,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
   const [nota, setNota] = useState('')
   const [errores, setErrores] = useState<Partial<Record<CampoNumerico | 'fecha', string>>>({})
   const [guardada, setGuardada] = useState(false)
+  const [falloGuardar, setFalloGuardar] = useState(false)
   // "Sucio": la persona escribió algo que aún no se guarda. Mientras lo esté, nada reemplaza lo escrito.
   const sucio = useRef(false)
   const diaVisto = useRef(hoyIso())
@@ -85,7 +86,13 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
     if (nota.trim()) medicion.nota = nota.trim()
     setErrores(err)
     if (Object.keys(err).length > 0) return
-    await guardarMedicion(medicion)
+    setFalloGuardar(false)
+    try {
+      await guardarMedicion(medicion)
+    } catch {
+      setFalloGuardar(true)
+      return
+    }
     sucio.current = false
     setGuardada(true)
   }
@@ -157,6 +164,11 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
       </div>
       <div className="row">
         <button className="btn primary" type="submit">{existente ? 'Actualizar medición' : 'Guardar medición'}</button>
+        {falloGuardar && (
+          <span className="notice bad" role="alert">
+            No se pudo guardar la medición. Puede que el navegador se haya quedado sin espacio; lo que escribiste sigue aquí, inténtalo de nuevo.
+          </span>
+        )}
         {guardada && (
           <span className="notice ok" role="status">
             Medición guardada.{' '}

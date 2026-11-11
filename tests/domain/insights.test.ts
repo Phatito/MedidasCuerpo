@@ -200,3 +200,31 @@ describe('hallazgos de la revisión final', () => {
     })
   })
 })
+
+describe('pendientes menores de la revisión', () => {
+  const todo = (ms: Medicion[], quien = p) => interpretar(quien, ms).map((x) => x.titulo + ' ' + x.texto).join(' | ')
+
+  test('los textos no suponen que pasó una semana', () => {
+    const lejos = '2026-12-01'
+    expect(todo([m(A, { pesoKg: 80 }), m(lejos, { pesoKg: 80.1 })])).not.toMatch(/semana/)
+    expect(todo([m(A, { pesoKg: 80 }), m(lejos, { pesoKg: 81 })])).not.toMatch(/[Uu]na semana sola/)
+  })
+
+  test('con menos de 4 días entre mediciones no se habla de ritmo rápido', () => {
+    expect(codigos([m(A, { pesoKg: 80 }), m('2026-11-02', { pesoKg: 79.5 })])).not.toContain('ritmo_rapido')
+    expect(codigos([m(A, { pesoKg: 80 }), m('2026-11-05', { pesoKg: 79 })])).toContain('ritmo_rapido')
+  })
+
+  test('un cambio que redondea a cero se dice sin cambio, no "bajó 0,0"', () => {
+    const t = todo([m('2026-10-18', { pesoKg: 80, cinturaCm: 90 }), m('2026-10-25', { pesoKg: 81, cinturaCm: 90 }), m(A, { pesoKg: 80, cinturaCm: 90 })])
+    expect(t).not.toMatch(/(subió|bajó) 0,0/)
+    expect(t).toContain('peso sin cambio')
+  })
+
+  test('el cierre de "bajaste peso y grasa" depende del objetivo', () => {
+    const ms = [m(A, { pesoKg: 80, grasaPct: 25 }), m('2026-12-01', { pesoKg: 79, grasaPct: 24 })]
+    expect(todo(ms, persona({ objetivo: 'bajar_grasa' }))).toContain('Lo que estás haciendo funciona')
+    expect(todo(ms, persona({ objetivo: 'ganar_musculo' }))).toContain('ganar músculo')
+    expect(todo(ms, persona({ objetivo: 'ganar_musculo' }))).not.toContain('Lo que estás haciendo funciona')
+  })
+})

@@ -48,3 +48,34 @@ describe('archivos que no son un respaldo', () => {
     expect(await listarMediciones('p1')).toHaveLength(2)
   })
 })
+
+describe('respaldos editados a mano', () => {
+  const base = () => ({
+    app: 'MedidasCuerpo', version: 1, exportadoEn: '',
+    personas: [{ id: 'a', nombre: 'Ana', sexo: 'mujer', fechaNacimiento: '', estaturaCm: 165, objetivo: 'mantener', creadaEn: '2026-01-01T00:00:00.000Z' }],
+    mediciones: [{ id: 'a_2026-10-01', personaId: 'a', fecha: '2026-10-01', pesoKg: 60, origen: 'manual' }] as Record<string, unknown>[],
+    ajustes: { diaRecordatorio: 0, horaRecordatorio: '09:00' },
+  })
+  const conMedicion = (extra: Record<string, unknown>) => {
+    const r = base()
+    r.mediciones[0] = { ...r.mediciones[0], ...extra }
+    return JSON.stringify(r)
+  }
+
+  test('el respaldo base es válido', () => {
+    expect(leerRespaldo(JSON.stringify(base())).personas).toHaveLength(1)
+  })
+  test.each([
+    ['un perímetro como texto', conMedicion({ cinturaCm: '88' })],
+    ['una fecha mal formada', conMedicion({ fecha: '01/10/2026' })],
+    ['una medición de una persona que no está en el archivo', conMedicion({ personaId: 'zzz' })],
+    ['un peso fuera de rango', conMedicion({ pesoKg: 9000 })],
+  ])('%s se rechaza', (_n, json) => {
+    expect(() => leerRespaldo(json)).toThrow(MENSAJE)
+  })
+  test('un sexo desconocido se rechaza', () => {
+    const r = base()
+    r.personas[0].sexo = 'otro'
+    expect(() => leerRespaldo(JSON.stringify(r))).toThrow(MENSAJE)
+  })
+})

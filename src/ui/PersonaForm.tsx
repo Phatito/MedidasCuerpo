@@ -11,21 +11,23 @@ interface Props {
 
 export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
   const [nombre, setNombre] = useState(persona?.nombre ?? '')
-  const [sexo, setSexo] = useState<Sexo>(persona?.sexo ?? 'hombre')
+  // Sin valor por defecto: el sexo decide la fórmula de estimación de grasa, así que se elige a conciencia.
+  const [sexo, setSexo] = useState<Sexo | ''>(persona?.sexo ?? '')
   const [fechaNacimiento, setFechaNacimiento] = useState(persona?.fechaNacimiento ?? '')
   const [estatura, setEstatura] = useState(persona ? String(persona.estaturaCm).replace('.', ',') : '')
   const [objetivo, setObjetivo] = useState<Objetivo>(persona?.objetivo ?? 'bajar_grasa')
-  const [errores, setErrores] = useState<{ nombre?: string; estatura?: string }>({})
+  const [errores, setErrores] = useState<{ nombre?: string; sexo?: string; estatura?: string }>({})
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
     const err: typeof errores = {}
     if (!nombre.trim()) err.nombre = 'Escribe un nombre'
+    if (sexo === '') err.sexo = 'Elige el sexo'
     const est = parseNumero(estatura)
     if (est == null) err.estatura = 'Escribe la estatura en centímetros, por ejemplo 170'
     else err.estatura = validarValor('estaturaCm', est) ?? undefined
     setErrores(err)
-    if (err.nombre || err.estatura || est == null) return
+    if (err.nombre || err.sexo || err.estatura || est == null || sexo === '') return
     await onGuardar({
       id: persona?.id ?? crypto.randomUUID(),
       nombre: nombre.trim(),
@@ -48,11 +50,12 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
         </div>
         <div className="field">
           <label htmlFor="persona-sexo">Sexo</label>
-          <select id="persona-sexo" value={sexo} onChange={(e) => setSexo(e.target.value as Sexo)}>
+          <select id="persona-sexo" value={sexo} onChange={(e) => setSexo(e.target.value as Sexo | '')}>
+            <option value="">Elige…</option>
             <option value="hombre">Hombre</option>
             <option value="mujer">Mujer</option>
           </select>
-          <span className="hint">Se usa para estimar el % de grasa.</span>
+          {errores.sexo ? <span className="error">{errores.sexo}</span> : <span className="hint">Se usa para estimar el % de grasa.</span>}
         </div>
         <div className="field">
           <label htmlFor="persona-estatura">Estatura (cm)</label>

@@ -19,6 +19,7 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
   const mediciones = useLiveQuery(listarTodasLasMediciones, [], [] as Medicion[])
   const [editando, setEditando] = useState<Persona | 'nueva' | null>(null)
   const [porBorrar, setPorBorrar] = useState<string | null>(null)
+  const [fallo, setFallo] = useState<string | null>(null)
   const hoy = hoyIso()
 
   const porPersona = new Map<string, Medicion[]>()
@@ -35,8 +36,23 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
           : null
 
   async function guardar(p: Persona) {
-    await guardarPersona(p)
-    setEditando(null)
+    setFallo(null)
+    try {
+      await guardarPersona(p)
+      setEditando(null)
+    } catch {
+      setFallo('No se pudo guardar a la persona. Puede que el navegador se haya quedado sin espacio; inténtalo de nuevo.')
+    }
+  }
+
+  async function borrar(id: string) {
+    setFallo(null)
+    try {
+      await borrarPersona(id)
+      setPorBorrar(null)
+    } catch {
+      setFallo('No se pudo borrar a la persona; inténtalo de nuevo.')
+    }
   }
 
   return (
@@ -54,6 +70,8 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
           <button className="btn" onClick={onIrDatos}>Hacer respaldo</button>
         </div>
       )}
+
+      {fallo && <p className="notice bad" role="alert">{fallo}</p>}
 
       {editando != null && (
         <PersonaForm persona={editando === 'nueva' ? undefined : editando} onGuardar={guardar} onCancelar={() => setEditando(null)} />
@@ -95,7 +113,7 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
                     Se borrará a {p.nombre} y sus {cantidad} {cantidad === 1 ? 'medición' : 'mediciones'}. No se puede deshacer.
                   </span>
                   <div className="row">
-                    <button className="btn danger" onClick={() => borrarPersona(p.id).then(() => setPorBorrar(null))}>Sí, borrar</button>
+                    <button className="btn danger" onClick={() => borrar(p.id)}>Sí, borrar</button>
                     <button className="btn" onClick={() => setPorBorrar(null)}>Cancelar</button>
                   </div>
                 </div>

@@ -55,6 +55,7 @@ export function Grafico({ puntos, unidad }: Props) {
         )}
         {puntos.length > 1 && <path className="line" d={camino(puntos)} />}
         {promedio.length > 1 && <path className="avg" d={camino(promedio)} />}
+        {promedio.length === 1 && <circle className="avg-dot" cx={x(promedio[0].fecha)} cy={y(promedio[0].valor)} r={5} />}
         {puntos.map((p) => (
           <circle className="dot" key={p.fecha} cx={x(p.fecha)} cy={y(p.valor)} r={4.5}>
             <title>{`${fechaLegible(p.fecha)}: ${formatear(p.valor)} ${unidad}`}</title>
@@ -68,7 +69,7 @@ export function Grafico({ puntos, unidad }: Props) {
       ) : (
         <div className="legend">
           <span><i />Cada medición ({unidad})</span>
-          {promedio.length > 1 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
+          {promedio.length > 0 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
         </div>
       )}
     </div>

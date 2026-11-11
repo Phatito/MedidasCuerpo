@@ -139,6 +139,7 @@ th { font-size: 0.8125rem; color: var(--muted); font-weight: 600; }
 .chart .axis { fill: var(--muted); font-size: 12px; font-family: var(--font); }
 .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
 .chart .avg { fill: none; stroke: var(--tape); stroke-width: 2; stroke-dasharray: 6 5; }
+.chart .avg-dot { fill: var(--tape); stroke: var(--surface); stroke-width: 2; }
 .chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
 .chart .last { fill: var(--ink); font-size: 13px; font-weight: 700; font-family: var(--font); }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8125rem; color: var(--muted); }

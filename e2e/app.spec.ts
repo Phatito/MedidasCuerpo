@@ -178,7 +178,7 @@ test('exportar CSV y descargar el recordatorio de calendario', async ({ page }) 
 
   const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar CSV' }).click()])
   expect(csv.suggestedFilename()).toBe('medidas-Ana.csv')
-  expect(await readFile(await csv.path(), 'utf8')).toContain(`${haceDias(0)},72.5`)
+  expect(await readFile(await csv.path(), 'utf8')).toContain(`${haceDias(0)};72,5;`)
 
   await page.getByLabel('Día del recordatorio').selectOption('3')
   await page.getByLabel('Hora del recordatorio').fill('20:30')
@@ -242,6 +242,7 @@ test('tras restaurar un respaldo con otras personas, exportar sigue funcionando'
   await page.goto('./')
   await page.getByRole('button', { name: 'Agregar persona' }).click()
   await page.getByLabel('Nombre').fill('Prueba')
+  await page.getByLabel('Sexo').selectOption('hombre')
   await page.getByLabel('Estatura (cm)').fill('170')
   await page.getByRole('button', { name: 'Guardar persona' }).click()
   await ir(page, 'Datos')
@@ -256,4 +257,47 @@ test('tras restaurar un respaldo con otras personas, exportar sigue funcionando'
   await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
   const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exportar CSV' }).click()])
   expect(csv.suggestedFilename()).toBe('medidas-Ana.csv')
+})
+
+test('el sexo no viene elegido de antemano y es obligatorio', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Agregar persona' }).click()
+  await expect(page.getByLabel('Sexo')).toHaveValue('')
+  await page.getByLabel('Nombre').fill('Ana')
+  await page.getByLabel('Estatura (cm)').fill('165')
+  await page.getByRole('button', { name: 'Guardar persona' }).click()
+  await expect(page.getByText('Elige el sexo')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Ana' })).toBeHidden()
+})
+
+test('con cuatro mediciones ya se ve el promedio de las últimas 4', async ({ page }) => {
+  await agregarAna(page)
+  for (const [dias, peso] of [[21, '73'], [14, '72,6'], [7, '72,4'], [0, '72']] as const) await medir(page, haceDias(dias), peso, '88')
+  await ir(page, 'Evolución')
+  await expect(page.locator('svg.chart .avg-dot')).toHaveCount(1)
+  await expect(page.getByText('Promedio de las últimas 4')).toBeVisible()
+})
+
+test('si el navegador no puede guardar, se avisa y no se dice que se guardó', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await page.evaluate(() => {
+    IDBObjectStore.prototype.put = () => {
+      throw new DOMException('Sin espacio', 'QuotaExceededError')
+    }
+  })
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('No se pudo guardar la medición')).toBeVisible()
+  await expect(page.getByText('Medición guardada')).toBeHidden()
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
+})
+
+test('el resumen de importación no cuenta dos veces una fecha repetida ni acepta fechas futuras', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  const csv = 'fecha;peso\n05/10/2025;72\n05/10/2025;73\n01/01/2999;70\n'
+  await page.getByLabel('Archivo CSV').setInputFiles({ name: 'd.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
+  await expect(page.getByText('1 nuevas, 0 reemplazan, 2 omitidas')).toBeVisible()
+  await expect(page.getByText('Fila 4: La fecha 01/01/2999 es futura')).toBeVisible()
 })
