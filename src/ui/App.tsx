@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import type { Persona } from '../domain/types'
 import { db, listarPersonas } from '../storage/db'
 import { Familia } from './Familia'
+import { Historial } from './Historial'
+import { Medir } from './Medir'
 
 export type Pantalla = 'familia' | 'medir' | 'evolucion' | 'historial' | 'datos'
 
@@ -27,6 +29,7 @@ function leerPersonaGuardada(): string | null {
 export function App() {
   const [pantalla, setPantalla] = useState<Pantalla>('familia')
   const [personaId, setPersonaId] = useState<string | null>(leerPersonaGuardada)
+  const [fechaMedir, setFechaMedir] = useState<string | undefined>(undefined)
   const [sinAlmacenamiento, setSinAlmacenamiento] = useState(false)
   const personas = useLiveQuery(() => listarPersonas().catch(() => [] as Persona[]), [])
 
@@ -63,7 +66,10 @@ export function App() {
                 key={t.id}
                 disabled={t.requierePersona && !persona}
                 aria-current={visible === t.id ? 'page' : undefined}
-                onClick={() => setPantalla(t.id)}
+                onClick={() => {
+                  setFechaMedir(undefined)
+                  setPantalla(t.id)
+                }}
               >
                 {t.nombre}
               </button>
@@ -88,7 +94,37 @@ export function App() {
                 }}
               />
             )}
-            {visible !== 'familia' && <p className="muted">Sección en construcción.</p>}
+            {persona && actual.requierePersona && visible !== 'familia' && (
+              <div className="head">
+                <h2>
+                  {actual.nombre}: {persona.nombre}
+                </h2>
+                {personas.length > 1 && (
+                  <div className="field">
+                    <label htmlFor="persona-activa" className="small">Persona</label>
+                    <select id="persona-activa" value={persona.id} onChange={(e) => elegirPersona(e.target.value)}>
+                      {personas.map((p) => (
+                        <option key={p.id} value={p.id}>{p.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
+            {visible === 'medir' && persona && (
+              <Medir key={`${persona.id}-${fechaMedir ?? ''}`} persona={persona} fechaInicial={fechaMedir} onVerEvolucion={() => setPantalla('evolucion')} />
+            )}
+            {visible === 'historial' && persona && (
+              <Historial
+                persona={persona}
+                onEditar={(fecha) => {
+                  setFechaMedir(fecha)
+                  setPantalla('medir')
+                }}
+                onMedir={() => setPantalla('medir')}
+              />
+            )}
+            {(visible === 'evolucion' || visible === 'datos') && <p className="muted">Sección en construcción.</p>}
           </>
         )}
       </main>

@@ -26,3 +26,50 @@ test('una estatura fuera de rango no se guarda', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar persona' }).click()
   await expect(page.getByText('Debe estar entre 40 y 250')).toBeVisible()
 })
+
+const filas = (page: Page) => page.locator('tbody tr')
+const ir = (page: Page, nombre: string) => page.getByRole('navigation').getByRole('button', { name: nombre, exact: true }).click()
+
+test('registrar, actualizar y validar una medición', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await page.getByLabel('Cintura (cm)').fill('88')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+  await expect(filas(page).first()).toContainText('72,5')
+
+  // Guardar otra vez el mismo día reemplaza la medición.
+  await ir(page, 'Medir')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
+  await page.getByLabel('Peso (kg)').fill('72')
+  await page.getByRole('button', { name: 'Actualizar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+  await expect(filas(page).first()).toContainText('72,0')
+
+  // Un valor fuera de rango no se guarda.
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('900')
+  await page.getByRole('button', { name: 'Actualizar medición' }).click()
+  await expect(page.getByText('Debe estar entre 2 y 400')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page).first()).toContainText('72,0')
+
+  // Eliminar pide confirmación en la fila.
+  await page.getByRole('button', { name: 'Eliminar' }).click()
+  await page.getByRole('button', { name: 'Sí, eliminar' }).click()
+  await expect(page.getByText('Todavía no hay mediciones de Ana.')).toBeVisible()
+})
+
+test('el formulario exige el peso', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await page.getByLabel('Cintura (cm)').fill('88')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('El peso es obligatorio', { exact: true })).toBeVisible()
+})
