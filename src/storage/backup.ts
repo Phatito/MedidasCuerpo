@@ -35,7 +35,8 @@ function personaValida(x: unknown): boolean {
     esTexto(x.nombre) &&
     (x.sexo === 'hombre' || x.sexo === 'mujer') &&
     typeof x.estaturaCm === 'number' &&
-    validarValor('estaturaCm', x.estaturaCm) == null
+    validarValor('estaturaCm', x.estaturaCm) == null &&
+    (x.metaPesoKg == null || (typeof x.metaPesoKg === 'number' && validarValor('pesoKg', x.metaPesoKg) == null))
   )
 }
 

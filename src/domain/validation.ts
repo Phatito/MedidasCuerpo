@@ -12,6 +12,10 @@ export const RANGOS: Record<CampoNumerico | 'estaturaCm', [number, number]> = {
   caderaCm: [5, 300],
   brazoCm: [5, 300],
   musloCm: [5, 300],
+  brazoIzqCm: [5, 300],
+  brazoDerCm: [5, 300],
+  musloIzqCm: [5, 300],
+  musloDerCm: [5, 300],
   estaturaCm: [40, 250],
 }
 

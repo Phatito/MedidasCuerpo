@@ -9,6 +9,8 @@ export interface Persona {
   estaturaCm: number
   objetivo: Objetivo
   creadaEn: string
+  /** Peso objetivo opcional, en kg. */
+  metaPesoKg?: number
 }
 
 export interface Medicion {
@@ -26,6 +28,10 @@ export interface Medicion {
   caderaCm?: number
   brazoCm?: number
   musloCm?: number
+  brazoIzqCm?: number
+  brazoDerCm?: number
+  musloIzqCm?: number
+  musloDerCm?: number
   nota?: string
   origen: 'manual' | 'csv'
 }
@@ -48,9 +54,17 @@ export type CampoNumerico =
   | 'caderaCm'
   | 'brazoCm'
   | 'musloCm'
+  | 'brazoIzqCm'
+  | 'brazoDerCm'
+  | 'musloIzqCm'
+  | 'musloDerCm'
 
 export const CAMPOS_BASCULA: CampoNumerico[] = ['pesoKg', 'grasaPct', 'musculoKg', 'grasaVisceral', 'aguaPct']
-export const CAMPOS_PERIMETROS: CampoNumerico[] = ['cuelloCm', 'pechoCm', 'cinturaCm', 'caderaCm', 'brazoCm', 'musloCm']
+export const CAMPOS_PERIMETROS: CampoNumerico[] = [
+  'cuelloCm', 'pechoCm', 'brazoIzqCm', 'brazoDerCm', 'brazoCm', 'cinturaCm', 'caderaCm', 'musloIzqCm', 'musloDerCm', 'musloCm',
+]
+/** Medidas de antes de separar por lado: se conservan y se muestran, pero ya no se piden. */
+export const CAMPOS_SIN_LADO: CampoNumerico[] = ['brazoCm', 'musloCm']
 export const CAMPOS_NUMERICOS: CampoNumerico[] = [...CAMPOS_BASCULA, ...CAMPOS_PERIMETROS]
 
 export const ETIQUETAS: Record<CampoNumerico, { nombre: string; unidad: string }> = {
@@ -63,6 +77,10 @@ export const ETIQUETAS: Record<CampoNumerico, { nombre: string; unidad: string }
   pechoCm: { nombre: 'Pecho', unidad: 'cm' },
   cinturaCm: { nombre: 'Cintura', unidad: 'cm' },
   caderaCm: { nombre: 'Cadera', unidad: 'cm' },
-  brazoCm: { nombre: 'Brazo', unidad: 'cm' },
-  musloCm: { nombre: 'Muslo', unidad: 'cm' },
+  brazoCm: { nombre: 'Brazo (sin lado)', unidad: 'cm' },
+  musloCm: { nombre: 'Muslo (sin lado)', unidad: 'cm' },
+  brazoIzqCm: { nombre: 'Brazo izquierdo', unidad: 'cm' },
+  brazoDerCm: { nombre: 'Brazo derecho', unidad: 'cm' },
+  musloIzqCm: { nombre: 'Muslo izquierdo', unidad: 'cm' },
+  musloDerCm: { nombre: 'Muslo derecho', unidad: 'cm' },
 }

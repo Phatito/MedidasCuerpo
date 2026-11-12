@@ -12,7 +12,7 @@ interface Props {
 }
 
 type Metrica = CampoNumerico | 'imc'
-const ORDEN: Metrica[] = ['pesoKg', 'grasaPct', 'musculoKg', 'grasaVisceral', 'cinturaCm', 'caderaCm', 'pechoCm', 'brazoCm', 'musloCm', 'imc']
+const ORDEN: Metrica[] = ['pesoKg', 'grasaPct', 'musculoKg', 'grasaVisceral', 'cinturaCm', 'caderaCm', 'pechoCm', 'brazoIzqCm', 'brazoDerCm', 'brazoCm', 'musloIzqCm', 'musloDerCm', 'musloCm', 'imc']
 const ROTULO: Record<Tono, string> = { bien: 'Bien', atencion: 'Atención', neutro: 'Dato' }
 
 function valor(p: Persona, m: Medicion, metrica: Metrica): number | null {

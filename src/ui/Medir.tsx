@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { fechaLegible, formatear, hoyIso, idMedicion, parseNumero } from '../domain/numbers'
-import { CAMPOS_BASCULA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
+import { CAMPOS_BASCULA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, CAMPOS_SIN_LADO, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
 import { guardarMedicion, listarMediciones } from '../storage/db'
 
@@ -171,7 +171,8 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
       <div className="card">
         <fieldset>
           <legend>Perímetros</legend>
-          <div className="form">{CAMPOS_PERIMETROS.map(campo)}</div>
+          {/* Las medidas sin lado ya no se piden; solo aparecen si la medición cargada las trae, para no perderlas. */}
+          <div className="form">{CAMPOS_PERIMETROS.filter((c) => !CAMPOS_SIN_LADO.includes(c) || existente?.[c] != null || textos[c] !== '').map(campo)}</div>
           <p className="muted small">Mide siempre a la misma hora y en el mismo punto. Con cuello y cintura (y cadera en mujeres) la app estima el % de grasa si no lo tienes.</p>
         </fieldset>
       </div>

@@ -79,3 +79,28 @@ describe('respaldos editados a mano', () => {
     expect(() => leerRespaldo(JSON.stringify(r))).toThrow(MENSAJE)
   })
 })
+
+describe('meta de peso y campos por lado en el respaldo', () => {
+  const base = (persona: Record<string, unknown> = {}, medicion: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      app: 'MedidasCuerpo', version: 1, exportadoEn: '',
+      personas: [{ id: 'a', nombre: 'Ana', sexo: 'mujer', fechaNacimiento: '', estaturaCm: 165, objetivo: 'mantener', creadaEn: '2026-01-01T00:00:00.000Z', ...persona }],
+      mediciones: [{ id: 'a_2026-10-01', personaId: 'a', fecha: '2026-10-01', pesoKg: 60, origen: 'manual', ...medicion }],
+      ajustes: { diaRecordatorio: 0, horaRecordatorio: '09:00' },
+    })
+  test('un respaldo anterior, sin los campos nuevos, sigue siendo válido', () => {
+    expect(leerRespaldo(base()).personas[0].nombre).toBe('Ana')
+  })
+  test('una meta válida y campos por lado se aceptan', () => {
+    const r = leerRespaldo(base({ metaPesoKg: 58 }, { brazoIzqCm: 28, musloDerCm: 52 }))
+    expect(r.personas[0].metaPesoKg).toBe(58)
+    expect(r.mediciones[0].brazoIzqCm).toBe(28)
+  })
+  test.each([
+    ['meta como texto', base({ metaPesoKg: '58' })],
+    ['meta fuera de rango', base({ metaPesoKg: 9000 })],
+    ['brazo izquierdo como texto', base({}, { brazoIzqCm: '28' })],
+  ])('%s se rechaza', (_n, json) => {
+    expect(() => leerRespaldo(json)).toThrow(MENSAJE)
+  })
+})

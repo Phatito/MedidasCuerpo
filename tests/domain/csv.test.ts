@@ -120,3 +120,23 @@ describe('pendientes menores de la revisión', () => {
     expect(texto).toContain('2026-11-01;72,5;')
   })
 })
+
+describe('medidas por lado', () => {
+  test('reconoce los encabezados de la hoja del entrenador', () => {
+    const a = sugerirAsignacion(['Fecha', 'Peso', 'Torso', 'Brazo izquierdo', 'Brazo derecho', 'Cintura', 'Cadera', 'Pierna izquierda', 'Pierna derecha'])
+    expect(a).toMatchObject({
+      fecha: 0, pesoKg: 1, pechoCm: 2, brazoIzqCm: 3, brazoDerCm: 4, cinturaCm: 5, caderaCm: 6, musloIzqCm: 7, musloDerCm: 8, brazoCm: null, musloCm: null,
+    })
+  })
+  test('columnas con y sin lado a la vez van cada una a su campo', () => {
+    expect(sugerirAsignacion(['Fecha', 'Peso', 'Brazo', 'Brazo izquierdo', 'Pierna'])).toMatchObject({ brazoCm: 2, brazoIzqCm: 3, musloCm: 4, musloIzqCm: null })
+  })
+  test('encabezados en inglés', () => {
+    expect(sugerirAsignacion(['date', 'weight', 'Left Arm', 'Right Thigh', 'Left leg'])).toMatchObject({ brazoIzqCm: 2, musloDerCm: 3, musloIzqCm: 4 })
+  })
+  test('exportar e importar conserva los cuatro campos por lado', () => {
+    const ms = [m('2026-11-01', { pesoKg: 90, brazoIzqCm: 35, brazoDerCm: 36.5, musloIzqCm: 55, musloDerCm: 55.5, brazoCm: 34, origen: 'csv' })]
+    const { columnas, filas } = parseCsv(medicionesACsv(ms))
+    expect(filasAMediciones(filas, sugerirAsignacion(columnas), 'p1').mediciones).toEqual(ms)
+  })
+})

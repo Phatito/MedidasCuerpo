@@ -27,6 +27,9 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
     )
   }
 
+  // Las columnas de medidas antiguas sin lado solo se muestran si alguna medición las tiene.
+  const haySinLado = { brazoCm: mediciones.some((m) => m.brazoCm != null), musloCm: mediciones.some((m) => m.musloCm != null) }
+
   return (
     <div className="card table-scroll">
       <table>
@@ -39,6 +42,12 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
             <th>Visceral</th>
             <th>Cintura (cm)</th>
             <th>Cadera (cm)</th>
+            <th>Brazo izq. (cm)</th>
+            <th>Brazo der. (cm)</th>
+            <th>Muslo izq. (cm)</th>
+            <th>Muslo der. (cm)</th>
+            {haySinLado.brazoCm && <th>Brazo (sin lado)</th>}
+            {haySinLado.musloCm && <th>Muslo (sin lado)</th>}
             <th>IMC</th>
             <th><span className="small">Acciones</span></th>
           </tr>
@@ -58,6 +67,12 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
                 <td>{celda(m.grasaVisceral, 0)}</td>
                 <td>{celda(m.cinturaCm)}</td>
                 <td>{celda(m.caderaCm)}</td>
+                <td>{celda(m.brazoIzqCm)}</td>
+                <td>{celda(m.brazoDerCm)}</td>
+                <td>{celda(m.musloIzqCm)}</td>
+                <td>{celda(m.musloDerCm)}</td>
+                {haySinLado.brazoCm && <td>{celda(m.brazoCm)}</td>}
+                {haySinLado.musloCm && <td>{celda(m.musloCm)}</td>}
                 <td>{celda(d.imc)}</td>
                 <td>
                   {porBorrar === m.id ? (

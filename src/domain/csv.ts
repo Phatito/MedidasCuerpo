@@ -15,11 +15,16 @@ const ALIAS: [CampoCsv, string[]][] = [
   ['aguaPct', ['agua', 'water']],
   ['pesoKg', ['peso', 'weight']],
   ['cuelloCm', ['cuello', 'neck']],
-  ['pechoCm', ['pecho', 'chest']],
+  ['pechoCm', ['pecho', 'chest', 'torso']],
   ['cinturaCm', ['cintura', 'waist']],
   ['caderaCm', ['cadera', 'hip', 'hips']],
+  // Las medidas por lado van antes que las "sin lado": "Brazo izquierdo" no debe caer en "Brazo".
+  ['brazoIzqCm', ['brazo izquierdo', 'brazo izq', 'left arm', 'left biceps']],
+  ['brazoDerCm', ['brazo derecho', 'brazo der', 'right arm', 'right biceps']],
+  ['musloIzqCm', ['muslo izquierdo', 'muslo izq', 'pierna izquierda', 'pierna izq', 'left thigh', 'left leg']],
+  ['musloDerCm', ['muslo derecho', 'muslo der', 'pierna derecha', 'pierna der', 'right thigh', 'right leg']],
   ['brazoCm', ['brazo', 'arm', 'biceps']],
-  ['musloCm', ['muslo', 'thigh']],
+  ['musloCm', ['muslo', 'thigh', 'pierna', 'leg']],
   ['nota', ['nota', 'notas', 'note', 'notes', 'comentario', 'comentarios']],
 ]
 // Una columna de masa (kg) no es un porcentaje de grasa.

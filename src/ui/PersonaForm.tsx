@@ -16,7 +16,8 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
   const [fechaNacimiento, setFechaNacimiento] = useState(persona?.fechaNacimiento ?? '')
   const [estatura, setEstatura] = useState(persona ? String(persona.estaturaCm).replace('.', ',') : '')
   const [objetivo, setObjetivo] = useState<Objetivo>(persona?.objetivo ?? 'bajar_grasa')
-  const [errores, setErrores] = useState<{ nombre?: string; sexo?: string; estatura?: string }>({})
+  const [meta, setMeta] = useState(persona?.metaPesoKg != null ? String(persona.metaPesoKg).replace('.', ',') : '')
+  const [errores, setErrores] = useState<{ nombre?: string; sexo?: string; estatura?: string; meta?: string }>({})
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
@@ -26,8 +27,17 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
     const est = parseNumero(estatura)
     if (est == null) err.estatura = 'Escribe la estatura en centímetros, por ejemplo 170'
     else err.estatura = validarValor('estaturaCm', est) ?? undefined
+    let metaKg: number | undefined
+    if (meta.trim() !== '') {
+      const n = parseNumero(meta)
+      if (n == null) err.meta = 'Escribe solo un número, por ejemplo 75'
+      else {
+        err.meta = validarValor('pesoKg', n) ?? undefined
+        metaKg = n
+      }
+    }
     setErrores(err)
-    if (err.nombre || err.sexo || err.estatura || est == null || sexo === '') return
+    if (err.nombre || err.sexo || err.estatura || err.meta || est == null || sexo === '') return
     await onGuardar({
       id: persona?.id ?? crypto.randomUUID(),
       nombre: nombre.trim(),
@@ -36,6 +46,7 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
       estaturaCm: est,
       objetivo,
       creadaEn: persona?.creadaEn ?? new Date().toISOString(),
+      ...(metaKg != null ? { metaPesoKg: metaKg } : {}),
     })
   }
 
@@ -74,6 +85,11 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
             <option value="ganar_musculo">Ganar músculo</option>
             <option value="mantener">Mantener</option>
           </select>
+        </div>
+        <div className="field">
+          <label htmlFor="persona-meta">Peso objetivo (kg, opcional)</label>
+          <input id="persona-meta" inputMode="decimal" value={meta} onChange={(e) => setMeta(e.target.value)} />
+          {errores.meta ? <span className="error">{errores.meta}</span> : <span className="hint">Con una meta, la ficha estima en qué fecha llegarías.</span>}
         </div>
       </div>
       <div className="row">

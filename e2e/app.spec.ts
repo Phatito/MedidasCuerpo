@@ -431,3 +431,82 @@ test('la inicial de la tarjeta de Familia cabe en su círculo', async ({ page })
   const px = await page.locator('.person .avatar').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
   expect(px).toBeLessThanOrEqual(20)
 })
+
+// ---------- Medidas por lado ----------
+
+const HOJA = fileURLToPath(new URL('./fixtures/hoja-entrenador.csv', import.meta.url))
+
+test('registrar ambos brazos y ambos muslos', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await page.getByLabel('Brazo izquierdo (cm)').fill('38')
+  await page.getByLabel('Brazo derecho (cm)').fill('39,5')
+  await page.getByLabel('Muslo izquierdo (cm)').fill('60')
+  await expect(page.getByLabel('Brazo (sin lado) (cm)')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  await ir(page, 'Historial')
+  const columnas = await page.locator('thead th').allTextContents()
+  const celda = (nombre: string) => filas(page).first().locator('td').nth(columnas.findIndex((c) => c.startsWith(nombre)))
+  await expect(celda('Brazo izq.')).toHaveText('38,0')
+  await expect(celda('Brazo der.')).toHaveText('39,5')
+  await expect(celda('Muslo izq.')).toHaveText('60,0')
+  await expect(celda('Muslo der.')).toHaveText('–')
+})
+
+test('importar la hoja del entrenador', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  await page.getByLabel('Archivo CSV').setInputFiles(HOJA)
+  await expect(page.getByLabel('Columna para Pecho')).toHaveValue('2')
+  await expect(page.getByLabel('Columna para Brazo izquierdo')).toHaveValue('3')
+  await expect(page.getByLabel('Columna para Muslo derecho')).toHaveValue('8')
+  await expect(page.getByLabel('Columna para Brazo (sin lado)')).toHaveValue('')
+  await expect(page.getByText('3 nuevas, 0 reemplazan, 0 omitidas')).toBeVisible()
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(3)
+  await expect(filas(page).first()).toContainText('34,5')
+  await expect(filas(page).first()).toContainText('54,5')
+})
+
+test('una medición antigua sin lado sigue visible y editable', async ({ page }) => {
+  await page.goto('./')
+  await agregarPersona(page, 'Prueba')
+  await ir(page, 'Datos')
+  const respaldo = {
+    app: 'MedidasCuerpo', version: 1, exportadoEn: '2026-11-01T00:00:00.000Z',
+    personas: [{ id: 'ana', nombre: 'Ana', sexo: 'mujer', fechaNacimiento: '', estaturaCm: 165, objetivo: 'mantener', creadaEn: '2026-01-01T00:00:00.000Z' }],
+    mediciones: [{ id: 'ana_2026-10-01', personaId: 'ana', fecha: '2026-10-01', pesoKg: 60, brazoCm: 34, musloCm: 52, origen: 'manual' }],
+    ajustes: { diaRecordatorio: 0, horaRecordatorio: '09:00' },
+  }
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'r.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(respaldo)) })
+  await page.getByRole('button', { name: 'Sí, restaurar' }).click()
+  await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
+  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await ir(page, 'Historial')
+  await expect(page.locator('thead')).toContainText('Brazo (sin lado)')
+  await expect(filas(page).first()).toContainText('34,0')
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await expect(page.getByLabel('Brazo (sin lado) (cm)')).toHaveValue('34')
+  await page.getByLabel('Peso (kg)').fill('61')
+  await page.getByRole('button', { name: 'Actualizar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page).first()).toContainText('61,0')
+  await expect(filas(page).first()).toContainText('34,0')
+  await expect(filas(page).first()).toContainText('52,0')
+})
+
+test('la persona puede tener un peso objetivo', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await page.getByLabel('Peso objetivo (kg, opcional)').fill('900')
+  await page.getByRole('button', { name: 'Guardar persona' }).click()
+  await expect(page.getByText('Debe estar entre 2 y 400')).toBeVisible()
+  await page.getByLabel('Peso objetivo (kg, opcional)').fill('58,5')
+  await page.getByRole('button', { name: 'Guardar persona' }).click()
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await expect(page.getByLabel('Peso objetivo (kg, opcional)')).toHaveValue('58,5')
+})
