@@ -29,11 +29,11 @@ const SILUETA: Record<Sexo, string> = {
 const ZONAS: Record<Sexo, Record<CampoPerimetro, Zona>> = {
   hombre: {
     cuelloCm: { y: 70, x: 100, w: 12, lado: 'der', rotuloY: 66 },
-    pechoCm: { y: 112, x: 100, w: 38, lado: 'izq', rotuloY: 104 },
+    pechoCm: { y: 112, x: 100, w: 38, lado: 'izq', rotuloY: 92 },
     brazoIzqCm: { y: 150, x: 153, w: 8, lado: 'der', rotuloY: 150 },
     brazoDerCm: { y: 150, x: 47, w: 8, lado: 'izq', rotuloY: 150 },
     brazoCm: { y: 150, x: 153, w: 8, lado: 'der', rotuloY: 150 },
-    cinturaCm: { y: 184, x: 100, w: 30, lado: 'izq', rotuloY: 198 },
+    cinturaCm: { y: 184, x: 100, w: 30, lado: 'izq', rotuloY: 210 },
     caderaCm: { y: 228, x: 100, w: 40, lado: 'der', rotuloY: 228 },
     musloIzqCm: { y: 290, x: 121, w: 16, lado: 'der', rotuloY: 290 },
     musloDerCm: { y: 290, x: 79, w: 16, lado: 'izq', rotuloY: 290 },
@@ -41,11 +41,11 @@ const ZONAS: Record<Sexo, Record<CampoPerimetro, Zona>> = {
   },
   mujer: {
     cuelloCm: { y: 70, x: 100, w: 10, lado: 'der', rotuloY: 66 },
-    pechoCm: { y: 114, x: 100, w: 33, lado: 'izq', rotuloY: 104 },
+    pechoCm: { y: 114, x: 100, w: 33, lado: 'izq', rotuloY: 92 },
     brazoIzqCm: { y: 150, x: 145, w: 8, lado: 'der', rotuloY: 150 },
     brazoDerCm: { y: 150, x: 55, w: 8, lado: 'izq', rotuloY: 150 },
     brazoCm: { y: 150, x: 145, w: 8, lado: 'der', rotuloY: 150 },
-    cinturaCm: { y: 180, x: 100, w: 24, lado: 'izq', rotuloY: 198 },
+    cinturaCm: { y: 180, x: 100, w: 24, lado: 'izq', rotuloY: 210 },
     caderaCm: { y: 232, x: 100, w: 44, lado: 'der', rotuloY: 232 },
     musloIzqCm: { y: 292, x: 122, w: 17, lado: 'der', rotuloY: 292 },
     musloDerCm: { y: 292, x: 78, w: 17, lado: 'izq', rotuloY: 292 },

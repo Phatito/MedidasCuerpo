@@ -32,12 +32,25 @@ misma pestaña elige el archivo en "Archivo de respaldo".
   zona y su cambio reciente, más sus números principales, la tendencia del
   peso y la interpretación más importante.
 - **Medir:** peso (obligatorio) y, opcionalmente, % de grasa, masa muscular,
-  grasa visceral, % de agua y perímetros.
+  grasa visceral, % de agua y perímetros, con brazo y muslo de cada lado por
+  separado y una guía de dónde tomar cada medida.
+- **Peso de tendencia:** un promedio que da más importancia a las pesadas
+  recientes y suaviza las subidas y bajadas de un día. Es el número principal
+  del peso en la Ficha y la línea celeste en los gráficos de peso.
+- **Meta:** con un peso objetivo en la persona, la Ficha muestra cuánto falta y
+  la fecha estimada al ritmo de las últimas cuatro semanas.
 - **Evolución:** gráfico por métrica con promedio de las últimas 4 mediciones e
   interpretación de los cambios.
 - **Historial:** tabla de mediciones, con edición y eliminación.
 - **Datos:** importar y exportar CSV, respaldo, y recordatorio semanal como
   evento de calendario.
+
+### Pasar una hoja escrita a mano
+
+La importación reconoce los nombres habituales de una hoja de entrenador:
+`Fecha`, `Peso`, `Torso`, `Brazo izquierdo`, `Brazo derecho`, `Cintura`,
+`Cadera`, `Pierna izquierda`, `Pierna derecha`. Con las cifras en un archivo CSV
+con esas columnas (separado por punto y coma), se cargan en Datos → Importar.
 
 Las interpretaciones son orientación general, no diagnóstico médico. El % de
 grasa y la grasa visceral de las básculas domésticas son estimaciones: lo que
