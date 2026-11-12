@@ -10,11 +10,12 @@ interface Props {
   personas: Persona[]
   onMedir: (personaId: string) => void
   onIrDatos: () => void
+  onVerFicha: (personaId: string) => void
 }
 
 const DIAS_SIN_RESPALDO = 30
 
-export function Familia({ personas, onMedir, onIrDatos }: Props) {
+export function Familia({ personas, onMedir, onIrDatos, onVerFicha }: Props) {
   const ajustes = useLiveQuery(leerAjustes, [])
   const mediciones = useLiveQuery(listarTodasLasMediciones, [], [] as Medicion[])
   const [editando, setEditando] = useState<Persona | 'nueva' | null>(null)
@@ -119,7 +120,8 @@ export function Familia({ personas, onMedir, onIrDatos }: Props) {
                 </div>
               ) : (
                 <div className="row">
-                  <button className="btn primary" onClick={() => onMedir(p.id)}>Registrar medición</button>
+                  <button className="btn primary" onClick={() => onVerFicha(p.id)}>Ver ficha</button>
+                  <button className="btn" onClick={() => onMedir(p.id)}>Registrar medición</button>
                   <button className="btn link" onClick={() => setEditando(p)}>Editar</button>
                   <button className="btn link danger" onClick={() => setPorBorrar(p.id)}>Eliminar</button>
                 </div>

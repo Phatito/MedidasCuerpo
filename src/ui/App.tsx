@@ -7,6 +7,7 @@ import { db, listarPersonas, listarTodasLasMediciones } from '../storage/db'
 import { Datos } from './Datos'
 import { Evolucion } from './Evolucion'
 import { Familia } from './Familia'
+import { Ficha } from './Ficha'
 import { Historial } from './Historial'
 import { Medir } from './Medir'
 import { PersonasBar } from './PersonasBar'
@@ -107,6 +108,10 @@ export function App() {
               <Familia
                 personas={personas}
                 onIrDatos={() => irA('datos')}
+                onVerFicha={(id) => {
+                  guardarSeleccion(id)
+                  irA('ficha')
+                }}
                 onMedir={(id) => {
                   guardarSeleccion(id)
                   irA('medir')
@@ -118,7 +123,7 @@ export function App() {
                 {pestana.nombre}: {persona.nombre}
               </h2>
             )}
-            {visible === 'ficha' && persona && <p className="muted">Ficha en construcción.</p>}
+            {visible === 'ficha' && persona && <Ficha persona={persona} onMedir={() => irA('medir')} onVerEvolucion={() => irA('evolucion')} />}
             {visible === 'medir' && persona && (
               <Medir key={`${persona.id}-${fechaMedir ?? ''}`} persona={persona} fechaInicial={fechaMedir} onVerEvolucion={() => irA('evolucion')} />
             )}

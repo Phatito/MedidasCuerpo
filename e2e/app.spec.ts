@@ -345,3 +345,47 @@ test('doce personas con nombres largos no desbordan a 400 px', async ({ page }) 
   await ir(page, 'Datos')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
+
+const figura = (page: Page) => page.locator('svg.body-fig')
+
+test('la ficha dibuja la figura según el sexo y solo las medidas registradas', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72,5', '88')
+  await ir(page, 'Ficha')
+  await expect(figura(page)).toHaveAttribute('data-sexo', 'mujer')
+  await expect(figura(page).locator('[data-medida]')).toHaveCount(1)
+  await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('88,0 cm')
+  await expect(page.getByText('NaN')).toHaveCount(0)
+  await expect(page.getByText('undefined')).toHaveCount(0)
+})
+
+test('la ficha muestra el cambio frente a la medición anterior y la interpretación', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await medir(page, haceDias(0), '72,4', '86,5')
+  await ir(page, 'Ficha')
+  await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
+  await expect(page.locator('.tile', { hasText: 'Peso' })).toContainText('72,4')
+  await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
+  await expect(page.locator('svg.chart.compact circle.dot')).toHaveCount(2)
+  await page.getByRole('button', { name: 'Ver todo en Evolución' }).click()
+  await expect(page.getByRole('heading', { name: /Evolución: Ana/ })).toBeVisible()
+  await expect(page.locator('svg.chart .area')).toHaveCount(1)
+})
+
+test('sin mediciones la ficha invita a registrar la primera', async ({ page }) => {
+  await agregarAna(page)
+  await page.getByRole('button', { name: 'Ver ficha' }).click()
+  await expect(figura(page)).toBeVisible()
+  await expect(figura(page).locator('[data-medida]')).toHaveCount(0)
+  await expect(page.getByText('Todavía no hay mediciones de Ana.')).toBeVisible()
+  await page.getByRole('button', { name: 'Registrar medición de esta semana' }).click()
+  await expect(page.getByRole('heading', { name: /Medir: Ana/ })).toBeVisible()
+})
+
+test('un hombre recibe la figura de hombre', async ({ page }) => {
+  await page.goto('./')
+  await agregarPersona(page, 'Beto', 'hombre')
+  await page.getByRole('button', { name: 'Ver ficha' }).click()
+  await expect(figura(page)).toHaveAttribute('data-sexo', 'hombre')
+})

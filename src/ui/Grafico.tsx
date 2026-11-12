@@ -3,6 +3,8 @@ import { diasEntre, fechaLegible, formatear } from '../domain/numbers'
 interface Props {
   puntos: { fecha: string; valor: number }[]
   unidad: string
+  /** Versión pequeña para la Ficha: sin promedio ni leyenda. */
+  compacto?: boolean
 }
 
 const ANCHO = 720
@@ -10,7 +12,7 @@ const ALTO = 280
 const M = { izq: 52, der: 64, arriba: 18, abajo: 30 }
 const VENTANA = 4
 
-export function Grafico({ puntos, unidad }: Props) {
+export function Grafico({ puntos, unidad, compacto = false }: Props) {
   if (puntos.length === 0) return null
   const valores = puntos.map((p) => p.valor)
   let min = Math.min(...valores)
@@ -36,8 +38,8 @@ export function Grafico({ puntos, unidad }: Props) {
 
   return (
     <div className="stack">
-      <div className="chart-scroll">
-      <svg className="chart" viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={`Evolución en ${unidad}, ${puntos.length} mediciones`}>
+      <div className={compacto ? undefined : 'chart-scroll'}>
+      <svg className={compacto ? 'chart compact' : 'chart'} viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={`Evolución en ${unidad}, ${puntos.length} mediciones`}>
         {marcas.map((v) => (
           <g key={v}>
             <line className="grid-line" x1={M.izq} x2={ANCHO - M.der} y1={y(v)} y2={y(v)} />
@@ -53,18 +55,21 @@ export function Grafico({ puntos, unidad }: Props) {
         {totalDias === 0 && (
           <text className="axis" x={x(ultimo.fecha)} y={ALTO - 8} textAnchor="middle">{fechaLegible(ultimo.fecha)}</text>
         )}
+        {puntos.length > 1 && (
+          <path className="area" d={`${camino(puntos)} L${x(ultimo.fecha).toFixed(1)},${ALTO - M.abajo} L${x(puntos[0].fecha).toFixed(1)},${ALTO - M.abajo} Z`} />
+        )}
         {puntos.length > 1 && <path className="line" d={camino(puntos)} />}
-        {promedio.length > 1 && <path className="avg" d={camino(promedio)} />}
-        {promedio.length === 1 && <circle className="avg-dot" cx={x(promedio[0].fecha)} cy={y(promedio[0].valor)} r={5} />}
+        {!compacto && promedio.length > 1 && <path className="avg" d={camino(promedio)} />}
+        {!compacto && promedio.length === 1 && <circle className="avg-dot" cx={x(promedio[0].fecha)} cy={y(promedio[0].valor)} r={5} />}
         {puntos.map((p) => (
-          <circle className="dot" key={p.fecha} cx={x(p.fecha)} cy={y(p.valor)} r={4.5}>
+          <circle className={p === ultimo ? 'dot end' : 'dot'} key={p.fecha} cx={x(p.fecha)} cy={y(p.valor)} r={4.5}>
             <title>{`${fechaLegible(p.fecha)}: ${formatear(p.valor)} ${unidad}`}</title>
           </circle>
         ))}
         <text className="last" x={x(ultimo.fecha) + 10} y={y(ultimo.valor) + 4}>{formatear(ultimo.valor)}</text>
       </svg>
       </div>
-      {puntos.length === 1 ? (
+      {compacto ? null : puntos.length === 1 ? (
         <p className="muted small">Registra otra medición para ver la línea.</p>
       ) : (
         <div className="legend">
