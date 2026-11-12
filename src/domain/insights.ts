@@ -66,7 +66,7 @@ function deltaGrasa(p: Persona, a: Medicion, b: Medicion): { cambio: number; nom
 }
 
 /** Las reglas y categorías de esta app son para adultos. Sin fecha de nacimiento, una estatura baja indica un niño. */
-function esMenor(p: Persona, fechaReferencia: string): boolean {
+export function esMenor(p: Persona, fechaReferencia: string): boolean {
   if (/^\d{4}-\d{2}-\d{2}$/.test(p.fechaNacimiento)) {
     const [an, mn, dn] = p.fechaNacimiento.split('-').map(Number)
     const [ar, mr, dr] = fechaReferencia.split('-').map(Number)
