@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { resumenFicha, type ClaveTarjeta, type TarjetaFicha } from '../domain/ficha'
-import { fechaLegible, formatear } from '../domain/numbers'
+import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import type { ProyeccionMeta } from '../domain/trend'
 import type { Objetivo, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
@@ -42,7 +42,7 @@ function textoMeta(m: ProyeccionMeta): string {
     case 'alcanzada':
       return 'Meta alcanzada.'
     case 'sin_datos':
-      return 'Faltan mediciones para estimar una fecha.'
+      return 'Faltan mediciones recientes (al menos dos en las últimas cuatro semanas) para estimar una fecha.'
     case 'en_contra':
       return m.ritmoSemanalKg === 0 ? 'Tu tendencia está estable: a este ritmo no llegarías a la meta.' : `Al ritmo actual (${ritmo}) te alejas de la meta.`
     case 'lejana':
@@ -55,7 +55,7 @@ function textoMeta(m: ProyeccionMeta): string {
 export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   if (mediciones == null) return <p className="muted">Cargando…</p>
-  const r = resumenFicha(persona, mediciones)
+  const r = resumenFicha(persona, mediciones, { hoy: hoyIso() })
 
   return (
     <div className="ficha">

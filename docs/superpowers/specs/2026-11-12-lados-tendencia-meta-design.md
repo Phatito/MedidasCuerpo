@@ -72,14 +72,20 @@ La persona puede tener un peso objetivo opcional (`metaPesoKg`, rango del peso),
 editable en su formulario. Con meta, la Ficha muestra una tarjeta "Meta":
 
 - Siempre: la meta y cuánto falta desde la tendencia actual.
-- **Alcanzada**: la tendencia está a menos de 0,05 kg de la meta, o la meta queda
-  entre la primera tendencia y la actual.
+- **Alcanzada**: la tendencia está a menos de 0,05 kg de la meta. (Haber cruzado
+  la meta en algún momento del historial no cuenta: quien subió y ahora quiere
+  bajar sigue viendo cuánto le falta.)
 - **Sin datos suficientes**: menos de dos mediciones en los últimos 28 días
-  separadas por 7 días o más. Texto: "Faltan mediciones para estimar una fecha."
+  separadas por 7 días o más, la última medición tiene más de 28 días respecto de
+  hoy, o la fecha calculada ya pasó. Texto: "Faltan mediciones recientes (al
+  menos dos en las últimas cuatro semanas) para estimar una fecha."
 - **Ritmo**: cambio de la tendencia entre la primera y la última medición de los
   últimos 28 días, por día. Se muestra por semana.
-- **En contra**: el ritmo es cero o aleja de la meta. Texto: "Al ritmo actual te
-  alejas de la meta." No se muestra fecha.
+- **En contra**: el ritmo, redondeado a 0,01 kg por semana, es cero o aleja de la
+  meta. Texto: "Al ritmo actual te alejas de la meta." o, si es cero, "Tu
+  tendencia está estable: a este ritmo no llegarías a la meta." No se muestra fecha.
+- **Menores**: no se muestra la tarjeta Meta, como el resto de las reglas para
+  adultos.
 - **Fecha estimada**: última fecha + días necesarios al ritmo actual (hacia
   arriba). Si son más de 730 días, no se muestra fecha: "A este ritmo faltan más
   de dos años."

@@ -49,25 +49,31 @@ function sumarDias(fecha: string, dias: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-/** Cuánto falta para la meta y, al ritmo de las últimas cuatro semanas, cuándo se alcanzaría. */
-export function proyeccionMeta(serie: PuntoTendencia[], metaKg: number): ProyeccionMeta | null {
+/**
+ * Cuánto falta para la meta y, al ritmo de las últimas cuatro semanas, cuándo se alcanzaría.
+ * `hoy` evita proyectar desde mediciones viejas: sin datos recientes no hay fecha.
+ */
+export function proyeccionMeta(serie: PuntoTendencia[], metaKg: number, hoy?: string): ProyeccionMeta | null {
   const ultima = serie[serie.length - 1]
   if (!ultima) return null
   const falta = metaKg - ultima.tendencia
   const base = { faltaKg: Math.round(falta * 10) / 10, ritmoSemanalKg: null, fecha: null }
 
-  const cruzada = (serie[0].tendencia - metaKg) * falta > 0
-  if (Math.abs(falta) < TOLERANCIA_META_KG || cruzada) return { ...base, estado: 'alcanzada', faltaKg: Math.abs(falta) < TOLERANCIA_META_KG ? 0 : base.faltaKg }
+  if (Math.abs(falta) < TOLERANCIA_META_KG) return { ...base, estado: 'alcanzada', faltaKg: 0 }
+  if (hoy && diasEntre(ultima.fecha, hoy) > VENTANA_RITMO_DIAS) return { ...base, estado: 'sin_datos' }
 
   const inicio = serie.find((p) => diasEntre(p.fecha, ultima.fecha) <= VENTANA_RITMO_DIAS)!
   const lapso = diasEntre(inicio.fecha, ultima.fecha)
   if (lapso < DIAS_MINIMOS_PARA_RITMO) return { ...base, estado: 'sin_datos' }
 
   const ritmoDiario = (ultima.tendencia - inicio.tendencia) / lapso
-  const ritmoSemanalKg = Math.round(ritmoDiario * 7 * 100) / 100
-  if (ritmoDiario === 0 || Math.sign(ritmoDiario) !== Math.sign(falta)) return { ...base, ritmoSemanalKg, estado: 'en_contra' }
+  const ritmoSemanalKg = Math.round(ritmoDiario * 7 * 100) / 100 || 0
+  // Un ritmo que se muestra como 0,00 kg por semana es, para quien lo lee, estable.
+  if (ritmoSemanalKg === 0 || Math.sign(ritmoDiario) !== Math.sign(falta)) return { ...base, ritmoSemanalKg, estado: 'en_contra' }
 
   const dias = Math.ceil(falta / ritmoDiario)
   if (dias > MAXIMO_DIAS_PROYECCION) return { ...base, ritmoSemanalKg, estado: 'lejana' }
-  return { ...base, ritmoSemanalKg, estado: 'estimada', fecha: sumarDias(ultima.fecha, dias) }
+  const fecha = sumarDias(ultima.fecha, dias)
+  if (hoy && fecha < hoy) return { ...base, ritmoSemanalKg, estado: 'sin_datos' }
+  return { ...base, ritmoSemanalKg, estado: 'estimada', fecha }
 }

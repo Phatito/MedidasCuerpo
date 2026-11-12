@@ -80,8 +80,26 @@ describe('proyeccionMeta', () => {
     const s = tendenciaPeso([{ fecha: '2026-11-01', valor: 95.04 }])
     expect(proyeccionMeta(s, 95)).toMatchObject({ estado: 'alcanzada', fecha: null })
   })
-  test('la meta quedó entre la primera tendencia y la actual: alcanzada', () => {
-    expect(proyeccionMeta(bajando, 99.5)?.estado).toBe('alcanzada')
+  test('empezó bajo la meta y hoy está sobre ella: no está alcanzada, falta bajar', () => {
+    const s = tendenciaPeso([{ fecha: '2025-01-01', valor: 78 }, ...semanal('2026-10-04', [85, 85, 85, 85, 85])])
+    expect(proyeccionMeta(s, 80)).toMatchObject({ estado: 'en_contra' })
+    expect(proyeccionMeta(s, 80)!.faltaKg).toBeLessThan(-4)
+  })
+  test('empezó sobre la meta y hoy está bajo ella: falta subir', () => {
+    const s = tendenciaPeso([{ fecha: '2025-01-01', valor: 90 }, ...semanal('2026-10-04', [70, 70, 70, 70, 70])])
+    expect(proyeccionMeta(s, 75)!.estado).not.toBe('alcanzada')
+    expect(proyeccionMeta(s, 75)!.faltaKg).toBeGreaterThan(4)
+  })
+  test('la última medición tiene más de 28 días respecto de hoy: sin datos, nunca una fecha pasada', () => {
+    expect(proyeccionMeta(bajando, 96, '2026-12-15')).toMatchObject({ estado: 'sin_datos', fecha: null })
+  })
+  test('con hoy reciente la fecha estimada no es anterior a hoy', () => {
+    const p = proyeccionMeta(bajando, 97.9, '2026-11-20')!
+    expect(p.fecha === null || p.fecha >= '2026-11-20').toBe(true)
+  })
+  test('un ritmo que se redondea a 0,00 kg por semana cuenta como estable', () => {
+    const s = tendenciaPeso([{ fecha: '2026-10-04', valor: 80 }, { fecha: '2026-11-01', valor: 79.99 }])
+    expect(proyeccionMeta(s, 70)).toMatchObject({ estado: 'en_contra', ritmoSemanalKg: 0 })
   })
   test('ritmo ínfimo hacia una meta lejana: sin fecha', () => {
     const s = tendenciaPeso(semanal('2026-10-04', [100, 99.99, 99.98, 99.97, 99.96]))

@@ -131,6 +131,19 @@ describe('medidas por lado', () => {
   test('columnas con y sin lado a la vez van cada una a su campo', () => {
     expect(sugerirAsignacion(['Fecha', 'Peso', 'Brazo', 'Brazo izquierdo', 'Pierna'])).toMatchObject({ brazoCm: 2, brazoIzqCm: 3, musloCm: 4, musloIzqCm: null })
   })
+  test.each([
+    ['Brazo I', 'Brazo D', 'Pierna I', 'Pierna D'],
+    ['Brazo izdo', 'Brazo dcho', 'Muslo izda', 'Muslo dcha'],
+    ['Bíceps izquierdo', 'Bíceps derecho', 'Pierna izquierda', 'Pierna derecha'],
+    ['Brazo L', 'Brazo R', 'Thigh L', 'Thigh R'],
+  ])('reconoce lados abreviados: %s, %s, %s, %s', (bi, bd, mi, md) => {
+    expect(sugerirAsignacion(['Fecha', 'Peso', bi, bd, mi, md])).toMatchObject({ brazoIzqCm: 2, brazoDerCm: 3, musloIzqCm: 4, musloDerCm: 5, brazoCm: null, musloCm: null })
+  })
+  test('una columna con lado nunca cae en el campo sin lado', () => {
+    const a = sugerirAsignacion(['Fecha', 'Peso', 'Brazo izquierdo relajado', 'Brazo izquierdo contraído'])
+    expect(a).toMatchObject({ brazoIzqCm: 2, brazoCm: null })
+  })
+
   test('encabezados en inglés', () => {
     expect(sugerirAsignacion(['date', 'weight', 'Left Arm', 'Right Thigh', 'Left leg'])).toMatchObject({ brazoIzqCm: 2, musloDerCm: 3, musloIzqCm: 4 })
   })

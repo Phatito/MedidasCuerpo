@@ -93,7 +93,7 @@ function tonoDe(clave: ClaveTarjeta, cambio: number | null, valor: number, p: Pe
   return 'neutro'
 }
 
-export function resumenFicha(p: Persona, mediciones: Medicion[]): ResumenFicha {
+export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy?: string } = {}): ResumenFicha {
   const ms = [...mediciones].sort((a, b) => a.fecha.localeCompare(b.fecha))
   const ultima = ms[ms.length - 1] ?? null
   if (!ultima) return { ultima: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null }
@@ -157,7 +157,8 @@ export function resumenFicha(p: Persona, mediciones: Medicion[]): ResumenFicha {
     asimetrias,
     tarjetas: [tarjetaPeso, ...otras],
     serie: serieCompleta.slice(-MEDICIONES_EN_TENDENCIA),
-    meta: p.metaPesoKg == null ? null : proyeccionMeta(serieCompleta, p.metaPesoKg),
+    // A un menor no se le proyecta un peso meta, como en el resto de las reglas para adultos.
+    meta: p.metaPesoKg == null || esMenor(p, ultima.fecha) ? null : proyeccionMeta(serieCompleta, p.metaPesoKg, opciones.hoy),
     mensaje: interpretar(p, ms)[0] ?? null,
   }
 }

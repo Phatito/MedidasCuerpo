@@ -5,6 +5,14 @@ import { validarValor } from './validation'
 export type CampoCsv = 'fecha' | CampoNumerico | 'nota'
 export type Asignacion = Record<CampoCsv, number | null>
 
+const BRAZO = ['brazo', 'arm', 'biceps']
+const MUSLO = ['muslo', 'thigh', 'pierna', 'leg']
+const IZQUIERDO = ['izquierdo', 'izquierda', 'izq', 'izdo', 'izda', 'i', 'left', 'l']
+const DERECHO = ['derecho', 'derecha', 'der', 'dcho', 'dcha', 'd', 'right', 'r']
+/** Una columna con alguna palabra de lado nunca va a un campo "sin lado". */
+const PALABRAS_DE_LADO = [...IZQUIERDO, ...DERECHO]
+const conLado = (zonas: string[], lados: string[]) => zonas.flatMap((z) => lados.map((l) => `${z} ${l}`))
+
 // El orden importa: "grasa visceral" debe reconocerse antes que "grasa".
 // Cada alias es una lista de palabras que deben aparecer completas en el encabezado.
 const ALIAS: [CampoCsv, string[]][] = [
@@ -19,12 +27,12 @@ const ALIAS: [CampoCsv, string[]][] = [
   ['cinturaCm', ['cintura', 'waist']],
   ['caderaCm', ['cadera', 'hip', 'hips']],
   // Las medidas por lado van antes que las "sin lado": "Brazo izquierdo" no debe caer en "Brazo".
-  ['brazoIzqCm', ['brazo izquierdo', 'brazo izq', 'left arm', 'left biceps']],
-  ['brazoDerCm', ['brazo derecho', 'brazo der', 'right arm', 'right biceps']],
-  ['musloIzqCm', ['muslo izquierdo', 'muslo izq', 'pierna izquierda', 'pierna izq', 'left thigh', 'left leg']],
-  ['musloDerCm', ['muslo derecho', 'muslo der', 'pierna derecha', 'pierna der', 'right thigh', 'right leg']],
-  ['brazoCm', ['brazo', 'arm', 'biceps']],
-  ['musloCm', ['muslo', 'thigh', 'pierna', 'leg']],
+  ['brazoIzqCm', conLado(BRAZO, IZQUIERDO)],
+  ['brazoDerCm', conLado(BRAZO, DERECHO)],
+  ['musloIzqCm', conLado(MUSLO, IZQUIERDO)],
+  ['musloDerCm', conLado(MUSLO, DERECHO)],
+  ['brazoCm', BRAZO],
+  ['musloCm', MUSLO],
   ['nota', ['nota', 'notas', 'note', 'notes', 'comentario', 'comentarios']],
 ]
 // Una columna de masa (kg) no es un porcentaje de grasa.
@@ -108,7 +116,8 @@ export function sugerirAsignacion(columnas: string[]): Asignacion {
         (ps, i) =>
           !usadas.has(i) &&
           alias.some((a) => a.split(' ').every((palabra) => ps.includes(palabra))) &&
-          !(campo === 'grasaPct' && ps.some((x) => NO_ES_PORCENTAJE.includes(x))),
+          !(campo === 'grasaPct' && ps.some((x) => NO_ES_PORCENTAJE.includes(x))) &&
+          !((campo === 'brazoCm' || campo === 'musloCm') && ps.some((x) => PALABRAS_DE_LADO.includes(x))),
       ),
     )
   }

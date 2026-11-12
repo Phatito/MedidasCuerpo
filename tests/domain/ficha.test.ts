@@ -127,4 +127,10 @@ describe('peso de tendencia y meta', () => {
     expect(resumenFicha(p, subida).meta).toBeNull()
     expect(resumenFicha(persona({ metaPesoKg: 95 }), subida).meta).toMatchObject({ faltaKg: expect.any(Number) })
   })
+  test('a un menor no se le muestra la meta', () => {
+    expect(resumenFicha(persona({ metaPesoKg: 30, fechaNacimiento: '2016-01-01', estaturaCm: 135 }), subida).meta).toBeNull()
+  })
+  test('la proyección usa la fecha de hoy', () => {
+    expect(resumenFicha(persona({ metaPesoKg: 95 }), subida, { hoy: '2027-03-01' }).meta?.estado).toBe('sin_datos')
+  })
 })
