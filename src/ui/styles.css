@@ -14,6 +14,9 @@
   --warn: #ffb454;
   --warn-bg: #3a2c12;
   --bad: #ff7b7b;
+  --sil-top: #8f73ff;
+  --sil-bottom: #3a2f8f;
+  --sil-line: #5d49c9;
   --font: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 16px;
   color-scheme: dark;
@@ -124,6 +127,7 @@ tbody tr:hover { background: var(--soft); }
 .say.bien { background: var(--good-bg); color: var(--good); }
 .say.atencion { background: var(--warn-bg); color: var(--warn); }
 .say p { font-size: 0.9rem; }
+.say .pill { background: var(--bg); }
 
 .chart-scroll { overflow-x: auto; }
 .chart { width: 100%; min-width: 560px; height: auto; display: block; }
@@ -153,7 +157,7 @@ tbody tr:hover { background: var(--soft); }
 .tile .d.bien { color: var(--good); }
 .tile .d.atencion { color: var(--warn); }
 .body-fig { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
-.body-fig .sil { fill: url(#cuerpo-relleno); stroke: #5d49c9; stroke-width: 1.5; }
+.body-fig .sil { fill: url(#cuerpo-relleno); stroke: var(--sil-line); stroke-width: 1.5; }
 .body-fig .band { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-linecap: round; }
 .body-fig .lead { fill: none; stroke: var(--dim); stroke-width: 1; opacity: 0.7; }
 .body-fig .pin { fill: var(--cyan); }

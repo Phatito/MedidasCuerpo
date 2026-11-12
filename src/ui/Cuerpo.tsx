@@ -55,8 +55,8 @@ export function Cuerpo({ sexo, medidas }: Props) {
     <svg className="body-fig" data-sexo={sexo} viewBox="-110 10 420 430" role="img" aria-label={descripcion}>
       <defs>
         <linearGradient id="cuerpo-relleno" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8f73ff" />
-          <stop offset="1" stopColor="#3a2f8f" />
+          <stop offset="0" style={{ stopColor: 'var(--sil-top)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--sil-bottom)' }} />
         </linearGradient>
       </defs>
       <g className="sil">

@@ -28,6 +28,9 @@ misma pestaña elige el archivo en "Archivo de respaldo".
 
 - **Familia:** una tarjeta por persona, con aviso de a quién le toca medirse
   (7 días o más desde su última medición).
+- **Ficha:** la figura del cuerpo de la persona con cada perímetro sobre su
+  zona y su cambio reciente, más sus números principales, la tendencia del
+  peso y la interpretación más importante.
 - **Medir:** peso (obligatorio) y, opcionalmente, % de grasa, masa muscular,
   grasa visceral, % de agua y perímetros.
 - **Evolución:** gráfico por métrica con promedio de las últimas 4 mediciones e

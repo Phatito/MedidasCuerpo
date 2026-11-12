@@ -36,7 +36,7 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
   return (
     <div className="ficha">
       <section className="card stack">
-        <div className="row">
+        <div className="row" style={{ flexWrap: 'nowrap' }}>
           <span className="avatar big" aria-hidden="true">{inicial(persona.nombre)}</span>
           <div style={{ minWidth: 0 }}>
             <h2>{persona.nombre}</h2>

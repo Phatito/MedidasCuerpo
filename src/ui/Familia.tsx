@@ -5,6 +5,7 @@ import { estadoMedicion } from '../domain/reminders'
 import type { Medicion, Persona } from '../domain/types'
 import { borrarPersona, guardarPersona, leerAjustes, listarTodasLasMediciones } from '../storage/db'
 import { PersonaForm } from './PersonaForm'
+import { inicial } from './PersonasBar'
 
 interface Props {
   personas: Persona[]
@@ -92,8 +93,9 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha }: Props) {
           const cantidad = porPersona.get(p.id)?.length ?? 0
           return (
             <article className="card person" key={p.id}>
-              <div className="head">
-                <h3>{p.nombre}</h3>
+              <div className="who-head">
+                <span className="avatar big" aria-hidden="true">{inicial(p.nombre)}</span>
+                <h3 title={p.nombre}>{p.nombre}</h3>
                 <span className={`pill ${estado.pendiente ? 'due' : 'ok'}`}>{estado.pendiente ? 'Le toca medirse' : 'Al día'}</span>
               </div>
               {u ? (
