@@ -2,8 +2,11 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// GitHub Pages sirve la app bajo /MedidasCuerpo/; otros hosts (Vercel) la sirven en la raíz con VITE_BASE=/.
+const base = process.env.VITE_BASE ?? '/MedidasCuerpo/'
+
 export default defineConfig({
-  base: '/MedidasCuerpo/',
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -15,8 +18,8 @@ export default defineConfig({
         description: 'Control semanal de peso y medidas corporales de la familia',
         lang: 'es',
         display: 'standalone',
-        start_url: '/MedidasCuerpo/',
-        scope: '/MedidasCuerpo/',
+        start_url: base,
+        scope: base,
         theme_color: '#0e7c7b',
         background_color: '#eef2f1',
         icons: [
