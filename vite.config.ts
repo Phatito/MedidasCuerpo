@@ -12,6 +12,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
+      // La tipografía también se guarda en el dispositivo: sin esto la app sin conexión caería a la fuente del sistema.
+      workbox: { globPatterns: ['**/*.{js,css,html,png,woff2}'] },
       manifest: {
         name: 'MedidasCuerpo',
         short_name: 'Medidas',

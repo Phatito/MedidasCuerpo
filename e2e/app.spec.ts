@@ -334,6 +334,16 @@ test('cambiar de persona en Medir no arrastra lo escrito', async ({ page }) => {
   await fila(page).getByRole('button', { name: /Beto/ }).click()
   await expect(page.getByRole('heading', { name: /Medir: Beto/ })).toBeVisible()
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
+  // Lo escrito para Ana no se pierde: vuelve al regresar a ella.
+  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
+  await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeVisible()
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  // Una vez guardado ya no hay borrador que recuperar.
+  await fila(page).getByRole('button', { name: /Beto/ }).click()
+  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeHidden()
 })
 
 test('doce personas con nombres largos no desbordan a 400 px', async ({ page }) => {
@@ -365,6 +375,7 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await medir(page, haceDias(0), '72,4', '86,5')
   await ir(page, 'Ficha')
   await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
+  await expect(figura(page)).toHaveAttribute('aria-label', /cintura 86,5 cm \(bajó 1,5\)/)
   await expect(page.locator('.tile', { hasText: 'Peso' })).toContainText('72,4')
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
   await expect(page.locator('svg.chart.compact circle.dot')).toHaveCount(2)
@@ -388,4 +399,35 @@ test('un hombre recibe la figura de hombre', async ({ page }) => {
   await agregarPersona(page, 'Beto', 'hombre')
   await page.getByRole('button', { name: 'Ver ficha' }).click()
   await expect(figura(page)).toHaveAttribute('data-sexo', 'hombre')
+})
+
+test('el gráfico de la ficha se lee en un teléfono', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await medir(page, haceDias(0), '72,4', '86,5')
+  await ir(page, 'Ficha')
+  const px = await page.locator('svg.chart.compact text.axis').first().evaluate((t) => {
+    const svg = t.closest('svg')!
+    return (parseFloat(getComputedStyle(t).fontSize) * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width
+  })
+  expect(px).toBeGreaterThanOrEqual(10)
+  const etiqueta = await figura(page).locator('text.lab').first().evaluate((t) => {
+    const svg = t.closest('svg')!
+    return (parseFloat(getComputedStyle(t).fontSize) * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width
+  })
+  expect(etiqueta).toBeGreaterThanOrEqual(10)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+test('la tipografía queda guardada para usar la app sin conexión', async ({ page, request }) => {
+  await page.goto('./')
+  const sw = await (await request.get('sw.js')).text()
+  expect(sw).toContain('.woff2')
+})
+
+test('la inicial de la tarjeta de Familia cabe en su círculo', async ({ page }) => {
+  await agregarAna(page)
+  const px = await page.locator('.person .avatar').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+  expect(px).toBeLessThanOrEqual(20)
 })

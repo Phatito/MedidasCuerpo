@@ -22,10 +22,15 @@ const TARJETA: Record<ClaveTarjeta, { nombre: string; unidad: string; decimales:
 }
 const ROTULO = { bien: 'Bien', atencion: 'Atención', neutro: 'Dato' } as const
 
+const decimalesDe = (clave: ClaveTarjeta, n: number) => (TARJETA[clave].decimales === 0 && Number.isInteger(n) ? 0 : 1)
+
 function detalle(t: TarjetaFicha): string | null {
-  if (t.nota) return t.nota
-  if (t.cambio == null || t.desde == null) return null
-  return `${t.cambio < 0 ? '▼' : '▲'} ${formatear(Math.abs(t.cambio))}${TARJETA[t.clave].unidadCambio} desde el ${fechaLegible(t.desde)}`
+  // Los niveles enteros (grasa visceral) se muestran sin decimal; el resto, con uno.
+  const cambio =
+    t.cambio == null || t.desde == null
+      ? null
+      : `${t.cambio < 0 ? '▼' : '▲'} ${formatear(Math.abs(t.cambio), decimalesDe(t.clave, t.cambio))}${TARJETA[t.clave].unidadCambio} desde el ${fechaLegible(t.desde)}`
+  return [t.nota, cambio].filter(Boolean).join(' · ') || null
 }
 
 export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
@@ -69,7 +74,7 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
                     {t.estimada && ' (estimada)'}
                   </div>
                   <div className="v">
-                    {formatear(t.valor, def.decimales)} <small>{def.unidad}</small>
+                    {formatear(t.valor, decimalesDe(t.clave, t.valor))} <small>{def.unidad}</small>
                   </div>
                   {texto && <div className={`d ${t.tono}`}>{texto}</div>}
                 </div>

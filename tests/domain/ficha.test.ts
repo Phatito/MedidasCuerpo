@@ -83,3 +83,12 @@ test('la entrada desordenada da el mismo resultado', () => {
   const b = m('2026-11-08', { pesoKg: 79, cinturaCm: 88 })
   expect(resumenFicha(p, [b, a])).toEqual(resumenFicha(p, [a, b]))
 })
+
+test('grasa estimada antes y medida ahora: no se comparan entre sí', () => {
+  const r = resumenFicha(p, [m('2026-11-01', { cuelloCm: 40, cinturaCm: 90 }), m('2026-11-08', { grasaPct: 22 })])
+  expect(tarjeta(r, 'grasaPct')).toMatchObject({ valor: 22, estimada: false, cambio: null })
+})
+
+test('grasa visceral 9,5 no es elevada y conserva su decimal', () => {
+  expect(tarjeta(resumenFicha(p, [m('2026-11-01', { grasaVisceral: 9.5 })]), 'grasaVisceral')).toMatchObject({ valor: 9.5, tono: 'neutro', nota: null })
+})

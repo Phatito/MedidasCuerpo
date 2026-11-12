@@ -7,13 +7,14 @@ interface Props {
   compacto?: boolean
 }
 
-const ANCHO = 720
-const ALTO = 280
-const M = { izq: 52, der: 64, arriba: 18, abajo: 30 }
 const VENTANA = 4
 
 export function Grafico({ puntos, unidad, compacto = false }: Props) {
   if (puntos.length === 0) return null
+  // El compacto usa un lienzo más chico para que su texto no se achique al escalar en columnas angostas.
+  const ANCHO = compacto ? 360 : 720
+  const ALTO = compacto ? 170 : 280
+  const M = compacto ? { izq: 38, der: 44, arriba: 14, abajo: 26 } : { izq: 52, der: 64, arriba: 18, abajo: 30 }
   const valores = puntos.map((p) => p.valor)
   let min = Math.min(...valores)
   let max = Math.max(...valores)

@@ -31,7 +31,7 @@ const ZONAS: Record<Sexo, Record<CampoPerimetro, Zona>> = {
     brazoCm: { y: 150, x: 153, w: 8, lado: 'der' },
     cinturaCm: { y: 184, x: 100, w: 30, lado: 'izq' },
     caderaCm: { y: 228, x: 100, w: 40, lado: 'der' },
-    musloCm: { y: 290, x: 121, w: 16, lado: 'izq' },
+    musloCm: { y: 290, x: 79, w: 16, lado: 'izq' },
   },
   mujer: {
     cuelloCm: { y: 70, x: 100, w: 10, lado: 'der' },
@@ -39,7 +39,7 @@ const ZONAS: Record<Sexo, Record<CampoPerimetro, Zona>> = {
     brazoCm: { y: 150, x: 145, w: 8, lado: 'der' },
     cinturaCm: { y: 180, x: 100, w: 24, lado: 'izq' },
     caderaCm: { y: 232, x: 100, w: 44, lado: 'der' },
-    musloCm: { y: 292, x: 122, w: 17, lado: 'izq' },
+    musloCm: { y: 292, x: 78, w: 17, lado: 'izq' },
   },
 }
 
@@ -50,7 +50,13 @@ export function Cuerpo({ sexo, medidas }: Props) {
   const descripcion =
     medidas.length === 0
       ? 'Figura del cuerpo, sin perímetros registrados'
-      : 'Figura del cuerpo con ' + medidas.map((m) => `${ETIQUETAS[m.campo].nombre.toLowerCase()} ${formatear(m.valor)} cm`).join(', ')
+      : 'Figura del cuerpo con ' + medidas
+          .map(
+            (m) =>
+              `${ETIQUETAS[m.campo].nombre.toLowerCase()} ${formatear(m.valor)} cm` +
+              (m.cambio == null ? '' : ` (${m.cambio < 0 ? 'bajó' : 'subió'} ${formatear(Math.abs(m.cambio))})`),
+          )
+          .join(', ')
   return (
     <svg className="body-fig" data-sexo={sexo} viewBox="-110 10 420 430" role="img" aria-label={descripcion}>
       <defs>
@@ -76,10 +82,10 @@ export function Cuerpo({ sexo, medidas }: Props) {
             <path className="band" d={`M${z.x - z.w} ${z.y} Q${z.x} ${z.y + 7} ${z.x + z.w} ${z.y}`} />
             <path className="lead" d={`M${borde} ${z.y} L${der ? DER_X : IZQ_X} ${z.y}`} />
             <circle className="pin" cx={borde} cy={z.y} r={3.5} />
-            <text className="lab" x={textoX} y={z.y - 7} textAnchor={ancla}>{ETIQUETAS[m.campo].nombre}</text>
+            <text className="lab" x={textoX} y={z.y - 8} textAnchor={ancla}>{ETIQUETAS[m.campo].nombre}</text>
             <text className="val" x={textoX} y={z.y + 10} textAnchor={ancla}>{formatear(m.valor)} cm</text>
             {m.cambio != null && (
-              <text className="chg" x={textoX} y={z.y + 25} textAnchor={ancla}>
+              <text className="chg" x={textoX} y={z.y + 26} textAnchor={ancla}>
                 {m.cambio < 0 ? '▼' : '▲'} {formatear(Math.abs(m.cambio))}
               </text>
             )}

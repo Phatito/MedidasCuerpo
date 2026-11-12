@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { hoyIso } from '../domain/numbers'
 import { estadoMedicion } from '../domain/reminders'
 import type { Medicion, Persona } from '../domain/types'
@@ -9,7 +9,7 @@ import { Evolucion } from './Evolucion'
 import { Familia } from './Familia'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
-import { Medir } from './Medir'
+import { Medir, type Borrador } from './Medir'
 import { PersonasBar } from './PersonasBar'
 
 export type Pantalla = 'familia' | 'ficha' | 'medir' | 'evolucion' | 'historial' | 'datos'
@@ -38,6 +38,8 @@ export function App() {
   const [personaId, setPersonaId] = useState<string | null>(leerPersonaGuardada)
   const [fechaMedir, setFechaMedir] = useState<string | undefined>(undefined)
   const [sinAlmacenamiento, setSinAlmacenamiento] = useState(false)
+  // Lo escrito en Medir y aún no guardado, por persona: cambiar de persona con un toque no debe borrarlo.
+  const borradores = useRef(new Map<string, Borrador>())
   const personas = useLiveQuery(() => listarPersonas().catch(() => [] as Persona[]), [])
   const mediciones = useLiveQuery(() => listarTodasLasMediciones().catch(() => [] as Medicion[]), [], [] as Medicion[])
 
@@ -125,7 +127,14 @@ export function App() {
             )}
             {visible === 'ficha' && persona && <Ficha persona={persona} onMedir={() => irA('medir')} onVerEvolucion={() => irA('evolucion')} />}
             {visible === 'medir' && persona && (
-              <Medir key={`${persona.id}-${fechaMedir ?? ''}`} persona={persona} fechaInicial={fechaMedir} onVerEvolucion={() => irA('evolucion')} />
+              <Medir
+                key={`${persona.id}-${fechaMedir ?? ''}`}
+                persona={persona}
+                fechaInicial={fechaMedir}
+                borrador={fechaMedir ? undefined : borradores.current.get(persona.id)}
+                onBorrador={(b) => (b ? borradores.current.set(persona.id, b) : borradores.current.delete(persona.id))}
+                onVerEvolucion={() => irA('evolucion')}
+              />
             )}
             {visible === 'evolucion' && persona && <Evolucion persona={persona} onMedir={() => irA('medir')} />}
             {visible === 'historial' && persona && (

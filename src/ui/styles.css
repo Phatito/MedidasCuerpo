@@ -53,7 +53,7 @@ nav.tabs button:disabled { opacity: 0.4; cursor: not-allowed; }
   background: var(--card); border: 1px solid var(--edge); color: var(--dim); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer;
 }
 .who:hover { color: var(--fg); border-color: var(--dim); }
-.who[aria-pressed='true'] { border-color: var(--accent); color: var(--fg); }
+.who[aria-pressed='true'] { border-color: var(--accent); color: var(--fg); font-weight: 800; }
 .who .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .who .due { color: var(--warn); font-weight: 700; white-space: nowrap; }
 .avatar { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 800; background: var(--soft); color: var(--fg); }
@@ -70,7 +70,7 @@ main.wrap { padding-block: 22px 72px; display: flex; flex-direction: column; gap
 .person { display: flex; flex-direction: column; gap: 14px; }
 .person .who-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .person .who-head h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; margin-right: auto; }
-.person .big { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+.person .peso { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
 .empty { text-align: center; padding: 48px 16px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
 
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
@@ -141,6 +141,8 @@ tbody tr:hover { background: var(--soft); }
 .chart .dot { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
 .chart .dot.end { fill: var(--cyan); }
 .chart .last { fill: var(--fg); font-size: 14px; font-weight: 800; font-family: var(--font); }
+.chart.compact .axis { font-size: 11px; }
+.chart.compact .last { font-size: 12px; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: var(--dim); }
 .legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--accent); vertical-align: middle; margin-right: 6px; }
 .legend i.avg { border-top: 3px dashed var(--warn); }
@@ -161,9 +163,9 @@ tbody tr:hover { background: var(--soft); }
 .body-fig .band { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-linecap: round; }
 .body-fig .lead { fill: none; stroke: var(--dim); stroke-width: 1; opacity: 0.7; }
 .body-fig .pin { fill: var(--cyan); }
-.body-fig .lab { font-family: var(--font); font-size: 11px; font-weight: 600; fill: var(--dim); }
+.body-fig .lab { font-family: var(--font); font-size: 13px; font-weight: 600; fill: var(--dim); }
 .body-fig .val { font-family: var(--font); font-size: 15px; font-weight: 800; fill: var(--fg); }
-.body-fig .chg { font-family: var(--font); font-size: 11px; font-weight: 700; fill: var(--dim); }
+.body-fig .chg { font-family: var(--font); font-size: 13px; font-weight: 700; fill: var(--dim); }
 
 @media (max-width: 760px) {
   .ficha { grid-template-columns: 1fr; }

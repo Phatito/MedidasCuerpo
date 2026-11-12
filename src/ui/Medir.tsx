@@ -5,9 +5,18 @@ import { CAMPOS_BASCULA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, ETIQUETAS, type Ca
 import { validarValor } from '../domain/validation'
 import { guardarMedicion, listarMediciones } from '../storage/db'
 
+/** Lo escrito y aún no guardado; App lo conserva por persona para que no se pierda al cambiar de persona o de pantalla. */
+export interface Borrador {
+  fecha: string
+  textos: Record<CampoNumerico, string>
+  nota: string
+}
+
 interface Props {
   persona: Persona
   fechaInicial?: string
+  borrador?: Borrador
+  onBorrador?: (b: Borrador | null) => void
   onVerEvolucion: () => void
 }
 
@@ -15,16 +24,17 @@ type Textos = Record<CampoNumerico, string>
 const VACIO = Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, ''])) as Textos
 const aTexto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
+export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
-  const [fecha, setFecha] = useState(fechaInicial ?? hoyIso())
-  const [textos, setTextos] = useState<Textos>(VACIO)
-  const [nota, setNota] = useState('')
+  const [fecha, setFecha] = useState(fechaInicial ?? borrador?.fecha ?? hoyIso())
+  const [textos, setTextos] = useState<Textos>(borrador?.textos ?? VACIO)
+  const [nota, setNota] = useState(borrador?.nota ?? '')
+  const [recuperado, setRecuperado] = useState(borrador != null)
   const [errores, setErrores] = useState<Partial<Record<CampoNumerico | 'fecha', string>>>({})
   const [guardada, setGuardada] = useState(false)
   const [falloGuardar, setFalloGuardar] = useState(false)
   // "Sucio": la persona escribió algo que aún no se guarda. Mientras lo esté, nada reemplaza lo escrito.
-  const sucio = useRef(false)
+  const sucio = useRef(borrador != null)
   const diaVisto = useRef(hoyIso())
   const fechaActual = useRef(fecha)
   fechaActual.current = fecha
@@ -41,6 +51,12 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
     setErrores({})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persona.id, fecha, cargadas])
+
+  // Mientras haya algo sin guardar, App guarda una copia para devolverla si la persona se va y vuelve.
+  useEffect(() => {
+    if (sucio.current) onBorrador?.({ fecha, textos, nota })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fecha, textos, nota])
 
   // Si la ventana quedó abierta de un día para otro, al volver a ella el formulario pasa al día de hoy
   // (salvo que haya algo sin guardar o que la persona haya elegido otra fecha).
@@ -94,6 +110,8 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
       return
     }
     sucio.current = false
+    onBorrador?.(null)
+    setRecuperado(false)
     setGuardada(true)
   }
 
@@ -131,6 +149,7 @@ export function Medir({ persona, fechaInicial, onVerEvolucion }: Props) {
 
   return (
     <form className="stack" onSubmit={enviar} noValidate>
+      {recuperado && <p className="notice" role="status">Recuperamos lo que habías escrito sin guardar.</p>}
       <div className="card stack">
         <div className="form">
           <div className="field">
