@@ -6,7 +6,7 @@ const p = persona()
 const tarjeta = (r: ReturnType<typeof resumenFicha>, clave: string) => r.tarjetas.find((t) => t.clave === clave)
 
 test('sin mediciones todo está vacío', () => {
-  expect(resumenFicha(p, [])).toEqual({ ultima: null, medidas: [], tarjetas: [], pesos: [], mensaje: null })
+  expect(resumenFicha(p, [])).toEqual({ ultima: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null })
 })
 
 describe('medidas sobre la figura', () => {
@@ -29,7 +29,7 @@ describe('medidas sobre la figura', () => {
   test('solo aparecen los perímetros de la última medición, en orden fijo', () => {
     const r = resumenFicha(p, [m('2026-11-01', { pechoCm: 100 }), m('2026-11-08', { musloCm: 58, cuelloCm: 39, caderaCm: 104 })])
     expect(r.medidas.map((x) => x.campo)).toEqual(['cuelloCm', 'caderaCm', 'musloCm'])
-    expect(PERIMETROS).toEqual(['cuelloCm', 'pechoCm', 'brazoCm', 'cinturaCm', 'caderaCm', 'musloCm'])
+    expect(PERIMETROS).toEqual(['cuelloCm', 'pechoCm', 'brazoIzqCm', 'brazoDerCm', 'brazoCm', 'cinturaCm', 'caderaCm', 'musloIzqCm', 'musloDerCm', 'musloCm'])
   })
 })
 
@@ -37,7 +37,7 @@ describe('tarjetas', () => {
   const serie = [m('2026-09-09', { pesoKg: 84.2, grasaPct: 29.5, musculoKg: 35 }), m('2026-10-10', { pesoKg: 83 }), m('2026-11-11', { pesoKg: 81.7, grasaPct: 26.8, musculoKg: 34 })]
 
   test('el peso se compara con la primera medición y es favorable si el objetivo es bajar grasa', () => {
-    expect(tarjeta(resumenFicha(persona({ objetivo: 'bajar_grasa' }), serie), 'pesoKg')).toMatchObject({ valor: 81.7, cambio: -2.5, desde: '2026-09-09', tono: 'bien' })
+    expect(tarjeta(resumenFicha(persona({ objetivo: 'bajar_grasa' }), serie), 'pesoKg')).toMatchObject({ cambio: -2.5, desde: '2026-09-09', tono: 'bien', ultimaPesada: 81.7 })
   })
   test('con otro objetivo el peso no se colorea', () => {
     expect(tarjeta(resumenFicha(persona({ objetivo: 'ganar_musculo' }), serie), 'pesoKg')?.tono).toBe('neutro')
@@ -69,8 +69,10 @@ describe('tarjetas', () => {
 test('la tendencia trae las últimas 10 mediciones', () => {
   const ms = Array.from({ length: 14 }, (_, i) => m(`2026-10-${String(i + 1).padStart(2, '0')}`, { pesoKg: 80 + i }))
   const r = resumenFicha(p, ms)
-  expect(r.pesos).toHaveLength(10)
-  expect(r.pesos[9]).toEqual({ fecha: '2026-10-14', valor: 93 })
+  expect(r.serie).toHaveLength(10)
+  expect(r.serie[9]).toMatchObject({ fecha: '2026-10-14', valor: 93 })
+  // La tendencia se calcula con todas las pesadas, no solo con las 10 que se muestran.
+  expect(r.serie[0].tendencia).not.toBe(r.serie[0].valor)
 })
 
 test('el mensaje es la primera interpretación', () => {
@@ -91,4 +93,38 @@ test('grasa estimada antes y medida ahora: no se comparan entre sí', () => {
 
 test('grasa visceral 9,5 no es elevada y conserva su decimal', () => {
   expect(tarjeta(resumenFicha(p, [m('2026-11-01', { grasaVisceral: 9.5 })]), 'grasaVisceral')).toMatchObject({ valor: 9.5, tono: 'neutro', nota: null })
+})
+
+describe('medidas por lado', () => {
+  test('diferencia entre lados desde 1 cm', () => {
+    expect(resumenFicha(p, [m('2026-11-01', { brazoIzqCm: 38, brazoDerCm: 39.5 })]).asimetrias).toEqual([{ zona: 'brazo', mayor: 'der', diferencia: 1.5 }])
+    expect(resumenFicha(p, [m('2026-11-01', { musloIzqCm: 61, musloDerCm: 60 })]).asimetrias).toEqual([{ zona: 'muslo', mayor: 'izq', diferencia: 1 }])
+  })
+  test('0,9 cm de diferencia o un solo lado medido no se mencionan', () => {
+    expect(resumenFicha(p, [m('2026-11-01', { brazoIzqCm: 38, brazoDerCm: 38.9 })]).asimetrias).toEqual([])
+    expect(resumenFicha(p, [m('2026-11-01', { brazoIzqCm: 38 })]).asimetrias).toEqual([])
+  })
+  test('una medida sin lado no se dibuja si esa extremidad tiene medida por lado', () => {
+    const r = resumenFicha(p, [m('2026-11-01', { brazoIzqCm: 38, brazoCm: 37, musloCm: 58 })])
+    expect(r.medidas.map((x) => x.campo)).toEqual(['brazoIzqCm', 'musloCm'])
+  })
+  test('el cambio de cada lado se calcula por separado', () => {
+    const r = resumenFicha(p, [m('2026-11-01', { brazoIzqCm: 38, brazoDerCm: 39 }), m('2026-11-08', { brazoIzqCm: 37, brazoDerCm: 39.5 })])
+    expect(r.medidas).toEqual([{ campo: 'brazoIzqCm', valor: 37, cambio: -1 }, { campo: 'brazoDerCm', valor: 39.5, cambio: 0.5 }])
+  })
+})
+
+describe('peso de tendencia y meta', () => {
+  const subida = [m('2026-10-09', { pesoKg: 103.9 }), m('2026-10-16', { pesoKg: 103.8 }), m('2026-10-23', { pesoKg: 102.7 }), m('2026-10-30', { pesoKg: 102.2 }), m('2026-11-06', { pesoKg: 103 })]
+  test('la tarjeta del peso muestra la tendencia, no la última pesada', () => {
+    const t = tarjeta(resumenFicha(p, subida), 'pesoKg')!
+    expect(t.ultimaPesada).toBe(103)
+    expect(t.valor).toBeGreaterThan(102.2)
+    expect(t.valor).toBeLessThan(103)
+    expect(Number.isInteger(t.valor * 10)).toBe(true)
+  })
+  test('sin meta no hay proyección; con meta sí', () => {
+    expect(resumenFicha(p, subida).meta).toBeNull()
+    expect(resumenFicha(persona({ metaPesoKg: 95 }), subida).meta).toMatchObject({ faltaKg: expect.any(Number) })
+  })
 })

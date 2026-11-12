@@ -173,6 +173,18 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
           <legend>Perímetros</legend>
           {/* Las medidas sin lado ya no se piden; solo aparecen si la medición cargada las trae, para no perderlas. */}
           <div className="form">{CAMPOS_PERIMETROS.filter((c) => !CAMPOS_SIN_LADO.includes(c) || existente?.[c] != null || textos[c] !== '').map(campo)}</div>
+          <details className="guide">
+            <summary>Cómo medir cada zona</summary>
+            <ul>
+              <li><b>Cuello:</b> bajo la nuez, con la cinta horizontal.</li>
+              <li><b>Pecho:</b> a la altura de los pezones, después de soltar el aire.</li>
+              <li><b>Brazo:</b> a mitad del brazo, relajado y colgando.</li>
+              <li><b>Cintura:</b> a la altura del ombligo, sin meter la barriga.</li>
+              <li><b>Cadera:</b> en la parte más ancha de los glúteos.</li>
+              <li><b>Muslo:</b> a mitad del muslo, de pie y con el peso repartido.</li>
+              <li>Siempre en el mismo punto, en ayunas y a la misma hora.</li>
+            </ul>
+          </details>
           <p className="muted small">Mide siempre a la misma hora y en el mismo punto. Con cuello y cintura (y cadera en mujeres) la app estima el % de grasa si no lo tienes.</p>
         </fieldset>
       </div>

@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { interpretar, NOTA_ORIENTACION, type Tono } from '../domain/insights'
 import { derivar } from '../domain/metrics'
+import { tendenciaPeso } from '../domain/trend'
 import { ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { Grafico } from './Grafico'
@@ -57,7 +58,14 @@ export function Evolucion({ persona, onMedir }: Props) {
             ))}
           </select>
         </div>
-        <Grafico puntos={puntos} unidad={etiqueta(metrica).unidad} />
+        <Grafico
+          puntos={puntos}
+          unidad={etiqueta(metrica).unidad}
+          tendencia={metrica === 'pesoKg' ? tendenciaPeso(puntos).map((t) => ({ fecha: t.fecha, valor: t.tendencia })) : undefined}
+        />
+        {metrica === 'pesoKg' && puntos.length > 1 && (
+          <p className="muted small">La tendencia es un promedio que da más importancia a las pesadas recientes y suaviza las subidas y bajadas de un día.</p>
+        )}
         {hayEstimada && (
           <p className="muted small">Incluye valores estimados a partir de los perímetros (fórmula de la Marina de EE. UU.), no medidos por una báscula.</p>
         )}

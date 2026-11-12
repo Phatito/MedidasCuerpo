@@ -137,6 +137,7 @@ tbody tr:hover { background: var(--soft); }
 .chart .area { fill: var(--accent); opacity: 0.14; }
 .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .chart .avg { fill: none; stroke: var(--warn); stroke-width: 2; stroke-dasharray: 6 5; }
+.chart .trend { fill: none; stroke: var(--cyan); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 .chart .avg-dot { fill: var(--warn); stroke: var(--card); stroke-width: 2; }
 .chart .dot { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
 .chart .dot.end { fill: var(--cyan); }
@@ -146,6 +147,10 @@ tbody tr:hover { background: var(--soft); }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: var(--dim); }
 .legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--accent); vertical-align: middle; margin-right: 6px; }
 .legend i.avg { border-top: 3px dashed var(--warn); }
+.legend i.trend { border-top: 3px solid var(--cyan); }
+details.guide summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--cyan); }
+details.guide ul { margin: 10px 0 0; padding-left: 20px; color: var(--dim); font-size: 0.875rem; display: flex; flex-direction: column; gap: 4px; }
+details.guide b { color: var(--fg); font-weight: 600; }
 
 /* Ficha */
 .ficha { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 18px; align-items: start; }

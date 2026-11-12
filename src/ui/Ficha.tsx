@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { resumenFicha, type ClaveTarjeta, type TarjetaFicha } from '../domain/ficha'
 import { fechaLegible, formatear } from '../domain/numbers'
+import type { ProyeccionMeta } from '../domain/trend'
 import type { Objetivo, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { Cuerpo } from './Cuerpo'
@@ -15,7 +16,7 @@ interface Props {
 
 const OBJETIVO: Record<Objetivo, string> = { bajar_grasa: 'bajar grasa', ganar_musculo: 'ganar músculo', mantener: 'mantener' }
 const TARJETA: Record<ClaveTarjeta, { nombre: string; unidad: string; decimales: number; unidadCambio: string }> = {
-  pesoKg: { nombre: 'Peso', unidad: 'kg', decimales: 1, unidadCambio: ' kg' },
+  pesoKg: { nombre: 'Peso de tendencia', unidad: 'kg', decimales: 1, unidadCambio: ' kg' },
   grasaPct: { nombre: 'Grasa corporal', unidad: '%', decimales: 1, unidadCambio: ' puntos' },
   musculoKg: { nombre: 'Masa muscular', unidad: 'kg', decimales: 1, unidadCambio: ' kg' },
   grasaVisceral: { nombre: 'Grasa visceral', unidad: 'nivel', decimales: 0, unidadCambio: '' },
@@ -31,6 +32,24 @@ function detalle(t: TarjetaFicha): string | null {
       ? null
       : `${t.cambio < 0 ? '▼' : '▲'} ${formatear(Math.abs(t.cambio), decimalesDe(t.clave, t.cambio))}${TARJETA[t.clave].unidadCambio} desde el ${fechaLegible(t.desde)}`
   return [t.nota, cambio].filter(Boolean).join(' · ') || null
+}
+
+const ZONA = { brazo: 'Brazo', muslo: 'Muslo' } as const
+
+function textoMeta(m: ProyeccionMeta): string {
+  const ritmo = m.ritmoSemanalKg == null ? '' : `${m.ritmoSemanalKg < 0 ? '−' : '+'}${formatear(Math.abs(m.ritmoSemanalKg), 2)} kg por semana`
+  switch (m.estado) {
+    case 'alcanzada':
+      return 'Meta alcanzada.'
+    case 'sin_datos':
+      return 'Faltan mediciones para estimar una fecha.'
+    case 'en_contra':
+      return m.ritmoSemanalKg === 0 ? 'Tu tendencia está estable: a este ritmo no llegarías a la meta.' : `Al ritmo actual (${ritmo}) te alejas de la meta.`
+    case 'lejana':
+      return `A este ritmo (${ritmo}) faltan más de dos años.`
+    case 'estimada':
+      return `Fecha estimada: ${fechaLegible(m.fecha!)}, al ritmo actual de ${ritmo}.`
+  }
 }
 
 export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
@@ -53,6 +72,11 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
         </div>
         <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
         {r.ultima && r.medidas.length === 0 && <p className="muted small">Registra perímetros para verlos sobre la figura.</p>}
+        {r.asimetrias.map((a) => (
+          <p className="muted small" key={a.zona}>
+            {ZONA[a.zona]} {a.mayor === 'izq' ? 'izquierdo' : 'derecho'} {formatear(a.diferencia)} cm mayor que el {a.mayor === 'izq' ? 'derecho' : 'izquierdo'}.
+          </p>
+        ))}
       </section>
 
       <div className="side">
@@ -76,19 +100,40 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
                   <div className="v">
                     {formatear(t.valor, decimalesDe(t.clave, t.valor))} <small>{def.unidad}</small>
                   </div>
+                  {t.ultimaPesada != null && <div className="d">Última pesada: {formatear(t.ultimaPesada)} kg</div>}
                   {texto && <div className={`d ${t.tono}`}>{texto}</div>}
                 </div>
               )
             })}
           </div>
         )}
-        {r.pesos.length > 0 && (
+        {r.serie.length > 0 && (
           <div className="card stack">
             <div className="head">
               <h3>Peso</h3>
-              <span className="muted small">{r.pesos.length === 1 ? 'primera medición' : `últimas ${r.pesos.length} mediciones`}</span>
+              <span className="muted small">{r.serie.length === 1 ? 'primera medición' : `últimas ${r.serie.length} mediciones`}</span>
             </div>
-            <Grafico puntos={r.pesos} unidad="kg" compacto />
+            <Grafico puntos={r.serie} unidad="kg" compacto tendencia={r.serie.map((s) => ({ fecha: s.fecha, valor: s.tendencia }))} />
+            {r.serie.length > 1 && (
+              <div className="legend">
+                <span><i />Cada pesada</span>
+                <span><i className="trend" />Tendencia</span>
+              </div>
+            )}
+          </div>
+        )}
+        {r.meta && persona.metaPesoKg != null && (
+          <div className="card stack">
+            <div className="head">
+              <h3>Meta</h3>
+              <span className="num" style={{ fontWeight: 800 }}>{formatear(persona.metaPesoKg)} kg</span>
+            </div>
+            {r.meta.estado !== 'alcanzada' && (
+              <p className="num">
+                {r.meta.faltaKg < 0 ? 'Faltan por bajar' : 'Faltan por subir'} {formatear(Math.abs(r.meta.faltaKg))} kg desde tu peso de tendencia.
+              </p>
+            )}
+            <p className="muted small num">{textoMeta(r.meta)}</p>
           </div>
         )}
         {r.mensaje && (

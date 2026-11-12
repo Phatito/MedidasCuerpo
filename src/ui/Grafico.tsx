@@ -5,17 +5,19 @@ interface Props {
   unidad: string
   /** Versión pequeña para la Ficha: sin promedio ni leyenda. */
   compacto?: boolean
+  /** Línea de tendencia (para el peso). Si viene, reemplaza al promedio de las últimas mediciones. */
+  tendencia?: { fecha: string; valor: number }[]
 }
 
 const VENTANA = 4
 
-export function Grafico({ puntos, unidad, compacto = false }: Props) {
+export function Grafico({ puntos, unidad, compacto = false, tendencia }: Props) {
   if (puntos.length === 0) return null
   // El compacto usa un lienzo más chico para que su texto no se achique al escalar en columnas angostas.
   const ANCHO = compacto ? 360 : 720
   const ALTO = compacto ? 170 : 280
   const M = compacto ? { izq: 38, der: 44, arriba: 14, abajo: 26 } : { izq: 52, der: 64, arriba: 18, abajo: 30 }
-  const valores = puntos.map((p) => p.valor)
+  const valores = [...puntos, ...(tendencia ?? [])].map((p) => p.valor)
   let min = Math.min(...valores)
   let max = Math.max(...valores)
   const margen = max === min ? Math.max(1, Math.abs(max) * 0.02) : (max - min) * 0.1
@@ -60,8 +62,9 @@ export function Grafico({ puntos, unidad, compacto = false }: Props) {
           <path className="area" d={`${camino(puntos)} L${x(ultimo.fecha).toFixed(1)},${ALTO - M.abajo} L${x(puntos[0].fecha).toFixed(1)},${ALTO - M.abajo} Z`} />
         )}
         {puntos.length > 1 && <path className="line" d={camino(puntos)} />}
-        {!compacto && promedio.length > 1 && <path className="avg" d={camino(promedio)} />}
-        {!compacto && promedio.length === 1 && <circle className="avg-dot" cx={x(promedio[0].fecha)} cy={y(promedio[0].valor)} r={5} />}
+        {tendencia && tendencia.length > 1 && <path className="trend" d={camino(tendencia)} />}
+        {!tendencia && !compacto && promedio.length > 1 && <path className="avg" d={camino(promedio)} />}
+        {!tendencia && !compacto && promedio.length === 1 && <circle className="avg-dot" cx={x(promedio[0].fecha)} cy={y(promedio[0].valor)} r={5} />}
         {puntos.map((p) => (
           <circle className={p === ultimo ? 'dot end' : 'dot'} key={p.fecha} cx={x(p.fecha)} cy={y(p.valor)} r={4.5}>
             <title>{`${fechaLegible(p.fecha)}: ${formatear(p.valor)} ${unidad}`}</title>
@@ -75,7 +78,8 @@ export function Grafico({ puntos, unidad, compacto = false }: Props) {
       ) : (
         <div className="legend">
           <span><i />Cada medición ({unidad})</span>
-          {promedio.length > 0 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
+          {tendencia && tendencia.length > 1 && <span><i className="trend" />Tendencia</span>}
+          {!tendencia && promedio.length > 0 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
         </div>
       )}
     </div>
