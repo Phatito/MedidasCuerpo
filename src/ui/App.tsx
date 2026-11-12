@@ -1,17 +1,21 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
-import type { Persona } from '../domain/types'
-import { db, listarPersonas } from '../storage/db'
+import { hoyIso } from '../domain/numbers'
+import { estadoMedicion } from '../domain/reminders'
+import type { Medicion, Persona } from '../domain/types'
+import { db, listarPersonas, listarTodasLasMediciones } from '../storage/db'
 import { Datos } from './Datos'
 import { Evolucion } from './Evolucion'
 import { Familia } from './Familia'
 import { Historial } from './Historial'
 import { Medir } from './Medir'
+import { PersonasBar } from './PersonasBar'
 
-export type Pantalla = 'familia' | 'medir' | 'evolucion' | 'historial' | 'datos'
+export type Pantalla = 'familia' | 'ficha' | 'medir' | 'evolucion' | 'historial' | 'datos'
 
 const PESTANAS: { id: Pantalla; nombre: string; requierePersona: boolean }[] = [
   { id: 'familia', nombre: 'Familia', requierePersona: false },
+  { id: 'ficha', nombre: 'Ficha', requierePersona: true },
   { id: 'medir', nombre: 'Medir', requierePersona: true },
   { id: 'evolucion', nombre: 'Evolución', requierePersona: true },
   { id: 'historial', nombre: 'Historial', requierePersona: true },
@@ -34,6 +38,7 @@ export function App() {
   const [fechaMedir, setFechaMedir] = useState<string | undefined>(undefined)
   const [sinAlmacenamiento, setSinAlmacenamiento] = useState(false)
   const personas = useLiveQuery(() => listarPersonas().catch(() => [] as Persona[]), [])
+  const mediciones = useLiveQuery(() => listarTodasLasMediciones().catch(() => [] as Medicion[]), [], [] as Medicion[])
 
   useEffect(() => {
     db.open().catch(() => setSinAlmacenamiento(true))
@@ -42,7 +47,13 @@ export function App() {
 
   const persona = personas?.find((p) => p.id === personaId) ?? personas?.[0] ?? null
 
-  function elegirPersona(id: string) {
+  // Quién tiene medición pendiente: 7 días o más desde la última, o ninguna.
+  const hoy = hoyIso()
+  const ultimaFecha = new Map<string, string>()
+  for (const m of mediciones) if ((ultimaFecha.get(m.personaId) ?? '') < m.fecha) ultimaFecha.set(m.personaId, m.fecha)
+  const pendientes = new Set((personas ?? []).filter((p) => estadoMedicion(ultimaFecha.get(p.id) ?? null, hoy).pendiente).map((p) => p.id))
+
+  function guardarSeleccion(id: string) {
     setPersonaId(id)
     try {
       localStorage.setItem(CLAVE_PERSONA, id)
@@ -51,8 +62,21 @@ export function App() {
     }
   }
 
+  function irA(destino: Pantalla) {
+    setFechaMedir(undefined)
+    setPantalla(destino)
+  }
+
+  // Desde Familia o Datos, elegir a alguien abre su ficha; en las demás pantallas solo cambia de persona.
+  function elegirPersona(id: string) {
+    guardarSeleccion(id)
+    setFechaMedir(undefined)
+    if (visible === 'familia' || visible === 'datos') setPantalla('ficha')
+  }
+
   const actual = PESTANAS.find((t) => t.id === pantalla)!
   const visible: Pantalla = actual.requierePersona && !persona ? 'familia' : pantalla
+  const pestana = PESTANAS.find((t) => t.id === visible)!
 
   return (
     <>
@@ -64,21 +88,12 @@ export function App() {
           </div>
           <nav className="tabs" aria-label="Secciones">
             {PESTANAS.map((t) => (
-              <button
-                key={t.id}
-                disabled={t.requierePersona && !persona}
-                aria-current={visible === t.id ? 'page' : undefined}
-                onClick={() => {
-                  setFechaMedir(undefined)
-                  setPantalla(t.id)
-                }}
-              >
+              <button key={t.id} disabled={t.requierePersona && !persona} aria-current={visible === t.id ? 'page' : undefined} onClick={() => irA(t.id)}>
                 {t.nombre}
               </button>
             ))}
           </nav>
         </div>
-        <div className="ruler" aria-hidden="true" />
       </header>
       <main className="wrap">
         {sinAlmacenamiento ? (
@@ -87,36 +102,27 @@ export function App() {
           <p className="muted">Cargando tus datos…</p>
         ) : (
           <>
+            <PersonasBar personas={personas} activaId={pestana.requierePersona ? (persona?.id ?? null) : null} pendientes={pendientes} onElegir={elegirPersona} />
             {visible === 'familia' && (
               <Familia
                 personas={personas}
-                onIrDatos={() => setPantalla('datos')}
+                onIrDatos={() => irA('datos')}
                 onMedir={(id) => {
-                  elegirPersona(id)
-                  setPantalla('medir')
+                  guardarSeleccion(id)
+                  irA('medir')
                 }}
               />
             )}
-            {persona && actual.requierePersona && visible !== 'familia' && (
-              <div className="head">
-                <h2>
-                  {actual.nombre}: {persona.nombre}
-                </h2>
-                {personas.length > 1 && (
-                  <div className="field">
-                    <label htmlFor="persona-activa" className="small">Persona</label>
-                    <select id="persona-activa" value={persona.id} onChange={(e) => elegirPersona(e.target.value)}>
-                      {personas.map((p) => (
-                        <option key={p.id} value={p.id}>{p.nombre}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
+            {persona && pestana.requierePersona && visible !== 'ficha' && (
+              <h2>
+                {pestana.nombre}: {persona.nombre}
+              </h2>
             )}
+            {visible === 'ficha' && persona && <p className="muted">Ficha en construcción.</p>}
             {visible === 'medir' && persona && (
-              <Medir key={`${persona.id}-${fechaMedir ?? ''}`} persona={persona} fechaInicial={fechaMedir} onVerEvolucion={() => setPantalla('evolucion')} />
+              <Medir key={`${persona.id}-${fechaMedir ?? ''}`} persona={persona} fechaInicial={fechaMedir} onVerEvolucion={() => irA('evolucion')} />
             )}
+            {visible === 'evolucion' && persona && <Evolucion persona={persona} onMedir={() => irA('medir')} />}
             {visible === 'historial' && persona && (
               <Historial
                 persona={persona}
@@ -124,10 +130,9 @@ export function App() {
                   setFechaMedir(fecha)
                   setPantalla('medir')
                 }}
-                onMedir={() => setPantalla('medir')}
+                onMedir={() => irA('medir')}
               />
             )}
-            {visible === 'evolucion' && persona && <Evolucion persona={persona} onMedir={() => setPantalla('medir')} />}
             {visible === 'datos' && <Datos personas={personas} personaActual={persona} />}
           </>
         )}

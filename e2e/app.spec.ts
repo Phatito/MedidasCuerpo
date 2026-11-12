@@ -301,3 +301,47 @@ test('el resumen de importación no cuenta dos veces una fecha repetida ni acept
   await expect(page.getByText('1 nuevas, 0 reemplazan, 2 omitidas')).toBeVisible()
   await expect(page.getByText('Fila 4: La fecha 01/01/2999 es futura')).toBeVisible()
 })
+
+// ---------- Rediseño ----------
+
+async function agregarPersona(page: Page, nombre: string, sexo: 'hombre' | 'mujer' = 'hombre', estatura = '170') {
+  await ir(page, 'Familia')
+  await page.getByRole('button', { name: 'Agregar persona' }).click()
+  await page.getByLabel('Nombre').fill(nombre)
+  await page.getByLabel('Sexo').selectOption(sexo)
+  await page.getByLabel('Estatura (cm)').fill(estatura)
+  await page.getByRole('button', { name: 'Guardar persona' }).click()
+  await expect(page.getByRole('heading', { name: nombre, exact: true })).toBeVisible()
+}
+
+const fila = (page: Page) => page.getByLabel('Personas')
+
+test('la fila de personas marca a quien le toca y abre la ficha', async ({ page }) => {
+  await agregarAna(page)
+  const ana = fila(page).getByRole('button', { name: /Ana/ })
+  await expect(ana).toContainText('le toca')
+  await ana.click()
+  await expect(page.getByRole('navigation').getByRole('button', { name: 'Ficha', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(ana).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('cambiar de persona en Medir no arrastra lo escrito', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('72,5')
+  await fila(page).getByRole('button', { name: /Beto/ }).click()
+  await expect(page.getByRole('heading', { name: /Medir: Beto/ })).toBeVisible()
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
+})
+
+test('doce personas con nombres largos no desbordan a 400 px', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto('./')
+  for (let i = 1; i <= 12; i++) await agregarPersona(page, `Maximiliano Alejandro ${i}`)
+  await expect(fila(page).getByRole('button')).toHaveCount(12)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await ir(page, 'Datos')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
