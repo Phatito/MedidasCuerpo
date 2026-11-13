@@ -71,6 +71,9 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
           </div>
         </div>
         <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
+        {r.ultima && r.fechaPerimetros && r.fechaPerimetros !== r.ultima.fecha && (
+          <p className="muted small">Perímetros del {fechaLegible(r.fechaPerimetros)}, la última vez que se midieron.</p>
+        )}
         {r.ultima && r.medidas.length === 0 && <p className="muted small">Registra perímetros para verlos sobre la figura.</p>}
         {r.asimetrias.map((a) => (
           <p className="muted small" key={a.zona}>

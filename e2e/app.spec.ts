@@ -575,6 +575,25 @@ test('la meta muestra fecha estimada o avisa si el ritmo va en contra', async ({
   await expect(page.getByText(/NaN|Infinity|undefined/)).toHaveCount(0)
 })
 
+test('una pesada sin perímetros no borra la figura', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await ir(page, 'Medir')
+  await page.getByLabel('Fecha').fill(haceDias(3))
+  await page.getByLabel('Peso (kg)').fill('72')
+  await page.getByLabel('Cintura (cm)').fill('')
+  await page.getByRole('button', { name: /Guardar medición|Actualizar medición/ }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
+  await ir(page, 'Ficha')
+  await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('88,0 cm')
+  await expect(page.getByText(/Perímetros del \d{2}\/\d{2}\/\d{4}, la última vez que se midieron/)).toBeVisible()
+  await expect(page.getByText('Registra perímetros para verlos sobre la figura.')).toHaveCount(0)
+  // En Medir, el valor anterior de la cintura sigue a la vista aunque la última medición fuera solo peso.
+  await ir(page, 'Medir')
+  await page.getByLabel('Fecha').fill(haceDias(0))
+  await expect(page.locator('.field', { has: page.getByLabel('Cintura (cm)') }).getByText('antes: 88,0')).toBeVisible()
+})
+
 test('la guía para medir está en la pantalla Medir', async ({ page }) => {
   await agregarAna(page)
   await ir(page, 'Medir')

@@ -117,7 +117,8 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
 
   const campo = (c: CampoNumerico) => {
     const { nombre, unidad } = ETIQUETAS[c]
-    const previo = anterior?.[c]
+    // El último valor registrado de ese campo, aunque la medición anterior haya sido solo de peso.
+    const previo = mediciones?.filter((m) => m.fecha < fecha && m[c] != null).at(-1)?.[c]
     return (
       <div className="field" key={c}>
         <label htmlFor={`medir-${c}`}>

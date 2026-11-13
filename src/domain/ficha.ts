@@ -49,6 +49,8 @@ export interface TarjetaFicha {
 
 export interface ResumenFicha {
   ultima: Medicion | null
+  /** Fecha de la medición cuyos perímetros se dibujan: la última que tenga alguno. */
+  fechaPerimetros: string | null
   medidas: MedidaFigura[]
   asimetrias: Asimetria[]
   tarjetas: TarjetaFicha[]
@@ -96,22 +98,27 @@ function tonoDe(clave: ClaveTarjeta, cambio: number | null, valor: number, p: Pe
 export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy?: string } = {}): ResumenFicha {
   const ms = [...mediciones].sort((a, b) => a.fecha.localeCompare(b.fecha))
   const ultima = ms[ms.length - 1] ?? null
-  if (!ultima) return { ultima: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null }
+  if (!ultima) return { ultima: null, fechaPerimetros: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null }
   const anteriores = ms.slice(0, -1)
   const menor = esMenor(p, ultima.fecha)
 
+  // Una pesada sin cinta no borra la figura: se dibujan los perímetros de la última medición que tenga alguno.
+  const iFigura = ms.findLastIndex((m) => PERIMETROS.some((c) => m[c] != null))
+  const figura = iFigura < 0 ? null : ms[iFigura]
+  const previasFigura = ms.slice(0, Math.max(0, iFigura))
+
   // Una medida sin lado solo se dibuja si esa extremidad no tiene ninguna medida por lado.
-  const ocultas = new Set<CampoPerimetro>(LADOS.filter((l) => ultima[l.izq] != null || ultima[l.der] != null).map((l) => l.sinLado))
+  const ocultas = new Set<CampoPerimetro>(LADOS.filter((l) => figura?.[l.izq] != null || figura?.[l.der] != null).map((l) => l.sinLado))
   const medidas: MedidaFigura[] = PERIMETROS.flatMap((campo) => {
-    const valor = ultima[campo]
+    const valor = figura?.[campo]
     if (valor == null || ocultas.has(campo)) return []
-    const previa = [...anteriores].reverse().find((m) => m[campo] != null)
+    const previa = [...previasFigura].reverse().find((m) => m[campo] != null)
     return [{ campo, valor, cambio: previa ? diferencia(valor, previa[campo]!) : null }]
   })
 
   const asimetrias: Asimetria[] = LADOS.flatMap((l) => {
-    const izq = ultima[l.izq]
-    const der = ultima[l.der]
+    const izq = figura?.[l.izq]
+    const der = figura?.[l.der]
     if (izq == null || der == null) return []
     const d = redondear1(Math.abs(izq - der))
     return d >= ASIMETRIA_MINIMA_CM ? [{ zona: l.zona, mayor: izq > der ? ('izq' as const) : ('der' as const), diferencia: d }] : []
@@ -153,6 +160,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
 
   return {
     ultima,
+    fechaPerimetros: figura?.fecha ?? null,
     medidas,
     asimetrias,
     tarjetas: [tarjetaPeso, ...otras],

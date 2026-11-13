@@ -6,7 +6,7 @@ const p = persona()
 const tarjeta = (r: ReturnType<typeof resumenFicha>, clave: string) => r.tarjetas.find((t) => t.clave === clave)
 
 test('sin mediciones todo está vacío', () => {
-  expect(resumenFicha(p, [])).toEqual({ ultima: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null })
+  expect(resumenFicha(p, [])).toEqual({ ultima: null, fechaPerimetros: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null })
 })
 
 describe('medidas sobre la figura', () => {
@@ -26,7 +26,24 @@ describe('medidas sobre la figura', () => {
     expect(r.medidas[0].cambio).toBeNull()
   })
 
-  test('solo aparecen los perímetros de la última medición, en orden fijo', () => {
+  test('si la última medición es solo peso, la figura usa la última que tenga perímetros', () => {
+    const r = resumenFicha(p, [
+      m('2026-10-30', { cinturaCm: 92, brazoIzqCm: 38, brazoDerCm: 38 }),
+      m('2026-11-06', { cinturaCm: 90, brazoIzqCm: 37, brazoDerCm: 39 }),
+      m('2026-11-13', { pesoKg: 80 }),
+    ])
+    expect(r.medidas).toEqual([
+      { campo: 'brazoIzqCm', valor: 37, cambio: -1 },
+      { campo: 'brazoDerCm', valor: 39, cambio: 1 },
+      { campo: 'cinturaCm', valor: 90, cambio: -2 },
+    ])
+    expect(r.fechaPerimetros).toBe('2026-11-06')
+    expect(r.asimetrias).toEqual([{ zona: 'brazo', mayor: 'der', diferencia: 2 }])
+  })
+  test('sin perímetros en ninguna medición no hay fecha de perímetros', () => {
+    expect(resumenFicha(p, [m('2026-11-01'), m('2026-11-08')])).toMatchObject({ medidas: [], fechaPerimetros: null })
+  })
+  test('con perímetros en la última medición solo aparecen los de esa medición, en orden fijo', () => {
     const r = resumenFicha(p, [m('2026-11-01', { pechoCm: 100 }), m('2026-11-08', { musloCm: 58, cuelloCm: 39, caderaCm: 104 })])
     expect(r.medidas.map((x) => x.campo)).toEqual(['cuelloCm', 'caderaCm', 'musloCm'])
     expect(PERIMETROS).toEqual(['cuelloCm', 'pechoCm', 'brazoIzqCm', 'brazoDerCm', 'brazoCm', 'cinturaCm', 'caderaCm', 'musloIzqCm', 'musloDerCm', 'musloCm'])
