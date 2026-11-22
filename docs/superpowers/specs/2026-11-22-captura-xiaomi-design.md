@@ -31,9 +31,7 @@ Solo el usuario se pesa en la báscula, con la cuenta principal de Xiaomi.
 - Leer otros informes (InBody, Renpho, Zepp Life) o Xiaomi Home en otro idioma.
 - Conexión con la nube de Xiaomi o con Salud del iPhone.
 - Leer varias capturas a la vez.
-- Guardar campos nuevos (IMC, metabolismo basal, edad corporal, masa
-  muscular total, proteína, frecuencia cardíaca). No se agregan campos al
-  modelo de datos.
+- IMC, grasa en kg y peso sin grasa: la app los calcula sola, no se leen.
 
 ## Lo que hay en la captura
 
@@ -62,6 +60,19 @@ OCR suele leerla como dígitos o letras (`33,619`, `45,0rg`).
 | `aguaPct` | Agua corporal | Masa de agua corporal (kg) ÷ peso × 100 |
 | `musculoKg` | **Masa muscular esquelética** | ninguna |
 | `grasaVisceral` | Calificación de grasa visceral | ninguna |
+| `musculoTotalKg` | Masa muscular | Porcentaje de músculo × peso ÷ 100 |
+| `masaOseaKg` | Contenido mineral óseo | Porcentaje mineral óseo × peso ÷ 100 |
+| `proteinaPct` | Porcentaje de proteínas | Masa proteica (kg) ÷ peso × 100 |
+| `metabolismoBasalKcal` | Índice metabólico basal | ninguna |
+| `edadCorporal` | Edad corporal (`25 años de edad` → 25) | ninguna |
+| `frecuenciaCardiacaLpm` | Frecuencia cardíaca | ninguna |
+
+*Enmienda del 2026-11-22, tras el diseño de navegación sin pestañas:* la app
+ya guarda las seis medidas de abajo (`2026-11-22-navegacion-ficha-design.md`),
+así que la captura también las rellena. Las tres con comprobación siguen la
+regla de los porcentajes: un kg comprobado si difiere ≤ 0,15 kg del calculado;
+si no se leyó, se usa el calculado. Las tres sin comprobación van siempre a
+"revisar".
 
 `musculoKg` usa la masa muscular **esquelética**, no la "Masa muscular"
 total de Xiaomi: el historial del usuario ya trae valores de músculo
@@ -108,6 +119,14 @@ revisar.
    - Cada valor se valida con `validarValor`. Uno fuera de rango se descarta.
 
 ## Pantalla
+
+*Enmienda del 2026-11-22:* el botón vive en la pestaña **"Captura de Xiaomi
+Home"** de la pantalla Registrar medición (no sobre el formulario de Medir).
+Al terminar de leer, la pantalla pasa sola a la pestaña **Escribir** con el
+formulario rellenado y las marcas, y la miniatura queda al lado. Pegar con
+Ctrl+V funciona mientras Registrar está abierto, en cualquier pestaña. Lo
+demás de esta sección sigue igual.
+
 
 En Medir, sobre el formulario:
 

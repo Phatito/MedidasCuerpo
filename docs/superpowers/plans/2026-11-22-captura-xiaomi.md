@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Revisión del 2026-11-22** (tras la navegación sin pestañas): el botón va en la pestaña "Captura de Xiaomi Home" de `src/ui/Registrar.tsx`, que al leer pasa a la pestaña Escribir con `Medir` rellenado; y la captura rellena también los seis campos nuevos. Los cambios están marcados con **[rev]**.
+
 **Goal:** En Medir, elegir o pegar la captura del informe de Xiaomi Home y que la app rellene fecha, peso, % grasa, % agua, músculo esquelético y grasa visceral para revisar y guardar.
 
 **Architecture:** El OCR corre en el navegador con `tesseract.js`, que se carga con `import()` dinámico y usa archivos servidos desde `ocr/` del propio sitio. `src/ui/ocr.ts` prepara la imagen (gris, invertir si es oscura, 620 px de ancho) y devuelve palabras con su caja. La función pura `leerCapturaXiaomi` (dominio) las convierte en campos con marcas "revisar". `Medir.tsx` mezcla el resultado con lo guardado ese día y no guarda nada solo.
@@ -45,6 +47,7 @@
   export interface PalabraOcr { texto: string; x0: number; y0: number; x1: number; y1: number }
   export type LineaOcr = PalabraOcr[]
   export type CampoCaptura = 'pesoKg' | 'grasaPct' | 'aguaPct' | 'musculoKg' | 'grasaVisceral'
+    | 'musculoTotalKg' | 'masaOseaKg' | 'proteinaPct' | 'metabolismoBasalKcal' | 'edadCorporal' | 'frecuenciaCardiacaLpm'  // [rev]
   export interface LecturaCaptura {
     fecha: string | null        // AAAA-MM-DD
     hora: string | null         // HH:MM
@@ -55,10 +58,10 @@
   ```
 
 Reglas (del spec):
-- Rótulos, normalizados sin tildes ni mayúsculas, buscados como palabras contiguas exactas, **del más largo al más corto**, consumiendo las palabras usadas: `porcentaje de grasa corporal`, `masa de agua corporal`, `masa muscular esqueletica`, `calificacion de grasa visceral`, `peso corporal sin grasa`, `agua corporal`, `grasa corporal`.
+- Rótulos, normalizados sin tildes ni mayúsculas, buscados como palabras contiguas exactas, **del más largo al más corto**, consumiendo las palabras usadas: `porcentaje de grasa corporal`, `masa de agua corporal`, `masa muscular esqueletica`, `calificacion de grasa visceral`, `peso corporal sin grasa`, `agua corporal`, `grasa corporal`. **[rev]** Además: `porcentaje mineral oseo`, `contenido mineral oseo`, `porcentaje de proteinas`, `porcentaje de musculo`, `indice metabolico basal`, `masa proteica`, `edad corporal`, `frecuencia cardiaca`, `masa muscular` (este último después de `masa muscular esqueletica`).
 - Valor de un rótulo: en la línea más cercana por encima (y1 de la línea < y0 del rótulo, a no más de 3 alturas del rótulo), la palabra que empieza por `\d{1,4}(?:[.,]\s?\d)?` cuyo `x0` está más cerca del `x0` del rótulo, y a menos de `0,15 × anchoImagen`. Se toma un solo decimal (`33,619` → 33,6; `45,0rg` → 45,0; `13, 9xg` → 13,9).
 - Peso grande: entre las líneas por encima del primer rótulo, la palabra numérica de mayor altura con 2–3 dígitos enteros; si tiene `,d` se usa; si es entera y a su derecha, a menos de su altura, hay una palabra `,d` o `d`, se unen. Si no, no hay peso grande.
-- Peso final, porcentajes, comprobaciones y `revisar`: exactamente como la sección "Campos que se rellenan" del spec. `musculoKg` y `grasaVisceral` leídos siempre van a `revisar`.
+- Peso final, porcentajes, comprobaciones y `revisar`: exactamente como la sección "Campos que se rellenan" del spec. `musculoKg` y `grasaVisceral` leídos siempre van a `revisar`. **[rev]** `musculoTotalKg` se comprueba con porcentaje de músculo × peso, `masaOseaKg` con porcentaje mineral óseo × peso y `proteinaPct` con masa proteica ÷ peso (tolerancia 0,15 kg o 0,3 puntos); `metabolismoBasalKcal`, `edadCorporal` (entero, de `25 años de edad`) y `frecuenciaCardiacaLpm` siempre van a `revisar`. Prueba extra: con las líneas de la réplica completa, los once campos salen con sus valores.
 - Cada valor pasa por `validarValor`; uno fuera de rango se descarta (y no entra a `revisar`).
 - Fecha y hora: primer `dd/mm/aaaa` (con `HH:MM` opcional) en el texto de cualquier línea.
 
@@ -141,10 +144,11 @@ Run: `npx vitest run tests/domain/capturaXiaomi.test.ts` → PASS; `npm test` �
 
 ---
 
-### Task 3: Botón y pegado en Medir
+### Task 3: Pestaña Captura en Registrar (y relleno de Medir) **[rev]**
 
 **Files:**
-- Modify: `src/ui/Medir.tsx`
+- Modify: `src/ui/Medir.tsx` (prop `lectura?: { valores; revisar; hora; imagenUrl; id }`: al cambiar `id`, aplica la lectura como dice el spec)
+- Modify: `src/ui/Registrar.tsx` (la pestaña Captura monta `LeerCaptura`; al leer, guarda la lectura y pasa a Escribir; el pegado se escucha mientras Registrar está montado)
 - Create: `src/ui/LeerCaptura.tsx`
 - Modify: `src/ui/styles.css`
 - Create: `e2e/fixtures/captura-xiaomi.html` (réplica con números inventados; `?claro` cambia a fondo claro), `e2e/fixtures/captura-xiaomi.png` (oscura, 1242 px de ancho), `e2e/fixtures/captura-xiaomi-clara.png`, `e2e/fixtures/captura-xiaomi-chica.png` (oscura reducida a 216 px)
