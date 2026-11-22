@@ -48,7 +48,7 @@ h4 { font-size: 1.02rem; font-weight: 700; }
   display: flex; align-items: center; gap: 10px; margin-right: auto; min-height: 44px; padding: 0; border: 0; background: none;
   color: var(--fg); font: inherit; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; cursor: pointer;
 }
-.brand img { width: 30px; height: 30px; border-radius: 9px; }
+.brand img { width: 34px; height: 34px; }
 .icon-btn {
   flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
   border: 1px solid var(--edge); background: transparent; color: var(--fg);

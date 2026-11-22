@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png'],
+      includeAssets: ['icon-192.png', 'icon-512.png', 'favicon.svg', 'apple-touch-icon.png', 'logo.svg'],
       // La tipografía también se guarda en el dispositivo: sin esto la app sin conexión caería a la fuente del sistema.
       workbox: { globPatterns: ['**/*.{js,css,html,png,woff2}'] },
       manifest: {
@@ -25,8 +25,8 @@ export default defineConfig({
         theme_color: '#0e1220',
         background_color: '#0e1220',
         icons: [
-          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },

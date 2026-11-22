@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>MedidasCuerpo · Promo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  Video promocional de MedidasCuerpo.
+  - Ábrelo en el navegador: se reproduce solo (28 s, en bucle).
+  - Parámetros: ?f=v (1080×1920, vertical) | ?f=h (1920×1080, horizontal) | ?f=og (1200×630, imagen social)
+                &t=12.5 congela la animación en ese segundo.
+  - marketing/render-promo.cjs lo renderiza cuadro a cuadro llamando a window.seek(t).
+  Todos los nombres y números son de ejemplo (inventados).
+-->
+<style>
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: block;
+  src: url('../public/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+}
+:root {
+  --bg: #0e1220; --card: #171c30; --card2: #1d2340; --line: #2a3150;
+  --violet: #7c5cff; --cyan: #35e3ff; --green: #3fe0a5; --orange: #ffb454;
+  --text: #f2f4fb; --muted: #b8bfd6; --dim: #8e97b5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #05070d; overflow: hidden; }
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+#stage { position: relative; overflow: hidden; background: var(--bg); transform-origin: 0 0; }
+.glow { position: absolute; border-radius: 50%; filter: blur(120px); opacity: .55; will-change: transform; }
+#g1 { width: 900px; height: 900px; background: radial-gradient(circle, rgba(124,92,255,.75), rgba(124,92,255,0) 70%); }
+#g2 { width: 820px; height: 820px; background: radial-gradient(circle, rgba(53,227,255,.45), rgba(53,227,255,0) 70%); }
+#grain { position: absolute; inset: 0; opacity: .5;
+  background-image: radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px); background-size: 36px 36px; }
+
+.scene { position: absolute; inset: 0; display: flex; opacity: 0; }
+.txt .kicker { display: inline-flex; align-items: center; gap: 14px; font-weight: 700; font-size: 30px; letter-spacing: .14em; text-transform: uppercase; color: var(--cyan); }
+.txt .kicker::before { content: ''; width: 42px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--violet), var(--cyan)); }
+.txt h2 { text-wrap: balance; font-weight: 800; letter-spacing: -.03em; line-height: 1.02; margin-top: 22px; }
+.txt h2 .w { display: inline-block; white-space: pre; }
+.txt h2 .hl { background: linear-gradient(90deg, #9d85ff, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.txt p { text-wrap: pretty; color: var(--muted); font-weight: 500; line-height: 1.32; margin-top: 26px; }
+.vis { position: relative; }
+.vis svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* Vertical 1080×1920 */
+.f-v .scene { flex-direction: column; padding: 250px 80px 120px; }
+.f-v .txt h2 { font-size: 92px; }
+.f-v .txt p { font-size: 38px; max-width: 900px; }
+.f-v .vis { flex: 1; margin-top: 56px; }
+/* Horizontal 1920×1080 */
+.f-h .scene { flex-direction: row; align-items: center; padding: 120px 110px 90px 140px; gap: 70px; }
+.f-h .txt { width: 780px; flex: none; }
+.f-h .txt h2 { font-size: 82px; }
+.f-h .txt p { font-size: 34px; }
+.f-h .vis { flex: 1; height: 820px; }
+
+/* Marca fija arriba */
+#bug { position: absolute; display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 34px; letter-spacing: -.02em; opacity: 0; }
+#bug svg { width: 52px; height: 52px; }
+#bug b { color: var(--cyan); font-weight: 800; }
+.f-v #bug { top: 110px; left: 80px; }
+.f-h #bug { top: 64px; left: 140px; }
+
+/* Escena 1 y final: logo */
+.logo-scene { align-items: center; justify-content: center; flex-direction: column !important; text-align: center; padding: 0 !important; }
+.bigmark { width: 360px; height: 360px; }
+.f-h .bigmark { width: 330px; height: 330px; }
+.wordmark { font-weight: 800; font-size: 104px; letter-spacing: -.035em; margin-top: 40px; line-height: 1; }
+.f-h .wordmark { font-size: 112px; }
+.wordmark b { font-weight: 800; color: var(--cyan); }
+.tagline { text-wrap: balance; color: var(--muted); font-weight: 500; font-size: 38px; margin-top: 28px; }
+.f-v .tagline { max-width: 760px; }
+.url { display: inline-flex; align-items: center; gap: 18px; margin-top: 54px; padding: 24px 40px; border-radius: 999px;
+  background: var(--card); border: 2px solid rgba(124,92,255,.55); font-weight: 700; font-size: 42px; color: var(--text); }
+.url i { width: 18px; height: 18px; border-radius: 50%; background: var(--green); box-shadow: 0 0 22px var(--green); }
+.cta { color: var(--muted); font-size: 32px; font-weight: 600; margin-top: 30px; }
+
+/* Tarjetas */
+.cardbox { background: var(--card); border: 1.5px solid var(--line); border-radius: 36px; box-shadow: 0 40px 80px rgba(0,0,0,.35); }
+
+/* Gráfico */
+#chartCard { position: absolute; inset: 0; padding: 40px 44px 30px; display: flex; flex-direction: column; }
+.f-v #chartCard { bottom: 90px; }
+.chead { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.chead .who { font-size: 30px; color: var(--muted); font-weight: 600; }
+.chead .big { font-size: 76px; font-weight: 800; letter-spacing: -.03em; margin-top: 4px; }
+.chead .big small { font-size: 38px; color: var(--muted); font-weight: 700; margin-left: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 28px; }
+.pill.g { background: rgba(63,224,165,.14); color: var(--green); }
+.pill.c { background: rgba(53,227,255,.13); color: var(--cyan); }
+.pill.o { background: rgba(255,180,84,.15); color: var(--orange); }
+.pill.v { background: rgba(124,92,255,.2); color: #b9a9ff; }
+.legend { display: flex; gap: 34px; font-size: 26px; color: var(--muted); font-weight: 600; margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 10px; }
+.legend i { display: inline-block; width: 34px; height: 8px; border-radius: 4px; }
+#chart { flex: 1; margin-top: 18px; overflow: visible; }
+
+/* Composición */
+.tiles { position: absolute; inset: 0; display: grid; gap: 28px; }
+.f-v .tiles { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); bottom: 60px; }
+.f-h .tiles { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 22px; }
+.tile { padding: 34px 34px 30px; display: flex; flex-direction: column; border-radius: 32px; }
+.tile .lbl { font-size: 28px; color: var(--muted); font-weight: 600; }
+.tile .val { font-size: 72px; font-weight: 800; letter-spacing: -.03em; margin-top: 10px; line-height: 1.05; }
+.tile .val small { font-size: 32px; color: var(--muted); font-weight: 700; margin-left: 6px; letter-spacing: 0; }
+.f-h .tile { padding: 24px 32px 24px; }
+.f-h .tile .val { font-size: 58px; margin-top: 4px; }
+.f-h .tile .pill { margin: 10px 0 14px; }
+.tile .gauge { position: relative; height: 12px; border-radius: 6px; background: #252c48; margin-top: auto; overflow: visible; }
+.tile .gauge .seg { position: absolute; top: 0; bottom: 0; border-radius: 6px; }
+.tile .gauge .mk { position: absolute; top: -9px; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; border: 6px solid var(--bg); }
+.tile .pill { align-self: flex-start; margin: 18px 0 24px; font-size: 26px; padding: 10px 20px; }
+.tile .pill i { width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
+
+/* Familia */
+.fam { position: absolute; inset: 0; display: grid; gap: 26px; }
+.f-v .fam { grid-template-rows: repeat(4, 1fr); bottom: 60px; }
+.f-h .fam { grid-template-rows: repeat(4, 1fr); gap: 22px; }
+.f-h .person { padding: 20px 36px; }
+.f-h .av { width: 96px; height: 96px; font-size: 44px; }
+.person { display: flex; align-items: center; gap: 30px; padding: 30px 36px; border-radius: 34px; position: relative; }
+.av { width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 52px; color: #0e1220; flex: none; }
+.person .nm { font-size: 46px; font-weight: 800; letter-spacing: -.02em; }
+.person .sub { font-size: 27px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+.person .right { margin-left: auto; text-align: right; }
+.person .kg { font-size: 46px; font-weight: 800; letter-spacing: -.02em; }
+.person .kg small { font-size: 26px; color: var(--muted); }
+.person svg { width: 190px; height: 56px; margin-top: 6px; }
+.person .pill { font-size: 24px; padding: 8px 18px; margin-top: 12px; }
+
+/* Privacidad */
+.chips { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 40px; }
+.chip { display: inline-flex; align-items: center; gap: 14px; padding: 18px 28px; border-radius: 999px; background: var(--card); border: 1.5px solid var(--line); font-size: 30px; font-weight: 700; }
+.chip svg { width: 30px; height: 30px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="glow" id="g1"></div>
+  <div class="glow" id="g2"></div>
+  <div id="grain"></div>
+
+  <div id="bug">
+    <svg viewBox="0 0 64 64"><use href="#markSym"/></svg>
+    <span>Medidas<b>Cuerpo</b></span>
+  </div>
+
+  <!-- 1 · Logo -->
+  <section class="scene logo-scene" id="s1">
+    <svg class="bigmark" viewBox="0 0 64 64" id="m1"></svg>
+    <div class="wordmark" id="wm1">Medidas<b>Cuerpo</b></div>
+    <div class="tagline" id="tg1">Peso, composición y medidas para toda la familia</div>
+  </section>
+
+  <!-- 2 · Peso -->
+  <section class="scene" id="s2">
+    <div class="txt">
+      <div class="kicker">Peso</div>
+      <h2 data-split>Tu cuerpo, <span class="hl">semana a semana</span></h2>
+      <p>El peso de tendencia ignora el agua y la sal de un día.</p>
+    </div>
+    <div class="vis">
+      <div class="cardbox" id="chartCard">
+        <div class="chead">
+          <div>
+            <div class="who">Ana · Peso de tendencia</div>
+            <div class="big"><span id="kgNow">84,0</span><small>kg</small></div>
+          </div>
+          <div class="pill g" id="delta">−4,1 kg en 16 semanas</div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#9d85ff;height:14px;width:14px;border-radius:50%"></i>Báscula</span>
+          <span><i style="background:var(--cyan)"></i>Tendencia</span>
+        </div>
+        <svg id="chart"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · Perímetros -->
+  <section class="scene" id="s3">
+    <div class="txt">
+      <div class="kicker">Perímetros</div>
+      <h2 data-split>Brazos y piernas <span class="hl">por lado</span></h2>
+      <p>Cintura, pecho, brazos y muslos, cada uno sobre su zona del cuerpo.</p>
+    </div>
+    <div class="vis"><svg id="body" viewBox="0 0 960 1000"></svg></div>
+  </section>
+
+  <!-- 4 · Composición -->
+  <section class="scene" id="s4">
+    <div class="txt">
+      <div class="kicker">Composición</div>
+      <h2 data-split>Grasa, músculo, agua… <span class="hl">como tu báscula</span></h2>
+      <p>Los datos de tu báscula inteligente, con un color que te dice cómo vas.</p>
+    </div>
+    <div class="vis"><div class="tiles" id="tiles"></div></div>
+  </section>
+
+  <!-- 5 · Familia -->
+  <section class="scene" id="s5">
+    <div class="txt">
+      <div class="kicker">Familia</div>
+      <h2 data-split>Toda la familia en <span class="hl">un solo lugar</span></h2>
+      <p>Un perfil por persona y aviso de a quién le toca medirse.</p>
+    </div>
+    <div class="vis"><div class="fam" id="fam"></div></div>
+  </section>
+
+  <!-- 6 · Privacidad -->
+  <section class="scene" id="s6">
+    <div class="txt">
+      <div class="kicker">Privacidad</div>
+      <h2 data-split>Tus datos se quedan <span class="hl">en tu dispositivo</span></h2>
+      <div class="chips" id="chips">
+        <span class="chip"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#3fe0a5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sin cuentas</span>
+        <span class="chip"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#3fe0a5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Sin servidores</span>
+        <span class="chip"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#3fe0a5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Funciona sin conexión</span>
+      </div>
+    </div>
+    <div class="vis"><svg id="phone" viewBox="0 0 960 900"></svg></div>
+  </section>
+
+  <!-- 7 · Cierre -->
+  <section class="scene logo-scene" id="s7">
+    <svg class="bigmark" viewBox="0 0 64 64" id="m7"></svg>
+    <div class="wordmark" id="wm7">Medidas<b>Cuerpo</b></div>
+    <div class="url" id="url7"><i></i>phatito.github.io/MedidasCuerpo</div>
+    <div class="cta" id="cta7">Ábrela en el navegador e instálala en tu teléfono</div>
+  </section>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="mc-ring" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#35e3ff"/>
+    </linearGradient>
+    <symbol id="markSym" viewBox="0 0 64 64">
+      <path d="M55.56 21.01A26 26 0 1 1 42.99 8.44" fill="none" stroke="url(#mc-ring)" stroke-width="6.5" stroke-linecap="round"/>
+      <path d="M17 43 24 25.5 32 37.5 49.5 15.5" fill="none" stroke="#f2f4fb" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="52.5" cy="11.5" r="5" fill="#3fe0a5"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+(() => {
+const Q = new URLSearchParams(location.search);
+const FMT = Q.get('f') || 'v';
+const SIZES = { v: [1080, 1920], h: [1920, 1080], og: [1200, 630] };
+const [W, H] = SIZES[FMT] || SIZES.v;
+const DURATION = 28;
+const stage = document.getElementById('stage');
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+stage.className = 'f-' + (FMT === 'og' ? 'h' : FMT);
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const fmt = (n, d = 1) => n.toFixed(d).replace('.', ',');
+
+// ---------- easing ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eo5 = x => 1 - Math.pow(1 - x, 5);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const P = (t, s, d, e = eo) => e(clamp((t - s) / d));
+
+// ---------- marca animable ----------
+function buildMark(svg) {
+  const ticks = [];
+  const ring = el('path', { d: 'M55.56 21.01A26 26 0 1 1 42.99 8.44', fill: 'none', stroke: 'url(#mc-ring)', 'stroke-width': 6.5, 'stroke-linecap': 'round', pathLength: 100 }, svg);
+  const tg = el('g', {}, svg);
+  for (const a of [0, 30, 60, 90, 120, 150, 180, -30, -60]) ticks.push(el('path', { d: 'M32 59.5v-3.2', stroke: '#0e1220', 'stroke-width': 1.3, 'stroke-linecap': 'round', transform: `rotate(${a} 32 32)` }, tg));
+  const m = el('path', { d: 'M17 43 24 25.5 32 37.5 49.5 15.5', fill: 'none', stroke: '#f2f4fb', 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', pathLength: 100 }, svg);
+  const dot = el('circle', { cx: 52.5, cy: 11.5, r: 5, fill: '#3fe0a5' }, svg);
+  return { ring, m, dot, ticks, tg };
+}
+function drawMark(mk, t) { // t en segundos desde el inicio de la revelación
+  const r = P(t, 0, 1.1, eio), m = P(t, .55, .8, eio), d = P(t, 1.2, .5, back), k = P(t, 1.0, .6);
+  mk.ring.setAttribute('stroke-dasharray', `${r * 100} 200`);
+  mk.ring.style.opacity = r > 0 ? 1 : 0;
+  mk.m.setAttribute('stroke-dasharray', `${m * 100} 200`);
+  mk.m.style.opacity = m > 0 ? 1 : 0;
+  mk.dot.setAttribute('r', Math.max(0, 5 * d));
+  mk.tg.style.opacity = k;
+}
+const mark1 = buildMark($('#m1')), mark7 = buildMark($('#m7'));
+
+// ---------- texto palabra por palabra ----------
+$$('[data-split]').forEach(h => {
+  const walk = (node, cls) => {
+    const out = [];
+    node.childNodes.forEach(n => {
+      if (n.nodeType === 3) n.textContent.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) out.push(document.createTextNode(' ')); else { const s = document.createElement('span'); s.className = 'w' + (cls ? ' ' + cls : ''); s.textContent = w; out.push(s); } });
+      else out.push(...walk(n, n.className));
+    });
+    return out;
+  };
+  const parts = walk(h, '');
+  h.textContent = ''; parts.forEach(p => h.appendChild(p));
+});
+
+// ---------- 2 · gráfico de peso ----------
+const chart = $('#chart');
+let rnd = 7; const rand = () => (rnd = (rnd * 16807) % 2147483647) / 2147483647;
+const N = 16, raw = [], trend = [];
+for (let i = 0; i < N; i++) {
+  const base = 84.0 - 4.2 * (1 - Math.exp(-i / 9)) / (1 - Math.exp(-15 / 9));
+  raw.push(base + (rand() - .5) * 1.5 + (i === 6 ? .9 : 0) + (i === 11 ? -.6 : 0));
+}
+let ema = raw[0] + .1; raw.forEach(v => { ema = ema + .35 * (v - ema); trend.push(ema); });
+const _cr = chart.getBoundingClientRect(); const CH = FMT === 'og' ? 620 : Math.round(Math.max(420, Math.min(900, _cr.width ? 900 * _cr.height / _cr.width : 560))); chart.setAttribute('viewBox', `0 0 900 ${CH}`);
+const yMin = 78.5, yMax = 85.5, cx = i => 70 + i * (810 / (N - 1)), cy = v => CH - 40 - (v - yMin) / (yMax - yMin) * (CH - 90);
+for (const v of [79, 81, 83, 85]) {
+  el('line', { x1: 70, x2: 890, y1: cy(v), y2: cy(v), stroke: '#2a3150', 'stroke-width': 2, 'stroke-dasharray': '4 10', 'stroke-linecap': 'round' }, chart);
+  const tx = el('text', { x: 0, y: cy(v) + 9, fill: '#8e97b5', 'font-size': 26, 'font-weight': 600 }, chart); tx.textContent = v;
+}
+const rawLine = el('polyline', { points: raw.map((v, i) => `${cx(i)},${cy(v)}`).join(' '), fill: 'none', stroke: '#9d85ff', 'stroke-width': 3, opacity: .45, 'stroke-linejoin': 'round', pathLength: 100 }, chart);
+const area = el('path', { d: `M${cx(0)},${cy(trend[0])} ` + trend.map((v, i) => `L${cx(i)},${cy(v)}`).join(' ') + ` L${cx(N - 1)},${CH - 20} L${cx(0)},${CH - 20}Z`, fill: 'url(#areaG)' }, chart);
+const defs = el('defs', {}, chart);
+const ag = el('linearGradient', { id: 'areaG', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+el('stop', { offset: 0, 'stop-color': '#35e3ff', 'stop-opacity': .22 }, ag); el('stop', { offset: 1, 'stop-color': '#35e3ff', 'stop-opacity': 0 }, ag);
+const clip = el('clipPath', { id: 'areaClip' }, defs); const clipR = el('rect', { x: 0, y: 0, width: 0, height: CH }, clip);
+document.getElementById('delta').textContent = `${fmt(trend[N - 1] - trend[0]).replace('-', '−')} kg en ${N} semanas`;
+area.setAttribute('clip-path', 'url(#areaClip)');
+const dots = raw.map((v, i) => el('circle', { cx: cx(i), cy: cy(v), r: 0, fill: '#9d85ff', stroke: '#171c30', 'stroke-width': 4 }, chart));
+const trendLine = el('polyline', { points: trend.map((v, i) => `${cx(i)},${cy(v)}`).join(' '), fill: 'none', stroke: '#35e3ff', 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', pathLength: 100 }, chart);
+const head = el('circle', { r: 0, fill: '#35e3ff', stroke: '#171c30', 'stroke-width': 6 }, chart);
+const headGlow = el('circle', { r: 0, fill: '#35e3ff', opacity: .25 }, chart);
+// posición sobre la tendencia para una fracción u
+const trendAt = u => { const x = u * (N - 1), i = Math.min(N - 2, Math.floor(x)), f = x - i; return [cx(i) + (cx(i + 1) - cx(i)) * f, trend[i] + (trend[i + 1] - trend[i]) * f]; };
+
+// ---------- 3 · cuerpo ----------
+const body = $('#body');
+const bd = el('defs', {}, body);
+const bg1 = el('linearGradient', { id: 'bodyG', x1: 0, y1: 0, x2: 0, y2: 1, gradientUnits: 'objectBoundingBox' }, bd);
+el('stop', { offset: 0, 'stop-color': '#2e3766' }, bg1); el('stop', { offset: 1, 'stop-color': '#1e2445' }, bg1);
+const bgU = el('linearGradient', { id: 'bodyGU', x1: 0, y1: 40, x2: 0, y2: 980, gradientUnits: 'userSpaceOnUse' }, bd);
+el('stop', { offset: 0, 'stop-color': '#2e3766' }, bgU); el('stop', { offset: 1, 'stop-color': '#1e2445' }, bgU);
+const fig = el('g', {}, body);
+const limb = d => el('path', { d, fill: 'none', stroke: 'url(#bodyGU)', 'stroke-width': 62, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, fig);
+limb('M352 250 Q318 330 306 420 Q296 510 292 590');   // brazo derecho (izquierda de la pantalla)
+limb('M608 250 Q642 330 654 420 Q664 510 668 590');
+el('path', { d: 'M428 560 Q420 690 422 800 Q424 880 420 950', fill: 'none', stroke: 'url(#bodyGU)', 'stroke-width': 84, 'stroke-linecap': 'round' }, fig);
+el('path', { d: 'M532 560 Q540 690 538 800 Q536 880 540 950', fill: 'none', stroke: 'url(#bodyGU)', 'stroke-width': 84, 'stroke-linecap': 'round' }, fig);
+el('path', { d: 'M350 232 Q480 200 610 232 Q640 245 628 300 Q600 400 578 455 Q596 520 600 580 Q560 618 480 618 Q400 618 360 580 Q364 520 382 455 Q360 400 332 300 Q320 245 350 232Z', fill: 'url(#bodyGU)' }, fig);
+el('rect', { x: 452, y: 168, width: 56, height: 70, rx: 24, fill: 'url(#bodyGU)' }, fig);
+el('circle', { cx: 480, cy: 118, r: 66, fill: 'url(#bodyGU)' }, fig);
+// contorno suave
+const figStroke = el('path', { d: 'M350 232 Q480 200 610 232', fill: 'none', stroke: '#7c5cff', 'stroke-width': 0, opacity: 0 }, fig);
+// cintas: [nombre, valor, delta, color, x1,y1,x2,y2, labelX, labelY, side]
+const TAPES = [
+  ['Pecho', '98,0', '−0,5', 'g', 340, 300, 620, 300, 735, 190, 'r'],
+  ['Brazo der.', '32,0', '+0,4', 'c', 282, 352, 342, 368, 15, 300, 'l'],
+  ['Brazo izq.', '31,6', '+0,3', 'c', 618, 368, 678, 352, 735, 370, 'r'],
+  ['Cintura', '84,5', '−2,0', 'g', 378, 462, 582, 462, 15, 470, 'l'],
+  ['Muslo der.', '57,0', '−0,8', 'g', 380, 690, 468, 694, 15, 690, 'l'],
+  ['Muslo izq.', '56,4', '−0,6', 'g', 492, 694, 580, 690, 735, 690, 'r'],
+];
+const tapeEls = TAPES.map(([name, val, dl, col, x1, y1, x2, y2, lx, ly, side], i) => {
+  const g = el('g', {}, body);
+  const band = el('line', { x1, y1, x2, y2, stroke: '#ffb454', 'stroke-width': 16, 'stroke-linecap': 'round', pathLength: 100 }, g);
+  const ticks = el('line', { x1, y1, x2, y2, stroke: '#0e1220', 'stroke-width': 8, 'stroke-dasharray': '2 9', pathLength: 100, opacity: .6 }, g);
+  const ex = side === 'l' ? Math.min(x1, x2) : Math.max(x1, x2), ey = side === 'l' ? (x1 < x2 ? y1 : y2) : (x1 > x2 ? y1 : y2);
+  const cxl = side === 'l' ? lx + 220 : lx;
+  const lead = el('path', { d: `M${ex} ${ey} L${side === 'l' ? cxl + 24 : cxl - 24} ${ly} L${cxl} ${ly}`, fill: 'none', stroke: '#ffb454', 'stroke-width': 3, opacity: .8, pathLength: 100 }, g);
+  const card = el('g', {}, g);
+  el('rect', { x: lx, y: ly - 68, width: 220, height: 136, rx: 26, fill: '#171c30', stroke: '#2a3150', 'stroke-width': 2 }, card);
+  const t1 = el('text', { x: lx + 24, y: ly - 26, fill: '#b8bfd6', 'font-size': 27, 'font-weight': 600 }, card); t1.textContent = name;
+  const t2 = el('text', { x: lx + 24, y: ly + 22, fill: '#f2f4fb', 'font-size': 46, 'font-weight': 800, 'letter-spacing': -1 }, card); t2.textContent = val;
+  const t3 = el('text', { x: lx + 24 + val.length * 26 + 8, y: ly + 22, fill: '#b8bfd6', 'font-size': 26, 'font-weight': 700 }, card); t3.textContent = 'cm';
+  const t4 = el('text', { x: lx + 24, y: ly + 54, fill: col === 'g' ? '#3fe0a5' : '#35e3ff', 'font-size': 25, 'font-weight': 700 }, card); t4.textContent = dl + ' cm';
+  return { band, ticks, lead, card, lx, ly };
+});
+
+// ---------- 4 · composición ----------
+const TILES = [
+  ['Grasa corporal', 24.8, 1, '%', 'Normal', 'g', .52],
+  ['Grasa visceral', 11, 0, '', 'Alta', 'o', .74],
+  ['Músculo esquelético', 34.2, 1, 'kg', 'Buena', 'c', .66],
+  ['Agua', 54.1, 1, '%', 'Normal', 'g', .5],
+  ['Masa ósea', 3.1, 1, 'kg', 'Normal', 'g', .48],
+  ['Proteína', 17.6, 1, '%', 'Normal', 'g', .55],
+];
+const COL = { g: '#3fe0a5', c: '#35e3ff', o: '#ffb454' };
+const tiles = $('#tiles');
+const tileEls = TILES.map(([lbl, v, d, u, st, c, pos]) => {
+  const t = document.createElement('div'); t.className = 'tile cardbox';
+  t.innerHTML = `<div class="lbl">${lbl}</div><div class="val"><span>0</span><small>${u}</small></div>
+    <span class="pill ${c}"><i></i>${st}</span>
+    <div class="gauge"><div class="seg" style="left:${c === 'o' ? 62 : 30}%;width:${c === 'o' ? 38 : 34}%;background:${COL[c]};opacity:.35"></div><div class="mk" style="background:${COL[c]}"></div></div>`;
+  tiles.appendChild(t);
+  return { t, num: t.querySelector('.val span'), mk: t.querySelector('.mk'), v, d, pos };
+});
+
+// ---------- 5 · familia ----------
+const FAM = [
+  ['Ana', 'A', '#7c5cff', '80,1', 'Medida hace 2 días', null, [6, 5, 5.4, 4, 3.6, 2.6, 2.2, 1]],
+  ['Tomás', 'T', '#35e3ff', '86,2', 'Medido hace 4 días', null, [3, 3.4, 2.8, 2.6, 2.9, 2.2, 1.8, 1.6]],
+  ['Lucía', 'L', '#3fe0a5', '58,9', 'Medida hace 9 días', 'Le toca medirse', [3, 3.2, 3, 3.3, 3.1, 3.4, 3.2, 3.3]],
+  ['Marcos', 'M', '#ffb454', '71,5', 'Medido ayer', null, [5, 4.6, 4.8, 4.1, 3.9, 3.6, 3.7, 3.2]],
+];
+const fam = $('#fam');
+const famEls = FAM.map(([n, ini, c, kg, sub, badge, sp]) => {
+  const p = document.createElement('div'); p.className = 'person cardbox';
+  const pts = sp.map((v, i) => `${8 + i * 24.8},${50 - v * 6.5}`).join(' ');
+  p.innerHTML = `<div class="av" style="background:${c}">${ini}</div>
+    <div><div class="nm">${n}</div><div class="sub">${sub}</div>${badge ? `<span class="pill o">${badge}</span>` : ''}</div>
+    <div class="right"><div class="kg">${kg} <small>kg</small></div>
+    <svg viewBox="0 0 190 56"><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="100"/></svg></div>`;
+  fam.appendChild(p);
+  return { p, line: p.querySelector('polyline') };
+});
+
+// ---------- 6 · teléfono / privacidad ----------
+const ph = $('#phone');
+const phG = el('g', {}, ph);
+el('rect', { x: 290, y: 60, width: 380, height: 780, rx: 64, fill: '#171c30', stroke: '#2f3760', 'stroke-width': 6 }, phG);
+el('rect', { x: 430, y: 88, width: 100, height: 22, rx: 11, fill: '#0e1220' }, phG);
+const phMark = el('svg', { x: 380, y: 190, width: 200, height: 200, viewBox: '0 0 64 64' }, phG);
+el('use', { href: '#markSym' }, phMark);
+const bars = [0, 1, 2].map(i => el('rect', { x: 340, y: 460 + i * 90, width: 280, height: 60, rx: 18, fill: '#222947' }, phG));
+const barFill = [0, 1, 2].map(i => el('rect', { x: 340, y: 460 + i * 90, width: 0, height: 60, rx: 18, fill: ['#7c5cff', '#35e3ff', '#3fe0a5'][i], opacity: .55 }, phG));
+// escudo con candado
+const shield = el('g', {}, ph);
+const ring1 = el('circle', { cx: 480, cy: 450, r: 340, fill: 'none', stroke: '#7c5cff', 'stroke-width': 3, 'stroke-dasharray': '6 18', opacity: .5 }, ph);
+const ring2 = el('circle', { cx: 480, cy: 450, r: 400, fill: 'none', stroke: '#35e3ff', 'stroke-width': 2, 'stroke-dasharray': '2 22', opacity: .35 }, ph);
+el('path', { d: 'M0 -86 L72 -58 V0 C72 52 38 84 0 100 C-38 84 -72 52 -72 0 V-58Z', fill: '#3fe0a5' }, shield);
+el('rect', { x: -28, y: -14, width: 56, height: 46, rx: 10, fill: '#0e1220' }, shield);
+el('path', { d: 'M-17 -14 V-28 A17 17 0 0 1 17 -28 V-14', fill: 'none', stroke: '#0e1220', 'stroke-width': 10 }, shield);
+ph.appendChild(shield);
+ph.insertBefore(ring1, phG); ph.insertBefore(ring2, phG);
+
+// ---------- línea de tiempo ----------
+const SC = [ // [id, inicio, fin]
+  ['#s1', 0, 3.6], ['#s2', 3.4, 9.2], ['#s3', 9.0, 14.2], ['#s4', 14.0, 18.8],
+  ['#s5', 18.6, 22.6], ['#s6', 22.4, 25.2], ['#s7', 25.0, 28.01],
+];
+const scenes = SC.map(([s, a, b]) => ({ e: $(s), a, b }));
+
+function sceneIn(sc, t) {
+  const lt = t - sc.a, len = sc.b - sc.a;
+  const inn = sc.a === 0 ? 1 : P(lt, 0, .5, eo), out = sc.b > DURATION ? 1 : 1 - P(lt, len - .35, .35, x => x);
+  sc.e.style.opacity = Math.min(inn, out);
+  sc.e.style.visibility = (lt < 0 || lt > len) ? 'hidden' : 'visible';
+  const tx = sc.e.querySelector('.txt');
+  if (tx) {
+    const k = tx.querySelector('.kicker');
+    k.style.opacity = P(lt, .05, .4); k.style.transform = `translateY(${(1 - P(lt, .05, .5)) * 24}px)`;
+    tx.querySelectorAll('h2 .w').forEach((w, i) => {
+      const p = P(lt, .12 + i * .07, .6, eo5);
+      w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 60}px)`;
+    });
+    const pp = tx.querySelector('p');
+    if (pp) { const p = P(lt, .75, .6); pp.style.opacity = p; pp.style.transform = `translateY(${(1 - p) * 26}px)`; }
+    // salida: deriva ligera hacia arriba
+    const o = P(lt, len - .4, .4, x => x * x);
+    tx.style.transform = `translateY(${-o * 30}px)`;
+    const v = sc.e.querySelector('.vis'); if (v) v.style.transform = `translateY(${-o * 30}px)`;
+  }
+  return lt;
+}
+
+function seek(t) {
+  t = Math.max(0, Math.min(DURATION, t));
+  // fondo vivo
+  const g1 = $('#g1'), g2 = $('#g2');
+  g1.style.transform = `translate(${-250 + Math.sin(t * .35) * 120 + W * .05}px, ${-300 + Math.cos(t * .28) * 90}px)`;
+  g2.style.transform = `translate(${W - 560 + Math.cos(t * .3) * 110}px, ${H - 560 + Math.sin(t * .4) * 100}px)`;
+  // marca fija
+  const bug = $('#bug');
+  const bIn = P(t, 3.6, .6), bOut = 1 - P(t, 24.8, .4);
+  bug.style.opacity = Math.min(bIn, bOut) * .95;
+  bug.style.transform = `translateY(${(1 - bIn) * -20}px)`;
+
+  const L = scenes.map(sc => sceneIn(sc, t));
+
+  // 1 · logo
+  { const lt = L[0];
+    drawMark(mark1, lt - .1);
+    const s = .86 + .14 * P(lt, 0, 1.6, eo);
+    $('#m1').style.transform = `scale(${s})`;
+    const w = P(lt, 1.35, .7, eo5); $('#wm1').style.opacity = w; $('#wm1').style.transform = `translateY(${(1 - w) * 40}px)`;
+    const g = P(lt, 1.8, .7); $('#tg1').style.opacity = g; $('#tg1').style.transform = `translateY(${(1 - g) * 24}px)`;
+    const z = P(lt, 3.0, .6, x => x * x); $('#s1').style.transform = `scale(${1 + z * .06})`;
+  }
+  // 2 · gráfico
+  { const lt = L[1];
+    const card = P(lt, .35, .8, eo5); $('#chartCard').style.opacity = card; $('#chartCard').style.transform = `translateY(${(1 - card) * 80}px)`;
+    dots.forEach((d, i) => { const p = P(lt, .9 + i * .09, .35, back); d.setAttribute('r', Math.max(0, 11 * p)); });
+    rawLine.setAttribute('stroke-dasharray', `${P(lt, .9, 1.5, x => x) * 100} 200`);
+    const u = P(lt, 1.6, 2.6, eio);
+    trendLine.setAttribute('stroke-dasharray', `${u * 100} 200`);
+    trendLine.style.opacity = u > 0 ? 1 : 0;
+    clipR.setAttribute('width', u > 0 ? 70 + u * 820 : 0);
+    const [hx, hv] = trendAt(u);
+    head.setAttribute('cx', hx); head.setAttribute('cy', cy(hv)); head.setAttribute('r', u > 0 ? 13 : 0);
+    headGlow.setAttribute('cx', hx); headGlow.setAttribute('cy', cy(hv)); headGlow.setAttribute('r', u > 0 ? 30 + 6 * Math.sin(lt * 6) : 0);
+    $('#kgNow').textContent = fmt(u > 0 ? hv : trend[0]);
+    const dl = P(lt, 4.1, .5, back); $('#delta').style.transform = `scale(${dl})`; $('#delta').style.opacity = clamp(dl);
+  }
+  // 3 · cuerpo
+  { const lt = L[2];
+    const f = P(lt, .3, .9, eo5); fig.style.opacity = f; fig.style.transform = `translateY(${(1 - f) * 60}px)`;
+    tapeEls.forEach((te, i) => {
+      const s = 1.0 + i * .42;
+      const b = P(lt, s, .5, eio);
+      te.band.setAttribute('stroke-dasharray', `${b * 100} 200`); te.band.style.opacity = b > 0 ? 1 : 0;
+      te.ticks.style.opacity = .6 * P(lt, s + .3, .3);
+      te.lead.setAttribute('stroke-dasharray', `${P(lt, s + .25, .4) * 100} 200`); te.lead.style.opacity = b > 0 ? .8 : 0;
+      const c = P(lt, s + .45, .5, back);
+      te.card.style.opacity = clamp(c * 1.4);
+      te.card.style.transformOrigin = `${te.lx + 110}px ${te.ly}px`;
+      te.card.style.transform = `scale(${.7 + .3 * c})`;
+    });
+  }
+  // 4 · composición
+  { const lt = L[3];
+    tileEls.forEach((te, i) => {
+      const s = .45 + i * .14, p = P(lt, s, .7, eo5);
+      te.t.style.opacity = p; te.t.style.transform = `translateY(${(1 - p) * 70}px) scale(${.94 + .06 * p})`;
+      const n = P(lt, s + .1, 1.3, eo5);
+      te.num.textContent = fmt(te.v * n, te.d);
+      te.mk.style.left = (te.pos * 100 * P(lt, s + .2, 1.2, eio)) + '%';
+    });
+  }
+  // 5 · familia
+  { const lt = L[4];
+    famEls.forEach((fe, i) => {
+      const p = P(lt, .4 + i * .16, .7, eo5);
+      fe.p.style.opacity = p; fe.p.style.transform = `translateX(${(1 - p) * 120}px)`;
+      fe.line.setAttribute('stroke-dasharray', `${P(lt, .7 + i * .16, 1.0, eio) * 100} 200`);
+      const hl = i === 2 ? P(lt, 2.1, .5) : 0;
+      fe.p.style.borderColor = hl ? `rgba(255,180,84,${.75 * hl})` : '';
+      fe.p.style.boxShadow = hl ? `0 0 0 ${4 * hl}px rgba(255,180,84,.18), 0 40px 80px rgba(0,0,0,.35)` : '';
+    });
+  }
+  // 6 · privacidad
+  { const lt = L[5];
+    const p = P(lt, .2, .8, eo5); phG.style.opacity = p; phG.style.transform = `translateY(${(1 - p) * 80}px)`;
+    barFill.forEach((b, i) => b.setAttribute('width', 280 * [.72, .54, .86][i] * P(lt, .6 + i * .12, .8, eio)));
+    const s = P(lt, 1.0, .6, back);
+    shield.setAttribute('transform', `translate(620 700) scale(${Math.max(0, s) * 1.25})`);
+    ring1.setAttribute('transform', `rotate(${lt * 12} 480 450)`); ring1.style.opacity = .5 * P(lt, .3, .8);
+    ring2.setAttribute('transform', `rotate(${-lt * 8} 480 450)`); ring2.style.opacity = .35 * P(lt, .4, .8);
+    $$('#chips .chip').forEach((c, i) => { const q = P(lt, 1.0 + i * .15, .5, eo5); c.style.opacity = q; c.style.transform = `translateY(${(1 - q) * 30}px)`; });
+  }
+  // 7 · cierre
+  { const lt = L[6];
+    drawMark(mark7, lt);
+    const w = P(lt, .9, .7, eo5); $('#wm7').style.opacity = w; $('#wm7').style.transform = `translateY(${(1 - w) * 40}px)`;
+    const u = P(lt, 1.3, .6, back); $('#url7').style.opacity = clamp(u); $('#url7').style.transform = `scale(${.85 + .15 * u})`;
+    const c = P(lt, 1.6, .6); $('#cta7').style.opacity = c;
+  }
+}
+window.seek = seek;
+window.DURATION = DURATION;
+window.FORMAT = { W, H };
+
+// Imagen social 1200×630: composición estática propia
+if (FMT === 'og') {
+  scenes.forEach(s => s.e.style.display = 'none');
+  $('#bug').style.display = 'none';
+  const og = document.createElement('section');
+  og.className = 'scene'; og.style.cssText = 'opacity:1;padding:70px 80px;align-items:center;gap:56px;flex-direction:row';
+  og.innerHTML = `<div style="flex:1">
+      <div style="display:flex;align-items:center;gap:22px"><svg viewBox="0 0 64 64" style="width:92px;height:92px"><use href="#markSym"/></svg>
+      <div style="font-weight:800;font-size:58px;letter-spacing:-.035em">Medidas<b style="color:#35e3ff;font-weight:800">Cuerpo</b></div></div>
+      <div style="font-weight:800;font-size:62px;letter-spacing:-.03em;line-height:1.04;margin-top:44px">Tu cuerpo,<br><span class="hl" style="background:linear-gradient(90deg,#9d85ff,#35e3ff);-webkit-background-clip:text;background-clip:text;color:transparent">semana a semana</span></div>
+      <div style="color:#b8bfd6;font-size:28px;font-weight:500;margin-top:24px;line-height:1.38;max-width:600px;text-wrap:pretty">Peso, composición corporal y medidas para toda la familia. Tus datos, solo en tu dispositivo.</div>
+    </div>`;
+  const right = document.createElement('div');
+  right.style.cssText = 'width:460px;height:470px;flex:none;position:relative';
+  const cc = $('#chartCard'); right.appendChild(cc);
+  cc.style.cssText = 'position:absolute;inset:0;padding:30px 32px 22px;display:flex;flex-direction:column;transform:scale(1)';
+  cc.querySelector('.big').style.fontSize = '56px';
+  cc.querySelector('#delta').style.display = 'none';
+  cc.querySelector('.legend').style.display = 'none';
+  og.appendChild(right);
+  stage.appendChild(og);
+  const sv = $('#s2'); sv.style.display = 'none';
+  seek(9.0);
+  $('#chartCard').style.opacity = 1; $('#chartCard').style.transform = 'none';
+  window.seek = () => {};
+}
+
+// Reproducción en vivo (si no lo controla el script de render)
+const fixed = Q.get('t');
+const fit = () => { const s = Math.min(innerWidth / W, innerHeight / H); stage.style.transform = Q.has('render') ? 'none' : `scale(${s})`; };
+fit(); addEventListener('resize', fit);
+if (FMT !== 'og') {
+  if (fixed !== null) seek(+fixed);
+  else if (!Q.has('render')) { const t0 = performance.now(); const loop = now => { seek(((now - t0) / 1000) % DURATION); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+  else seek(0);
+}
+})();
+</script>
+</body>
+</html>
