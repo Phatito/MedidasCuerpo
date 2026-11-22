@@ -7,16 +7,19 @@ interface Props {
   compacto?: boolean
   /** Línea de tendencia (para el peso). Si viene, reemplaza al promedio de las últimas mediciones. */
   tendencia?: { fecha: string; valor: number }[]
+  /** Lienzo chico (para pantallas angostas) sin perder el promedio ni la leyenda. */
+  lienzoChico?: boolean
 }
 
 const VENTANA = 4
 
-export function Grafico({ puntos, unidad, compacto = false, tendencia }: Props) {
+export function Grafico({ puntos, unidad, compacto = false, tendencia, lienzoChico = false }: Props) {
   if (puntos.length === 0) return null
   // El compacto usa un lienzo más chico para que su texto no se achique al escalar en columnas angostas.
-  const ANCHO = compacto ? 360 : 720
-  const ALTO = compacto ? 170 : 280
-  const M = compacto ? { izq: 38, der: 44, arriba: 14, abajo: 26 } : { izq: 52, der: 64, arriba: 18, abajo: 30 }
+  const chico = compacto || lienzoChico
+  const ANCHO = chico ? 360 : 720
+  const ALTO = chico ? 200 : 280
+  const M = chico ? { izq: 38, der: 44, arriba: 14, abajo: 26 } : { izq: 52, der: 64, arriba: 18, abajo: 30 }
   const valores = [...puntos, ...(tendencia ?? [])].map((p) => p.valor)
   let min = Math.min(...valores)
   let max = Math.max(...valores)
@@ -41,8 +44,8 @@ export function Grafico({ puntos, unidad, compacto = false, tendencia }: Props) 
 
   return (
     <div className="stack">
-      <div className={compacto ? undefined : 'chart-scroll'}>
-      <svg className={compacto ? 'chart compact' : 'chart'} viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={`Evolución en ${unidad}, ${puntos.length} mediciones`}>
+      <div className={chico ? undefined : 'chart-scroll'}>
+      <svg className={chico ? 'chart compact' : 'chart'} viewBox={`0 0 ${ANCHO} ${ALTO}`} role="img" aria-label={`Evolución en ${unidad}, ${puntos.length} mediciones`}>
         {marcas.map((v) => (
           <g key={v}>
             <line className="grid-line" x1={M.izq} x2={ANCHO - M.der} y1={y(v)} y2={y(v)} />

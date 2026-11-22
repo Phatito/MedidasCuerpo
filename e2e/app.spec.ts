@@ -30,6 +30,7 @@ test('una estatura fuera de rango no se guarda', async ({ page }) => {
 })
 
 const filas = (page: Page) => page.locator('tbody tr')
+const elegirMetrica = (page: Page, nombre: string) => page.getByRole('group', { name: 'Medida del gráfico' }).getByRole('button', { name: nombre }).click()
 // Navegación sin pestañas: selector de perfil, botones de la ficha y ⚙.
 const perfiles = (page: Page) => page.getByRole('menu', { name: 'Perfiles' })
 async function abrirPerfiles(page: Page) {
@@ -124,10 +125,11 @@ test('la evolución interpreta dos mediciones', async ({ page }) => {
   await expect(page.getByText('Orientación general, no diagnóstico médico.')).toBeVisible()
   await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
   await expect(page.locator('svg.chart')).toContainText('72,4')
-  await page.getByLabel('Métrica').selectOption('cinturaCm')
+  await elegirMetrica(page, 'Cintura')
   await expect(page.locator('svg.chart')).toContainText('86,5')
   // Solo se ofrecen métricas con datos.
-  await expect(page.getByLabel('Métrica').locator('option')).toHaveText(['Peso', 'Cintura', 'IMC'])
+  await expect(page.getByRole('group', { name: 'Medida del gráfico' }).getByRole('button')).toHaveText(['Peso', 'Cintura'])
+  await expect(page.getByLabel('Más medidas').locator('option')).toHaveText(['Más…', 'IMC'])
 })
 
 test('con una sola medición la evolución invita a seguir', async ({ page }) => {
@@ -300,7 +302,7 @@ test('con cuatro mediciones ya se ve el promedio de las últimas 4', async ({ pa
   await ir(page, 'Evolución')
   // En el peso, el promedio se reemplaza por la tendencia; las demás métricas lo conservan.
   await expect(page.locator('svg.chart .avg-dot')).toHaveCount(0)
-  await page.getByLabel('Métrica').selectOption('cinturaCm')
+  await elegirMetrica(page, 'Cintura')
   await expect(page.locator('svg.chart .avg-dot')).toHaveCount(1)
   await expect(page.getByText('Promedio de las últimas 4')).toBeVisible()
 })
@@ -417,9 +419,9 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await ir(page, 'Ficha')
   await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
   await expect(figura(page)).toHaveAttribute('aria-label', /cintura 86,5 cm \(bajó 1,5\)/)
-  await expect(page.locator('.tile', { hasText: 'Peso' })).toContainText('72,4')
+  await expect(page.locator('.hero')).toContainText('72,4')
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
-  await expect(page.locator('svg.chart.compact circle.dot')).toHaveCount(2)
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
   await expect(page.locator('svg.chart .area')).toHaveCount(1)
 })
 
@@ -446,7 +448,7 @@ test('el gráfico de la ficha se lee en un teléfono', async ({ page }) => {
   await medir(page, haceDias(7), '72,5', '88')
   await medir(page, haceDias(0), '72,4', '86,5')
   await ir(page, 'Ficha')
-  const px = await page.locator('svg.chart.compact text.axis').first().evaluate((t) => {
+  const px = await page.locator('svg.chart text.axis').first().evaluate((t) => {
     const svg = t.closest('svg')!
     return (parseFloat(getComputedStyle(t).fontSize) * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width
   })
@@ -576,15 +578,13 @@ test('el peso se lee por su tendencia', async ({ page }) => {
   await agregarAna(page)
   for (const [dias, peso] of [[14, '74'], [7, '72'], [0, '74']] as const) await medir(page, haceDias(dias), peso, '88')
   await ir(page, 'Ficha')
-  const tarjeta = page.locator('.tile', { hasText: 'Peso de tendencia' })
+  const tarjeta = page.locator('.hero')
   await expect(tarjeta).toContainText('Última pesada: 74,0 kg')
   // 74 → 72 → 74 con pesadas semanales deja la tendencia en 73,5: la subida puntual se suaviza.
-  await expect(tarjeta.locator('.v')).toContainText('73,5')
-  await expect(page.locator('svg.chart.compact path.trend')).toHaveCount(1)
-  await ir(page, 'Evolución')
+  await expect(tarjeta.locator('.hero-v')).toContainText('73,5')
   await expect(page.locator('svg.chart path.trend')).toHaveCount(1)
   await expect(page.getByText('La tendencia es un promedio que da más importancia a las pesadas recientes')).toBeVisible()
-  await page.getByLabel('Métrica').selectOption('cinturaCm')
+  await elegirMetrica(page, 'Cintura')
   await expect(page.locator('svg.chart path.trend')).toHaveCount(0)
 })
 
@@ -683,4 +683,46 @@ test('una dirección inválida lleva al inicio', async ({ page }) => {
 test('sin personas se abre Familia', async ({ page }) => {
   await page.goto('./#/p/alguien')
   await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
+})
+
+// ---------- Ficha completa ----------
+
+test('la ficha muestra todas las medidas de la báscula con su estado', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  // Números inventados.
+  const csv = `Fecha;Peso;Grasa (%);Grasa visceral;Masa ósea;Metabolismo basal;Proteína (%)\n${haceDias(0).split('-').reverse().join('/')};70;30;16;2,4;1400;17\n`
+  await page.getByLabel('Archivo CSV').setInputFiles({ name: 'b.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await ir(page, 'Ficha')
+  const tile = (clave: string) => page.locator(`.tile[data-clave="${clave}"]`)
+  await expect(tile('grasaVisceral')).toContainText('Muy alto')
+  await expect(tile('grasaVisceral').getByRole('img')).toHaveAttribute('aria-label', /Tu valor está en Muy alto/)
+  await expect(tile('metabolismoBasalKcal')).toContainText('1400')
+  await expect(tile('masaOseaKg')).toContainText('2,4')
+  await expect(tile('proteinaPct')).toContainText('Estándar')
+  await expect(page.locator('.hero')).toContainText('IMC')
+})
+
+test('el gráfico cambia de período', async ({ page }) => {
+  await agregarAna(page)
+  for (const dias of [400, 200, 30, 0]) await medir(page, haceDias(dias), '72', '88')
+  await ir(page, 'Ficha')
+  const periodo = page.getByRole('group', { name: 'Período' })
+  await expect(periodo.getByRole('button', { name: '3 meses' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
+  await periodo.getByRole('button', { name: '1 año' }).click()
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(3)
+  await periodo.getByRole('button', { name: 'Todo' }).click()
+  await expect(page.locator('svg.chart circle.dot')).toHaveCount(4)
+})
+
+test('la ficha no tiene desplazamiento horizontal a 400 px', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await medir(page, haceDias(0), '72,4', '86,5')
+  await ir(page, 'Ficha')
+  await expect(page.locator('.hero')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })

@@ -4,7 +4,6 @@ import { escribirRuta, leerRuta, personaInicio, type Ruta } from '../domain/ruta
 import type { Medicion, Persona } from '../domain/types'
 import { db, guardarAjustes, leerAjustes, listarPersonas, listarTodasLasMediciones } from '../storage/db'
 import { Datos } from './Datos'
-import { Evolucion } from './Evolucion'
 import { Familia } from './Familia'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
@@ -135,17 +134,12 @@ export function App() {
               />
             )}
             {vista.pantalla === 'ficha' && personaDeRuta && (
-              <>
-                <Ficha
-                  persona={personaDeRuta}
-                  onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
-                  onVerEvolucion={() => document.getElementById('evolucion')?.scrollIntoView()}
-                  onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
-                />
-                <section id="evolucion" className="stack">
-                  <Evolucion persona={personaDeRuta} onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })} />
-                </section>
-              </>
+              <Ficha
+                key={personaDeRuta.id}
+                persona={personaDeRuta}
+                onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
+                onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
+              />
             )}
             {vista.pantalla === 'registrar' && personaDeRuta && (
               <>

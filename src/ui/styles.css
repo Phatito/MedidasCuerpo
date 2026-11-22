@@ -20,6 +20,13 @@
   --font: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 16px;
   --sombra: rgba(0, 0, 0, 0.5);
+  /* Estados de salud: cian, verde, naranja y rojo, que además difieren en claridad. */
+  --st-bajo: #5ad8f5;
+  --st-ok: #3fe0a5;
+  --st-alto: #ffb454;
+  --st-muy: #ff7b7b;
+  --hero-from: #2a2160;
+  --hero-to: #171c30;
   color-scheme: dark;
 }
 
@@ -34,7 +41,7 @@ h4 { font-size: 1.02rem; font-weight: 700; }
 .muted { color: var(--dim); }
 .small { font-size: 0.875rem; }
 
-.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .top { border-bottom: 1px solid var(--edge); background: var(--bg); }
 .top .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 14px; }
 .brand {
@@ -170,8 +177,49 @@ details.guide b { color: var(--fg); font-weight: 600; }
 
 /* Ficha */
 .ficha { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 18px; align-items: start; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ficha-a { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 20px; align-items: start; padding-block: 22px; }
+.ficha-a .aviso { grid-column: 1 / -1; }
+.col-izq, .col-der { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.hero { display: flex; flex-direction: column; gap: 8px; background: linear-gradient(160deg, var(--hero-from), var(--hero-to) 65%); }
+.hero-k { color: var(--dim); font-size: 0.85rem; font-weight: 600; margin-top: 8px; }
+.hero-v { font-size: 3.4rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; }
+.hero-v small { font-size: 1.1rem; color: var(--dim); letter-spacing: 0; }
+.hero-cambio { font-weight: 700; }
+.hero-cambio.bien { color: var(--good); }
+.hero-cambio.atencion { color: var(--warn); }
+.btn.grande { min-height: 52px; font-size: 1.05rem; font-weight: 800; margin-top: 8px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { padding: 6px 12px; border-radius: 999px; background: var(--soft); color: var(--fg); font-size: 0.8rem; font-weight: 700; }
+.chip.st-bajo { color: var(--st-bajo); } .chip.st-ok { color: var(--st-ok); } .chip.st-alto { color: var(--st-alto); } .chip.st-muy { color: var(--st-muy); }
+.grafico-controles { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+.chip-btn, .chip-select {
+  min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--edge); background: var(--soft); color: var(--fg);
+  font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer;
+}
+.chip-btn.chico { padding: 0 12px; font-weight: 600; }
+.chip-btn[aria-pressed='true'], .chip-select.activo { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.chip-btn:hover:not([aria-pressed='true']) { border-color: var(--dim); }
+.tile { display: flex; flex-direction: column; gap: 6px; }
+.tile h3.k { margin: 0; }
+.tile-fila { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.estado { font-size: 0.78rem; font-weight: 800; }
+.estado.st-bajo { color: var(--st-bajo); } .estado.st-ok { color: var(--st-ok); } .estado.st-alto { color: var(--st-alto); } .estado.st-muy { color: var(--st-muy); }
+.rango { position: relative; display: flex; gap: 3px; height: 6px; margin-block: 4px; }
+.rango .tramo { flex: 1; border-radius: 3px; opacity: 0.75; }
+.tramo.st-bajo { background: var(--st-bajo); } .tramo.st-ok { background: var(--st-ok); } .tramo.st-alto { background: var(--st-alto); } .tramo.st-muy { background: var(--st-muy); }
+.rango .punto {
+  position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%);
+  background: var(--fg); border: 3px solid var(--bg);
+}
+@media (max-width: 860px) {
+  .ficha-a { grid-template-columns: minmax(0, 1fr); }
+  /* En una columna: peso, gráfico, tarjetas y al final la figura. */
+  .col-izq, .col-der { display: contents; }
+  .hero { order: 1; } .col-der > * { order: 2; } .figura { order: 3; }
+}
 .ficha .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 12px; }
 .tile { background: var(--card); border: 1px solid var(--edge); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
 .tile .k { font-size: 0.78rem; font-weight: 600; color: var(--dim); }
 .tile .v { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-variant-numeric: tabular-nums; }

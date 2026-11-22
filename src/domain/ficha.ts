@@ -1,5 +1,7 @@
+import { clasificar, type Clasificacion, type MedidaConEstado } from './estados'
 import { esMenor, interpretar, type Mensaje, type Tono } from './insights'
 import { derivar } from './metrics'
+import { formatear } from './numbers'
 import { proyeccionMeta, tendenciaPeso, type ProyeccionMeta, type PuntoTendencia } from './trend'
 import type { Medicion, Persona } from './types'
 
@@ -31,20 +33,38 @@ export interface Asimetria {
   diferencia: number
 }
 
-export type ClaveTarjeta = 'pesoKg' | 'grasaPct' | 'musculoKg' | 'grasaVisceral'
+export type ClaveTarjeta =
+  | 'pesoKg'
+  | 'grasaPct'
+  | 'grasaVisceral'
+  | 'musculoKg'
+  | 'aguaPct'
+  | 'imc'
+  | 'grasaKg'
+  | 'pesoSinGrasaKg'
+  | 'musculoTotalKg'
+  | 'proteinaPct'
+  | 'masaOseaKg'
+  | 'metabolismoBasalKcal'
+  | 'edadCorporal'
+  | 'frecuenciaCardiacaLpm'
 
 export interface TarjetaFicha {
   clave: ClaveTarjeta
   /** Para el peso, la tendencia; para el resto, el valor de la última medición. */
   valor: number
   estimada: boolean
-  /** Frente a la primera medición que tenga ese dato; null si es la misma o no cambió. */
+  /** Peso: frente a la primera medición. Resto: frente a la medición anterior que tenga ese dato. Null si no cambió. */
   cambio: number | null
   desde: string | null
   tono: Tono
   nota: string | null
   /** Solo en la tarjeta del peso: la pesada de la última medición. */
   ultimaPesada?: number
+  /** Estado frente a rangos de referencia, para las medidas que los tienen (null en menores). */
+  clasificacion: Clasificacion | null
+  /** Una línea de contexto, por ejemplo "65,1 % del peso". */
+  referencia: string | null
 }
 
 export interface ResumenFicha {
@@ -60,7 +80,14 @@ export interface ResumenFicha {
   mensaje: Mensaje | null
 }
 
-const CLAVES: Exclude<ClaveTarjeta, 'pesoKg'>[] = ['grasaPct', 'musculoKg', 'grasaVisceral']
+// Orden de las tarjetas en la ficha.
+const CLAVES: Exclude<ClaveTarjeta, 'pesoKg'>[] = [
+  'grasaPct', 'grasaVisceral', 'musculoKg', 'aguaPct', 'imc', 'grasaKg', 'pesoSinGrasaKg',
+  'musculoTotalKg', 'proteinaPct', 'masaOseaKg', 'metabolismoBasalKcal', 'edadCorporal', 'frecuenciaCardiacaLpm',
+]
+const CON_ESTADO: Partial<Record<ClaveTarjeta, MedidaConEstado>> = {
+  grasaPct: 'grasaPct', grasaVisceral: 'grasaVisceral', aguaPct: 'aguaPct', imc: 'imc', proteinaPct: 'proteinaPct',
+}
 const LADOS = [
   { zona: 'brazo', izq: 'brazoIzqCm', der: 'brazoDerCm', sinLado: 'brazoCm' },
   { zona: 'muslo', izq: 'musloIzqCm', der: 'musloDerCm', sinLado: 'musloCm' },
@@ -78,12 +105,21 @@ function diferencia(actual: number, previo: number): number | null {
 }
 
 function dato(p: Persona, m: Medicion, clave: Exclude<ClaveTarjeta, 'pesoKg'>): { valor: number; estimada: boolean } | null {
-  if (clave === 'grasaPct') {
+  if (clave === 'grasaPct' || clave === 'grasaKg' || clave === 'pesoSinGrasaKg' || clave === 'imc') {
     const d = derivar(p, m)
-    return d.grasaPct == null ? null : { valor: d.grasaPct, estimada: d.grasaEstimada }
+    const v = clave === 'grasaPct' ? d.grasaPct : clave === 'grasaKg' ? d.masaGrasaKg : clave === 'pesoSinGrasaKg' ? d.masaMagraKg : d.imc
+    return v == null ? null : { valor: redondear1(v), estimada: clave !== 'imc' && d.grasaEstimada }
   }
   const v = m[clave]
   return v == null ? null : { valor: v, estimada: false }
+}
+
+function referencia(clave: ClaveTarjeta, valor: number, m: Medicion): string | null {
+  if (clave === 'musculoTotalKg' || clave === 'masaOseaKg') return `${formatear((valor / m.pesoKg) * 100)} % del peso`
+  if (clave === 'proteinaPct') return `${formatear((m.pesoKg * valor) / 100)} kg`
+  if (clave === 'grasaKg') return 'masa grasa'
+  if (clave === 'pesoSinGrasaKg') return 'masa magra'
+  return null
 }
 
 function tonoDe(clave: ClaveTarjeta, cambio: number | null, valor: number, p: Persona): Tono {
@@ -99,7 +135,6 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
   const ms = [...mediciones].sort((a, b) => a.fecha.localeCompare(b.fecha))
   const ultima = ms[ms.length - 1] ?? null
   if (!ultima) return { ultima: null, fechaPerimetros: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null }
-  const anteriores = ms.slice(0, -1)
   const menor = esMenor(p, ultima.fecha)
 
   // Una pesada sin cinta no borra la figura: se dibujan los perímetros de la última medición que tenga alguno.
@@ -136,24 +171,32 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     tono: menor ? 'neutro' : tonoDe('pesoKg', cambioPeso, tendencia, p),
     nota: null,
     ultimaPesada: ultima.pesoKg,
+    clasificacion: null,
+    referencia: null,
   }
 
   const otras: TarjetaFicha[] = CLAVES.flatMap((clave) => {
-    const actual = dato(p, ultima, clave)
-    if (!actual) return []
-    // La comparación solo vale contra un dato del mismo origen (medido o estimado).
-    const primera = anteriores.find((m) => dato(p, m, clave)?.estimada === actual.estimada)
-    const cambio = primera ? diferencia(actual.valor, dato(p, primera, clave)!.valor) : null
+    // Cada medida sale de la última medición que la tenga: una pesada sola no borra la grasa visceral del informe anterior.
+    const i = ms.findLastIndex((m) => dato(p, m, clave) != null)
+    if (i < 0) return []
+    const fuente = ms[i]
+    const actual = dato(p, fuente, clave)!
+    // La comparación es con la medición anterior que tenga el dato, y solo del mismo origen (medido o estimado).
+    const previa = ms.slice(0, i).reverse().find((m) => dato(p, m, clave)?.estimada === actual.estimada)
+    const cambio = previa ? diferencia(actual.valor, dato(p, previa, clave)!.valor) : null
     const tono = menor ? 'neutro' : tonoDe(clave, cambio, actual.valor, p)
+    const medidaConEstado = CON_ESTADO[clave]
     return [
       {
         clave,
         valor: actual.valor,
         estimada: actual.estimada,
         cambio,
-        desde: cambio == null ? null : primera!.fecha,
+        desde: cambio == null ? null : previa!.fecha,
         tono,
         nota: clave === 'grasaVisceral' && tono === 'atencion' ? 'Elevada' : null,
+        clasificacion: medidaConEstado ? clasificar(medidaConEstado, actual.valor, p, fuente.fecha) : null,
+        referencia: referencia(clave, actual.valor, fuente),
       },
     ]
   })

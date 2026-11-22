@@ -72,14 +72,16 @@ describe('tarjetas', () => {
     expect(tarjeta(resumenFicha(p, [m('2026-11-01', { grasaVisceral: 10 })]), 'grasaVisceral')).toMatchObject({ tono: 'atencion', nota: 'Elevada' })
     expect(tarjeta(resumenFicha(p, [m('2026-11-01', { grasaVisceral: 9 })]), 'grasaVisceral')).toMatchObject({ tono: 'neutro', nota: null })
   })
-  test('solo hay tarjetas para los datos presentes en la última medición', () => {
-    expect(resumenFicha(p, [m('2026-11-01', { musculoKg: 35 }), m('2026-11-08')]).tarjetas.map((t) => t.clave)).toEqual(['pesoKg'])
+  test('una medida que solo está en una medición anterior se sigue mostrando', () => {
+    const t = tarjeta(resumenFicha(p, [m('2026-11-01', { musculoKg: 35 }), m('2026-11-08')]), 'musculoKg')
+    expect(t).toMatchObject({ valor: 35, cambio: null })
   })
   test('en un menor de edad nada se colorea', () => {
     const nino = persona({ fechaNacimiento: '2020-06-01', estaturaCm: 115, objetivo: 'bajar_grasa' })
     const r = resumenFicha(nino, [m('2026-11-01', { pesoKg: 20, grasaVisceral: 12 }), m('2026-11-08', { pesoKg: 21, grasaVisceral: 12 })])
-    expect(r.tarjetas.map((t) => t.tono)).toEqual(['neutro', 'neutro'])
+    expect(r.tarjetas.every((t) => t.tono === 'neutro')).toBe(true)
     expect(r.tarjetas.every((t) => t.nota === null)).toBe(true)
+    expect(r.tarjetas.every((t) => t.clasificacion === null)).toBe(true)
   })
 })
 
@@ -149,5 +151,40 @@ describe('peso de tendencia y meta', () => {
   })
   test('la proyección usa la fecha de hoy', () => {
     expect(resumenFicha(persona({ metaPesoKg: 95 }), subida, { hoy: '2027-03-01' }).meta?.estado).toBe('sin_datos')
+  })
+})
+
+describe('todas las medidas de la báscula', () => {
+  const daniela = persona({ estaturaCm: 175, fechaNacimiento: '1990-01-01' })
+  const completa = m('2026-11-17', {
+    pesoKg: 96, grasaPct: 29, grasaVisceral: 16, musculoKg: 35, aguaPct: 49, musculoTotalKg: 64, masaOseaKg: 3.5,
+    proteinaPct: 15, metabolismoBasalKcal: 1850, edadCorporal: 30, frecuenciaCardiacaLpm: 80,
+  })
+  test('las tarjetas salen en el orden del diseño, con estado y referencias', () => {
+    const r = resumenFicha(daniela, [completa])
+    expect(r.tarjetas.map((t) => t.clave)).toEqual([
+      'pesoKg', 'grasaPct', 'grasaVisceral', 'musculoKg', 'aguaPct', 'imc', 'grasaKg', 'pesoSinGrasaKg',
+      'musculoTotalKg', 'proteinaPct', 'masaOseaKg', 'metabolismoBasalKcal', 'edadCorporal', 'frecuenciaCardiacaLpm',
+    ])
+    expect(tarjeta(r, 'grasaPct')?.clasificacion?.estado).toBe('muy')
+    expect(tarjeta(r, 'grasaVisceral')?.clasificacion?.estado).toBe('muy')
+    expect(tarjeta(r, 'aguaPct')?.clasificacion?.estado).toBe('bajo')
+    expect(tarjeta(r, 'imc')).toMatchObject({ valor: 31.3 })
+    expect(tarjeta(r, 'imc')?.clasificacion?.nombre).toBe('Obesidad')
+    expect(tarjeta(r, 'grasaKg')).toMatchObject({ valor: 27.8, referencia: 'masa grasa' })
+    expect(tarjeta(r, 'pesoSinGrasaKg')).toMatchObject({ valor: 68.2, referencia: 'masa magra' })
+    expect(tarjeta(r, 'musculoTotalKg')).toMatchObject({ referencia: '66,7 % del peso' })
+    expect(tarjeta(r, 'proteinaPct')).toMatchObject({ referencia: '14,4 kg' })
+    expect(tarjeta(r, 'masaOseaKg')).toMatchObject({ referencia: '3,6 % del peso' })
+    expect(tarjeta(r, 'edadCorporal')?.clasificacion).toBeNull()
+    expect(tarjeta(r, 'musculoKg')?.clasificacion).toBeNull()
+  })
+  test('el cambio es frente a la medición anterior que tenga esa medida', () => {
+    const r = resumenFicha(daniela, [m('2026-11-01', { pesoKg: 97, masaOseaKg: 3.4 }), m('2026-11-08', { pesoKg: 96.5 }), completa])
+    expect(tarjeta(r, 'masaOseaKg')).toMatchObject({ cambio: 0.1, desde: '2026-11-01' })
+  })
+  test('a un menor no se le asigna estado en ninguna tarjeta', () => {
+    const r = resumenFicha(persona({ fechaNacimiento: '2015-01-01', estaturaCm: 140 }), [completa])
+    expect(r.tarjetas.every((t) => t.clasificacion === null)).toBe(true)
   })
 })
