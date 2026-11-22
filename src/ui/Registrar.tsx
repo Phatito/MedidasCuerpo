@@ -14,8 +14,6 @@ interface Props {
   onBorrador: (b: Borrador | null) => void
   /** Volver a la ficha con un aviso. */
   onListo: (aviso: string) => void
-  /** Si hay algo escrito sin guardar para esta persona. */
-  haySinGuardar: () => boolean
 }
 
 type Modo = 'escribir' | 'captura' | 'archivo'
@@ -25,12 +23,15 @@ const MODOS: { id: Modo; nombre: string; detalle: string }[] = [
   { id: 'archivo', nombre: 'Archivo', detalle: 'CSV o Excel con varias semanas' },
 ]
 
-export function Registrar({ persona, fecha, borrador, onBorrador, onListo, haySinGuardar }: Props) {
+export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Props) {
   const [modo, setModo] = useState<Modo>('escribir')
   const personas = useLiveQuery(listarPersonas, [], [] as Persona[])
   const pestanas = useRef<HTMLDivElement>(null)
   const [lectura, setLectura] = useState<{ id: number; datos: LecturaCaptura; imagenUrl: string } | null>(null)
   const [pegada, setPegada] = useState<{ id: number; imagen: Blob } | null>(null)
+  // Lo que el formulario sabe de sí mismo: si tiene algo sin guardar y cuándo se escribió por última vez.
+  const formulario = useRef({ sucio: false, editadoEn: 0 })
+  const leyendo = useRef(false)
 
   // La miniatura de la captura vive solo en memoria mientras Registrar está abierto.
   useEffect(() => () => void (lectura && URL.revokeObjectURL(lectura.imagenUrl)), [lectura])
@@ -39,7 +40,10 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo, haySi
   useEffect(() => {
     function alPegar(e: ClipboardEvent) {
       const archivo = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith('image/'))
-      if (!archivo) return
+      if (!archivo || leyendo.current) return
+      // Pegar texto en un campo sigue funcionando aunque el portapapeles traiga además una imagen.
+      const destino = e.target
+      if (destino instanceof Element && destino.closest('input, textarea') && e.clipboardData?.types.includes('text/plain')) return
       e.preventDefault()
       setModo('captura')
       setPegada((p) => ({ id: (p?.id ?? 0) + 1, imagen: archivo }))
@@ -49,7 +53,7 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo, haySi
   }, [])
 
   function puedeLeer() {
-    return !haySinGuardar() || window.confirm('Tienes cambios sin guardar en Medir. ¿Reemplazarlos con la captura?')
+    return !formulario.current.sucio || window.confirm('Tienes cambios sin guardar en Medir. ¿Reemplazarlos con la captura?')
   }
 
   // Flechas izquierda y derecha mueven entre pestañas, como en cualquier lista de pestañas.
@@ -94,13 +98,17 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo, haySi
           onVerEvolucion={() => onListo('')}
           onGuardada={() => onListo('Medición guardada.')}
           lectura={lectura ?? undefined}
+          estado={formulario}
         />
       </div>
       <div role="tabpanel" id="panel-captura" aria-labelledby="pestana-captura" hidden={modo !== 'captura'}>
         <LeerCaptura
           puedeLeer={puedeLeer}
           pegada={pegada}
-          onLectura={(datos, imagen) => {
+          onLeyendo={(activo) => (leyendo.current = activo)}
+          onLectura={(datos, imagen, inicio) => {
+            // Si se escribió algo mientras se leía, no se pisa sin preguntar.
+            if (formulario.current.editadoEn > inicio && !window.confirm('Escribiste en el formulario mientras se leía la captura. ¿Reemplazarlo con la captura?')) return
             setLectura((l) => ({ id: (l?.id ?? 0) + 1, datos, imagenUrl: URL.createObjectURL(imagen) }))
             setModo('escribir')
           }}

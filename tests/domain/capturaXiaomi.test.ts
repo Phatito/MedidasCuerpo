@@ -136,3 +136,13 @@ describe('leerCapturaXiaomi', () => {
     expect(leerCapturaXiaomi([[p('Hola', 20, 10), p('mundo', 80, 10)]], ANCHO)).toEqual({ fecha: null, hora: null, valores: {}, revisar: [] })
   })
 })
+
+describe('fecha de la captura', () => {
+  const conFecha = (f: string) => leerCapturaXiaomi([[p(f, 20, 40), p('07:45', 140, 40)], ...fila(700, ['9,0', 'Calificación de grasa visceral'], null)], ANCHO)
+  test('una fecha imposible no se usa', () => {
+    expect(conFecha('31/02/2026').fecha).toBeNull()
+    expect(conFecha('29/02/2025').fecha).toBeNull()
+    expect(conFecha('15/13/2026').fecha).toBeNull()
+  })
+  test('una fecha válida sí', () => expect(conFecha('29/02/2028').fecha).toBe('2028-02-29'))
+})

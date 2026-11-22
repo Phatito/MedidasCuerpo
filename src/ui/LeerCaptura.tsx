@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { leerCapturaXiaomi, type LecturaCaptura } from '../domain/capturaXiaomi'
-import { reconocerImagen } from './ocr'
+import { ImagenIlegible, reconocerImagen } from './ocr'
 
 interface Props {
   /** Antes de leer: devuelve false si el usuario no quiere reemplazar lo que tiene sin guardar. */
   puedeLeer: () => boolean
-  onLectura: (l: LecturaCaptura, imagen: Blob) => void
+  /** `inicio`: cuándo empezó la lectura, para saber si se escribió algo mientras tanto. */
+  onLectura: (l: LecturaCaptura, imagen: Blob, inicio: number) => void
+  /** Avisa cuando empieza y termina una lectura (Registrar ignora lo pegado mientras tanto). */
+  onLeyendo?: (activo: boolean) => void
   /** Imagen pegada con Ctrl+V desde Registrar. */
   pegada?: { id: number; imagen: Blob } | null
 }
@@ -21,7 +24,7 @@ function lectorYaUsado(): boolean {
   }
 }
 
-export function LeerCaptura({ puedeLeer, onLectura, pegada }: Props) {
+export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) {
   const [leyendo, setLeyendo] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [clave, setClave] = useState(0)
@@ -29,9 +32,15 @@ export function LeerCaptura({ puedeLeer, onLectura, pegada }: Props) {
   const ultimaPegada = useRef<number | null>(null)
 
   async function leer(imagen: Blob) {
-    if (!puedeLeer()) return
+    if (!puedeLeer()) {
+      // Así se puede volver a elegir el mismo archivo.
+      setClave((k) => k + 1)
+      return
+    }
+    const inicio = Date.now()
     setError(null)
     setLeyendo(0)
+    onLeyendo?.(true)
     try {
       const { lineas, ancho } = await reconocerImagen(imagen, (f) => vigente.current && setLeyendo(f))
       try {
@@ -42,10 +51,12 @@ export function LeerCaptura({ puedeLeer, onLectura, pegada }: Props) {
       if (!vigente.current) return
       const lectura = leerCapturaXiaomi(lineas, ancho)
       if (Object.keys(lectura.valores).length === 0) setError(ERROR)
-      else onLectura(lectura, imagen)
-    } catch {
-      if (vigente.current) setError('No se pudo cargar el lector de capturas. Revisa tu conexión la primera vez que lo uses e inténtalo de nuevo.')
+      else onLectura(lectura, imagen, inicio)
+    } catch (e) {
+      if (!vigente.current) return
+      setError(e instanceof ImagenIlegible ? ERROR : 'No se pudo cargar el lector de capturas. Revisa tu conexión la primera vez que lo uses e inténtalo de nuevo.')
     } finally {
+      onLeyendo?.(false)
       if (vigente.current) {
         setLeyendo(null)
         setClave((k) => k + 1)
@@ -80,10 +91,14 @@ export function LeerCaptura({ puedeLeer, onLectura, pegada }: Props) {
         </label>
         <span className="muted small">o pega la imagen (Ctrl+V)</span>
       </div>
+      {/* Región de estado siempre presente: anuncia el inicio de la lectura una vez, no cada porcentaje. */}
+      <p role="status" className={leyendo != null ? '' : 'sr-only'}>
+        {leyendo != null ? 'Leyendo la captura…' : ''}
+      </p>
       {leyendo != null && (
-        <div className="stack" role="status">
-          <p>Leyendo la captura… {Math.round(leyendo * 100)} %</p>
+        <div className="stack">
           <progress max={1} value={leyendo} aria-label="Avance de la lectura" />
+          <span className="muted small num" aria-hidden="true">{Math.round(leyendo * 100)} %</span>
           {!lectorYaUsado() && <p className="muted small">La primera vez descarga el lector, unos 6 MB.</p>}
         </div>
       )}

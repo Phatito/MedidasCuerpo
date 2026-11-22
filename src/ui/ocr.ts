@@ -1,14 +1,29 @@
 import type { LineaOcr } from '../domain/capturaXiaomi'
 import { debeInvertir, tamanoOcr } from '../domain/imagen'
 
+declare const __VERSION_LECTOR__: string
+
+/** La imagen no se pudo abrir (formato no compatible, archivo dañado). */
+export class ImagenIlegible extends Error {
+  constructor() {
+    super('imagen ilegible')
+    this.name = 'ImagenIlegible'
+  }
+}
+
 /**
  * Lee el texto de una imagen en este mismo navegador: la imagen nunca sale del dispositivo.
  * El lector (tesseract.js) se carga solo al usarlo, desde los archivos de `ocr/` del propio sitio.
  */
 export async function reconocerImagen(imagen: Blob, alProgreso?: (fraccion: number) => void): Promise<{ lineas: LineaOcr[]; ancho: number }> {
-  const lienzo = await preparar(imagen)
+  let lienzo: HTMLCanvasElement
+  try {
+    lienzo = await preparar(imagen)
+  } catch {
+    throw new ImagenIlegible()
+  }
   const { createWorker } = await import('tesseract.js')
-  const base = `${import.meta.env.BASE_URL}ocr`
+  const base = `${import.meta.env.BASE_URL}ocr/${__VERSION_LECTOR__}`
   const worker = await createWorker('spa', 1, {
     workerPath: `${base}/worker.min.js`,
     corePath: base,

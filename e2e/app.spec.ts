@@ -913,7 +913,10 @@ test('editar una medición antigua no borra el borrador de la nueva', async ({ p
 // ---------- Lector de capturas ----------
 
 test('el lector se sirve desde el propio sitio y queda fuera del precache', async ({ request }) => {
-  for (const archivo of ['ocr/worker.min.js', 'ocr/tesseract-core-simd-lstm.wasm.js', 'ocr/tesseract-core-lstm.wasm.js', 'ocr/spa.traineddata.gz']) {
+  // Los archivos van en una carpeta con la versión del lector: al actualizarlo, la caché vieja no se mezcla con la nueva.
+  const version = JSON.parse(await readFile(fileURLToPath(new URL('../node_modules/tesseract.js/package.json', import.meta.url)), 'utf8')).version
+  for (const nombre of ['worker.min.js', 'tesseract-core-simd-lstm.wasm.js', 'tesseract-core-lstm.wasm.js', 'spa.traineddata.gz']) {
+    const archivo = `ocr/${version}/${nombre}`
     const r = await request.get(archivo)
     expect(r.status(), archivo).toBe(200)
     // No la página de la app (el servidor responde con ella a cualquier ruta desconocida).
@@ -1026,4 +1029,67 @@ test('pegar la captura con Ctrl+V la lee', async ({ page }) => {
   }, bytes)
   await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('82,4')
+})
+
+// ---------- Revisión final de la captura ----------
+
+test('al editar una fecha pasada, la captura pide confirmar antes de reemplazar lo escrito', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await ir(page, 'Historial')
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await page.getByLabel('Cintura (cm)').fill('86')
+  let pregunto = false
+  page.once('dialog', (d) => {
+    pregunto = true
+    void d.dismiss()
+  })
+  await leerCaptura(page, CAPTURA)
+  await page.getByRole('tab', { name: /Escribir/ }).click()
+  await expect(page.getByLabel('Cintura (cm)')).toHaveValue('86')
+  expect(pregunto).toBe(true)
+})
+
+test('lo escrito mientras se lee la captura no se pierde sin preguntar', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA)
+  await page.getByRole('tab', { name: /Escribir/ }).click()
+  await page.getByLabel('Peso (kg)').fill('70')
+  page.once('dialog', (d) => void d.dismiss())
+  await expect(page.getByText('Leyendo la captura')).toHaveCount(0, { timeout: 90_000 })
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('70')
+})
+
+test('tras leer, el foco va al resultado y cada campo dice si hay que revisarlo', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA)
+  await expect(page.getByRole('heading', { name: 'Captura leída' })).toBeFocused({ timeout: 90_000 })
+  await expect(page.getByLabel('Músculo esquelético (kg)')).toHaveAccessibleDescription(/revisa con la imagen/)
+  // Al corregir un campo a mano, deja de decir que viene de la captura.
+  await page.getByLabel('Peso (kg)').fill('80')
+  await expect(marca(page, 'Peso (kg)')).toHaveCount(0)
+})
+
+test('una imagen que el navegador no puede abrir muestra el error de imagen', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
+  await page.getByLabel('Elegir la captura de Xiaomi Home').setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: Buffer.from('esto no es una imagen') })
+  await expect(page.getByText(/No pude leer esta imagen/)).toBeVisible()
+})
+
+test('tras cancelar la confirmación se puede elegir el mismo archivo otra vez', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  page.once('dialog', (d) => void d.dismiss())
+  await leerCaptura(page, CAPTURA)
+  page.once('dialog', (d) => void d.accept())
+  await page.getByLabel('Elegir la captura de Xiaomi Home').setInputFiles(CAPTURA)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
 })

@@ -161,6 +161,10 @@ export function leerCapturaXiaomi(lineasCrudas: LineaOcr[], anchoImagen: number)
   for (const l of lineas) {
     const r = /(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(l.map((w) => w.texto).join(' '))
     if (r) {
+      // Solo una fecha que existe: el lector puede confundir cifras ("31/02").
+      const [d, m, a] = [Number(r[1]), Number(r[2]), Number(r[3])]
+      const f = new Date(Date.UTC(a, m - 1, d))
+      if (f.getUTCFullYear() !== a || f.getUTCMonth() !== m - 1 || f.getUTCDate() !== d) break
       fecha = `${r[3]}-${r[2]}-${r[1]}`
       hora = r[4] ? `${r[4].padStart(2, '0')}:${r[5]}` : null
       break

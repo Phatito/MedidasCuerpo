@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type MutableRefObject } from 'react'
 import { fechaLegible, formatear, hoyIso, idMedicion, parseNumero } from '../domain/numbers'
 import { CAMPOS_BASCULA, CAMPOS_BASCULA_EXTRA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, CAMPOS_SIN_LADO, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
 import type { CampoCaptura, LecturaCaptura } from '../domain/capturaXiaomi'
@@ -23,13 +23,15 @@ interface Props {
   onGuardada?: (fecha: string) => void
   /** Lo leído de una captura de Xiaomi Home; cada lectura nueva trae otro `id`. */
   lectura?: { id: number; datos: LecturaCaptura; imagenUrl: string }
+  /** Registrar lee aquí si hay algo sin guardar y cuándo se escribió por última vez. */
+  estado?: MutableRefObject<{ sucio: boolean; editadoEn: number }>
 }
 
 type Textos = Record<CampoNumerico, string>
 const VACIO = Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, ''])) as Textos
 const aTexto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada, lectura }: Props) {
+export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada, lectura, estado }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [fecha, setFecha] = useState(fechaInicial ?? borrador?.fecha ?? hoyIso())
   const [textos, setTextos] = useState<Textos>(borrador?.textos ?? VACIO)
@@ -41,6 +43,21 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
   // Marcas de los campos que vienen de una captura: comprobados o para revisar con la imagen.
   const [marcas, setMarcas] = useState<Partial<Record<CampoNumerico, 'ok' | 'revisar'>>>({})
   const [ampliada, setAmpliada] = useState(false)
+  const tituloLectura = useRef<HTMLHeadingElement>(null)
+  const [enfocarLectura, setEnfocarLectura] = useState(0)
+
+  // Cada vez que la persona escribe algo.
+  function editado() {
+    sucio.current = true
+    if (estado) estado.current.editadoEn = Date.now()
+  }
+  useEffect(() => {
+    if (estado) estado.current.sucio = sucio.current
+  })
+  // Tras aplicar una captura, el foco va al resultado para que se anuncie.
+  useEffect(() => {
+    if (enfocarLectura) tituloLectura.current?.focus()
+  }, [enfocarLectura])
   // "Sucio": la persona escribió algo que aún no se guarda. Mientras lo esté, nada reemplaza lo escrito.
   const sucio = useRef(borrador != null)
   const diaVisto = useRef(hoyIso())
@@ -81,6 +98,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
     const notaGuardada = guardada?.nota ?? ''
     setNota(notaGuardada || (datos.hora ? `Xiaomi Home ${datos.hora}` : ''))
     setMarcas(Object.fromEntries(leidos.map(([c]) => [c, datos.revisar.includes(c) ? 'revisar' : 'ok'])))
+    setEnfocarLectura((n) => n + 1)
     setErrores({})
     setGuardada(false)
     setRecuperado(false)
@@ -159,14 +177,20 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
           inputMode="decimal"
           autoComplete="off"
           value={textos[c]}
+          aria-describedby={marcas[c] ? `marca-${c}` : undefined}
           onChange={(e) => {
-            sucio.current = true
+            editado()
             setTextos({ ...textos, [c]: e.target.value })
             setGuardada(false)
+            // Corregido a mano: ya no es "de la captura".
+            if (marcas[c]) {
+              const { [c]: _quitada, ...resto } = marcas
+              setMarcas(resto)
+            }
           }}
         />
         {marcas[c] && (
-          <span className={`marca ${marcas[c] === 'revisar' ? 'revisar' : 'desde-captura'}`}>
+          <span id={`marca-${c}`} className={`marca ${marcas[c] === 'revisar' ? 'revisar' : 'desde-captura'}`}>
             {marcas[c] === 'revisar' ? 'revisa con la imagen' : 'de la captura'}
           </span>
         )}
@@ -186,12 +210,13 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
   return (
     <form className="stack" onSubmit={enviar} noValidate>
       {recuperado && <p className="notice" role="status">Recuperamos lo que habías escrito sin guardar.</p>}
-      {lectura && Object.keys(marcas).length > 0 && (
+      {lectura && enfocarLectura > 0 && (
         <div className="card captura-leida">
-          <button type="button" className={`captura-mini ${ampliada ? 'ampliada' : ''}`} onClick={() => setAmpliada(!ampliada)} aria-pressed={ampliada} aria-label={ampliada ? 'Achicar la captura' : 'Ampliar la captura'}>
+          <button type="button" className={`captura-mini ${ampliada ? 'ampliada' : ''}`} onClick={() => setAmpliada(!ampliada)} aria-pressed={ampliada} aria-label="Ampliar la captura">
             <img src={lectura.imagenUrl} alt="Tu captura" />
           </button>
           <div className="stack">
+            <h3 ref={tituloLectura} tabIndex={-1}>Captura leída</h3>
             <p className="notice info">Revisa los valores y pulsa Guardar.</p>
             <p className="muted small">
               Los campos marcados <span className="marca desde-captura">de la captura</span> cuadran con otras cifras del mismo informe; los marcados{' '}
@@ -204,7 +229,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
         <div className="form">
           <div className="field">
             <label htmlFor="medir-fecha">Fecha</label>
-            <input id="medir-fecha" type="date" max={hoyIso()} value={fecha} onChange={(e) => { setFecha(e.target.value); setGuardada(false) }} />
+            <input id="medir-fecha" type="date" max={hoyIso()} value={fecha} onChange={(e) => { if (estado) estado.current.editadoEn = Date.now(); setFecha(e.target.value); setGuardada(false) }} />
             {errores.fecha && <span className="error">{errores.fecha}</span>}
           </div>
         </div>
@@ -246,7 +271,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
       <div className="card">
         <div className="field">
           <label htmlFor="medir-nota">Nota (opcional)</label>
-          <input id="medir-nota" value={nota} onChange={(e) => { sucio.current = true; setNota(e.target.value) }} />
+          <input id="medir-nota" value={nota} onChange={(e) => { editado(); setNota(e.target.value) }} />
         </div>
       </div>
       <div className="row">

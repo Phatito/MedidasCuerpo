@@ -189,7 +189,6 @@ export function App() {
                 fecha={vista.fecha}
                 borrador={borradores.current.get(personaDeRuta.id)}
                 onBorrador={(b) => (b ? borradores.current.set(personaDeRuta.id, b) : borradores.current.delete(personaDeRuta.id))}
-                haySinGuardar={() => borradores.current.has(personaDeRuta.id)}
                 onListo={(texto) => {
                   const ficha = fichaDe(personaDeRuta.id)
                   // Si se vino desde la ficha, se vuelve atrás; si no (por ejemplo desde Todas las mediciones), se va a la ficha.
