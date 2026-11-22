@@ -219,7 +219,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
   .hero { order: 1; } .col-der > * { order: 2; } .figura { order: 3; }
 }
 .ficha .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: 12px; }
 .tile { background: var(--card); border: 1px solid var(--edge); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
 .tile .k { font-size: 0.78rem; font-weight: 600; color: var(--dim); }
 .tile .v { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-variant-numeric: tabular-nums; }

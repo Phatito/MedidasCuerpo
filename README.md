@@ -26,31 +26,50 @@ misma pestaña elige el archivo en "Archivo de respaldo".
 
 ## Qué hace
 
-- **Familia:** una tarjeta por persona, con aviso de a quién le toca medirse
-  (7 días o más desde su última medición).
-- **Ficha:** la figura del cuerpo de la persona con cada perímetro sobre su
-  zona y su cambio reciente, más sus números principales, la tendencia del
-  peso y la interpretación más importante.
-- **Medir:** peso (obligatorio) y, opcionalmente, % de grasa, masa muscular,
-  grasa visceral, % de agua y perímetros, con brazo y muslo de cada lado por
-  separado y una guía de dónde tomar cada medida.
+No hay pestañas: la app abre en la **ficha de la persona principal** y desde
+ahí se llega a todo.
+
+- **Selector de perfil** (arriba): cambia de persona, avisa a quién le toca
+  medirse (7 días o más desde su última medición), y lleva a agregar personas
+  y a Familia. La **persona principal** (★) es la que se abre al iniciar; se
+  elige en Familia o en Ajustes y datos.
+- **Ficha:** a la izquierda, el peso de tendencia, el IMC y la meta, el botón
+  **+ Registrar medición** y la figura del cuerpo con cada perímetro sobre su
+  zona. A la derecha, el gráfico (peso, grasa, músculo, cintura y "Más…", en 3
+  meses, 1 año o todo), una tarjeta por cada medida de la báscula y "Qué
+  indican tus cambios".
+- **Estados en color:** IMC (OMS), % de grasa por sexo y edad (Gallagher y
+  otros, 2000), grasa visceral, agua y proteína (escala habitual de las
+  básculas domésticas) muestran Bajo, Estándar, Alto o Muy alto, con una barra
+  de rango. Músculo, hueso y metabolismo no tienen un rango que sirva para
+  todos y solo muestran su cambio. A menores de 18 años no se les asigna
+  estado.
+- **Medidas de la báscula:** peso, % de grasa, músculo esquelético, grasa
+  visceral, % de agua y, en "Más de la báscula", masa muscular total, masa
+  ósea, proteína, metabolismo basal, edad corporal y frecuencia cardíaca, como
+  en el informe de básculas como la Xiaomi S400. La grasa en kg, el peso sin
+  grasa y el IMC se calculan solos.
+- **Registrar medición:** pantalla aparte con **← Volver a la ficha** y tres
+  formas de cargar: escribir, captura de Xiaomi Home (próximamente) y archivo
+  CSV, sin pasar por Ajustes. Brazo y muslo van por lado y hay una guía de dónde
+  tomar cada medida.
 - **Peso de tendencia:** un promedio que da más importancia a las pesadas
   recientes y suaviza las subidas y bajadas de un día. Es el número principal
-  del peso en la Ficha y la línea celeste en los gráficos de peso.
-- **Meta:** con un peso objetivo en la persona, la Ficha muestra cuánto falta y
+  del peso y la línea celeste del gráfico de peso.
+- **Meta:** con un peso objetivo en la persona, la ficha muestra cuánto falta y
   la fecha estimada al ritmo de las últimas cuatro semanas.
-- **Evolución:** gráfico por métrica con promedio de las últimas 4 mediciones e
-  interpretación de los cambios.
-- **Historial:** tabla de mediciones, con edición y eliminación.
-- **Datos:** importar y exportar CSV, respaldo, y recordatorio semanal como
-  evento de calendario.
+- **Todas las mediciones:** tabla con edición y eliminación.
+- **Ajustes y datos** (⚙): persona principal, importar y exportar CSV,
+  respaldo, y recordatorio semanal como evento de calendario.
+- El botón Atrás del navegador funciona en todas las pantallas.
 
 ### Pasar una hoja escrita a mano
 
 La importación reconoce los nombres habituales de una hoja de entrenador:
 `Fecha`, `Peso`, `Torso`, `Brazo izquierdo`, `Brazo derecho`, `Cintura`,
 `Cadera`, `Pierna izquierda`, `Pierna derecha`. Con las cifras en un archivo CSV
-con esas columnas (separado por punto y coma), se cargan en Datos → Importar.
+con esas columnas (separado por punto y coma), se cargan en Registrar medición →
+Archivo (o en Ajustes y datos → Importar).
 
 Las interpretaciones son orientación general, no diagnóstico médico. El % de
 grasa y la grasa visceral de las básculas domésticas son estimaciones: lo que
