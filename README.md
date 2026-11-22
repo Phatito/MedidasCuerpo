@@ -50,8 +50,8 @@ ahí se llega a todo.
   en el informe de básculas como la Xiaomi S400. La grasa en kg, el peso sin
   grasa y el IMC se calculan solos.
 - **Registrar medición:** pantalla aparte con **← Volver a la ficha** y tres
-  formas de cargar: escribir, captura de Xiaomi Home (próximamente) y archivo
-  CSV, sin pasar por Ajustes. Brazo y muslo van por lado y hay una guía de dónde
+  formas de cargar: escribir, leer una captura de Xiaomi Home y archivo CSV,
+  sin pasar por Ajustes. Brazo y muslo van por lado y hay una guía de dónde
   tomar cada medida.
 - **Peso de tendencia:** un promedio que da más importancia a las pesadas
   recientes y suaviza las subidas y bajadas de un día. Es el número principal
@@ -62,6 +62,29 @@ ahí se llega a todo.
 - **Ajustes y datos** (⚙): persona principal, importar y exportar CSV,
   respaldo, y recordatorio semanal como evento de calendario.
 - El botón Atrás del navegador funciona en todas las pantallas.
+
+### Leer la captura de Xiaomi Home
+
+Para la báscula Xiaomi Body Composition Scale S400 (o cualquier informe de
+Xiaomi Home en español):
+
+1. En Xiaomi Home abre el informe de la pesada y haz una **captura de pantalla
+   completa**, sin recortar.
+2. Pásala al computador **sin comprimir**: AirDrop, iCloud Drive, o como
+   archivo adjunto por correo. Las apps de mensajería la reducen y así ya no se
+   puede leer.
+3. En **Registrar medición → Captura de Xiaomi Home**, elige la imagen o pégala
+   con Ctrl+V.
+4. La app rellena la fecha, el peso, la grasa, el agua, el músculo esquelético,
+   la grasa visceral, la masa muscular total, la masa ósea, la proteína, el
+   metabolismo basal, la edad corporal y la frecuencia cardíaca. Cada campo dice
+   **"de la captura"** si cuadra con otras cifras del mismo informe, o **"revisa
+   con la imagen"** si no se pudo comprobar. Compara con la miniatura y pulsa
+   **Guardar medición**: nada se guarda antes.
+
+La imagen se lee en tu propio navegador y nunca sale del computador. La primera
+vez se descarga el lector desde este mismo sitio (unos 6 MB); después funciona
+sin conexión. Si ese día ya tenías perímetros guardados, se conservan.
 
 ### Pasar una hoja escrita a mano
 
