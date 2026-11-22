@@ -43,7 +43,7 @@ h4 { font-size: 1.02rem; font-weight: 700; }
 
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .top { border-bottom: 1px solid var(--edge); background: var(--bg); }
-.top .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 14px; }
+.top .wrap { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; padding-block: 12px; }
 .brand {
   display: flex; align-items: center; gap: 10px; margin-right: auto; min-height: 44px; padding: 0; border: 0; background: none;
   color: var(--fg); font: inherit; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; cursor: pointer;
@@ -54,7 +54,7 @@ h4 { font-size: 1.02rem; font-weight: 700; }
   border: 1px solid var(--edge); background: transparent; color: var(--fg);
 }
 .icon-btn:hover { background: var(--soft); }
-.perfil { position: relative; min-width: 0; }
+.perfil { position: relative; min-width: 0; flex: 0 1 auto; }
 .perfil-boton {
   display: flex; align-items: center; gap: 10px; min-height: 44px; max-width: 100%; padding: 6px 14px 6px 6px; border-radius: 999px;
   border: 1px solid var(--edge); background: var(--card); color: var(--fg); font: inherit; font-weight: 700; cursor: pointer;
@@ -264,3 +264,10 @@ details.guide b { color: var(--fg); font-weight: 600; }
 }
 .estrella[aria-pressed='true'] { color: var(--warn); border-color: var(--warn); }
 .estrella:hover { border-color: var(--dim); }
+
+/* Revisión: todo lo que se toca mide al menos 44 px. */
+.btn.link { min-height: 44px; display: inline-flex; align-items: center; }
+details.guide > summary { min-height: 44px; padding-block: 11px; cursor: pointer; }
+.aviso-app { margin-top: 16px; }
+.tile .fecha-vieja { font-weight: 600; }
+h2[tabindex='-1']:focus { outline: none; }

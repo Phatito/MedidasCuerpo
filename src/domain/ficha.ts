@@ -65,6 +65,8 @@ export interface TarjetaFicha {
   clasificacion: Clasificacion | null
   /** Una línea de contexto, por ejemplo "65,1 % del peso". */
   referencia: string | null
+  /** Fecha de la medición de donde sale el valor. */
+  fecha: string
 }
 
 export interface ResumenFicha {
@@ -173,6 +175,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     ultimaPesada: ultima.pesoKg,
     clasificacion: null,
     referencia: null,
+    fecha: ultima.fecha,
   }
 
   const otras: TarjetaFicha[] = CLAVES.flatMap((clave) => {
@@ -197,6 +200,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
         nota: clave === 'grasaVisceral' && tono === 'atencion' ? 'Elevada' : null,
         clasificacion: medidaConEstado ? clasificar(medidaConEstado, actual.valor, p, fuente.fecha) : null,
         referencia: referencia(clave, actual.valor, fuente),
+        fecha: fuente.fecha,
       },
     ]
   })

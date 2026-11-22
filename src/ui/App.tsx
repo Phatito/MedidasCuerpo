@@ -64,6 +64,34 @@ export function App() {
 
   // La pantalla desde la que se llegó a la actual (dentro de la app), para que Guardar sepa adónde volver.
   const anterior = useRef<string | null>(null)
+  const principal_ = useRef<HTMLElement>(null)
+  const primeraVista = useRef(true)
+  const claveVista = destino || !cargado ? null : escribirRuta(ruta)
+
+  // Al cambiar de pantalla, el foco va a su título y el título de la pestaña del navegador cambia:
+  // así quien usa teclado o lector de pantalla sabe que la página cambió.
+  useEffect(() => {
+    if (!claveVista) return
+    const enfocar = !primeraVista.current
+    primeraVista.current = false
+    // La pantalla puede tardar un instante en mostrar su título (mientras carga sus datos): se espera hasta un segundo.
+    let intentos = 0
+    let marco = 0
+    const buscar = () => {
+      const h2 = principal_.current?.querySelector('h2')
+      if (!h2) {
+        if (++intentos < 60) marco = requestAnimationFrame(buscar)
+        return
+      }
+      document.title = `${h2.textContent} · MedidasCuerpo`
+      if (enfocar) {
+        h2.setAttribute('tabindex', '-1')
+        h2.focus()
+      }
+    }
+    buscar()
+    return () => cancelAnimationFrame(marco)
+  }, [claveVista])
 
   function navegar(r: Ruta) {
     setAviso(null)
@@ -88,6 +116,7 @@ export function App() {
   const fichaDe = (id: string): Ruta => ({ pantalla: 'ficha', personaId: id })
   const alInicio: Ruta = principal ? fichaDe(principal.id) : { pantalla: 'familia' }
   const vista = destino ? null : ruta
+  const avisoVisible = !!(aviso && vista && aviso.hash === escribirRuta(vista))
 
   return (
     <>
@@ -119,7 +148,11 @@ export function App() {
           </button>
         </div>
       </header>
-      <main className="wrap">
+      <main className="wrap" ref={principal_}>
+        {/* Región de avisos siempre presente, para que los lectores de pantalla anuncien su texto cuando aparece. */}
+        <p id="aviso-app" role="status" className={avisoVisible ? 'notice ok aviso-app' : 'sr-only'}>
+          {avisoVisible ? aviso!.texto : ''}
+        </p>
         {sinAlmacenamiento ? (
           <div className="notice bad">Este navegador no permite guardar datos locales. La app no puede funcionar así.</div>
         ) : !cargado || !vista ? (
@@ -147,7 +180,6 @@ export function App() {
                 persona={personaDeRuta}
                 onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
                 onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
-                aviso={aviso && aviso.hash === escribirRuta(vista) ? aviso.texto : null}
               />
             )}
             {vista.pantalla === 'registrar' && personaDeRuta && (

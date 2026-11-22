@@ -17,8 +17,6 @@ interface Props {
   persona: Persona
   onMedir: () => void
   onVerMediciones: () => void
-  /** Aviso que trae quien vuelve de registrar ("Medición guardada"). */
-  aviso?: string | null
 }
 
 const OBJETIVO: Record<Objetivo, string> = { bajar_grasa: 'bajar grasa', ganar_musculo: 'ganar músculo', mantener: 'mantener' }
@@ -91,7 +89,7 @@ function BarraRango({ c }: { c: Clasificacion }) {
   )
 }
 
-function Tarjeta({ t }: { t: TarjetaFicha }) {
+function Tarjeta({ t, ultimaFecha }: { t: TarjetaFicha; ultimaFecha: string }) {
   const def = TARJETA[t.clave]
   const cambio = lineaCambio(t)
   return (
@@ -108,6 +106,8 @@ function Tarjeta({ t }: { t: TarjetaFicha }) {
       </div>
       {t.clasificacion && <BarraRango c={t.clasificacion} />}
       {(cambio || t.referencia) && <p className="d">{[cambio, t.referencia].filter(Boolean).join(' · ')}</p>}
+      {/* Un valor que no es de la última medición dice de cuándo es, para no leerlo como actual. */}
+      {t.fecha !== ultimaFecha && <p className="d fecha-vieja">del {fechaLegible(t.fecha)}</p>}
     </article>
   )
 }
@@ -126,7 +126,7 @@ function useAngosto(px: number): boolean {
   return angosto
 }
 
-export function Ficha({ persona, onMedir, onVerMediciones, aviso }: Props) {
+export function Ficha({ persona, onMedir, onVerMediciones }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [elegida, setElegida] = useState<Metrica>('pesoKg')
   const [periodo, setPeriodo] = useState<Periodo>('3m')
@@ -157,11 +157,6 @@ export function Ficha({ persona, onMedir, onVerMediciones, aviso }: Props) {
 
   return (
     <div className="ficha-a">
-      {aviso && (
-        <p className="notice ok aviso" role="status">
-          {aviso}
-        </p>
-      )}
       <div className="col-izq">
         <section className="card hero" aria-labelledby="ficha-nombre">
           <div className="who-head">
@@ -293,7 +288,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, aviso }: Props) {
           <section aria-label="Medidas">
             <div className="tiles">
               {otras.map((t) => (
-                <Tarjeta key={t.clave} t={t} />
+                <Tarjeta key={t.clave} t={t} ultimaFecha={r.ultima!.fecha} />
               ))}
             </div>
             <details className="guide">

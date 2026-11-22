@@ -782,8 +782,8 @@ test('la estrella en Familia cambia la persona principal', async ({ page }) => {
   await agregarPersona(page, 'Beto')
   await ir(page, 'Familia')
   const beto = page.locator('article.person', { hasText: 'Beto' })
-  await beto.getByRole('button', { name: 'Marcar como persona principal' }).click()
-  await expect(beto.getByRole('button', { name: 'Marcar como persona principal' })).toHaveAttribute('aria-pressed', 'true')
+  await beto.getByRole('button', { name: 'Marcar a Beto como persona principal' }).click()
+  await expect(beto.getByRole('button', { name: 'Marcar a Beto como persona principal' })).toHaveAttribute('aria-pressed', 'true')
   await page.goto('./')
   await expect(page.locator('.perfil-nombre')).toHaveText('Beto')
 })
@@ -844,4 +844,68 @@ test('la tabla de mediciones no desborda la página a 400 px', async ({ page }) 
   await ir(page, 'Historial')
   await expect(filas(page)).toHaveCount(1)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+// ---------- Revisión final: accesibilidad ----------
+
+test('al cambiar de pantalla el foco va al título de la nueva', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  await page.locator('.perfil-boton').focus()
+  await page.keyboard.press('Enter')
+  await perfiles(page).getByRole('menuitem', { name: /Beto/ }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('heading', { name: 'Beto', level: 2 })).toBeFocused()
+  await page.getByRole('button', { name: '+ Registrar medición' }).click()
+  await expect(page.getByRole('heading', { name: 'Registrar medición · Beto' })).toBeFocused()
+  await expect(page).toHaveTitle(/Registrar medición/)
+})
+
+test('los enlaces y desplegables de la ficha miden al menos 44 px', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72', '88')
+  await ir(page, 'Ficha')
+  for (const objetivo of [page.getByRole('button', { name: 'Ver todas las mediciones →' }), page.getByText('Cómo leer estas cifras')]) {
+    expect((await objetivo.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  }
+})
+
+test('un nombre largo no parte el encabezado en varias filas', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await page.goto('./')
+  await agregarPersona(page, 'María Fernanda de los Ángeles Pérez')
+  expect((await page.locator('header.top').boundingBox())!.height).toBeLessThan(90)
+})
+
+test('salir del menú de perfiles con Tab lo cierra', async ({ page }) => {
+  await agregarAna(page)
+  await abrirPerfiles(page)
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Tab')
+  await expect(perfiles(page)).toBeHidden()
+})
+
+test('el aviso de guardado vive en una región que ya existía', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Ficha')
+  await expect(page.locator('#aviso-app')).toHaveAttribute('role', 'status')
+  await expect(page.locator('#aviso-app')).toHaveText('')
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.locator('#aviso-app')).toHaveText('Medición guardada.')
+})
+
+test('editar una medición antigua no borra el borrador de la nueva', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await ir(page, 'Historial')
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await page.getByLabel('Cintura (cm)').fill('87')
+  await page.getByRole('button', { name: /Actualizar medición|Guardar medición/ }).click()
+  await ir(page, 'Medir')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('70')
 })

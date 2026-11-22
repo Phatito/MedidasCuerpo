@@ -60,7 +60,15 @@ export function SelectorPerfil({ personas, actual, principalId, ultimaFecha, onE
   }
 
   return (
-    <div className="perfil" ref={caja} onKeyDown={teclas}>
+    <div
+      className="perfil"
+      ref={caja}
+      onKeyDown={teclas}
+      // Si el foco sale del selector (por ejemplo con Tab), el menú se cierra.
+      onBlur={(e) => {
+        if (abierto && !caja.current?.contains(e.relatedTarget as Node | null)) setAbierto(false)
+      }}
+    >
       <button ref={boton} type="button" className="perfil-boton" aria-haspopup="menu" aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>
         <span className="avatar" aria-hidden="true">{inicial(actual?.nombre ?? '?')}</span>
         <span className="perfil-nombre">{actual?.nombre ?? 'Elegir persona'}</span>

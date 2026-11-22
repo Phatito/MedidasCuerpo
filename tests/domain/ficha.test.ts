@@ -188,3 +188,9 @@ describe('todas las medidas de la báscula', () => {
     expect(r.tarjetas.every((t) => t.clasificacion === null)).toBe(true)
   })
 })
+
+test('cada tarjeta dice de qué fecha es su valor', () => {
+  const r = resumenFicha(p, [m('2026-08-01', { pesoKg: 80, grasaVisceral: 12 }), m('2026-11-08', { pesoKg: 79 })])
+  expect(tarjeta(r, 'grasaVisceral')?.fecha).toBe('2026-08-01')
+  expect(tarjeta(r, 'imc')?.fecha).toBe('2026-11-08')
+})

@@ -63,7 +63,8 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Pro
             persona={persona}
             fechaInicial={fecha}
             borrador={fecha ? undefined : borrador}
-            onBorrador={onBorrador}
+            // Editar una medición de otra fecha no debe tocar el borrador de la medición nueva.
+            onBorrador={fecha ? undefined : onBorrador}
             onVerEvolucion={() => onListo('')}
             onGuardada={() => onListo('Medición guardada.')}
           />

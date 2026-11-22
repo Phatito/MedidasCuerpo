@@ -102,7 +102,7 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
                 <button
                   type="button"
                   className="estrella"
-                  aria-label="Marcar como persona principal"
+                  aria-label={`Marcar a ${p.nombre} como persona principal`}
                   aria-pressed={ajustes?.personaPrincipalId === p.id}
                   title={ajustes?.personaPrincipalId === p.id ? 'Persona principal: su ficha se abre al iniciar' : 'Marcar como persona principal'}
                   disabled={!ajustes}
