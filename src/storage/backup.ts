@@ -77,6 +77,8 @@ export function leerRespaldo(json: string): Respaldo {
     ajustes: {
       diaRecordatorio: typeof a.diaRecordatorio === 'number' && a.diaRecordatorio >= 0 && a.diaRecordatorio <= 6 ? a.diaRecordatorio : 0,
       horaRecordatorio: typeof a.horaRecordatorio === 'string' && /^\d{2}:\d{2}$/.test(a.horaRecordatorio) ? a.horaRecordatorio : '09:00',
+      // Solo si apunta a alguien que viene en el respaldo.
+      ...(typeof a.personaPrincipalId === 'string' && idsPersonas.has(a.personaPrincipalId) ? { personaPrincipalId: a.personaPrincipalId } : {}),
     },
   }
 }

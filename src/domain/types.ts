@@ -22,6 +22,12 @@ export interface Medicion {
   musculoKg?: number
   grasaVisceral?: number
   aguaPct?: number
+  musculoTotalKg?: number
+  masaOseaKg?: number
+  proteinaPct?: number
+  metabolismoBasalKcal?: number
+  edadCorporal?: number
+  frecuenciaCardiacaLpm?: number
   cuelloCm?: number
   pechoCm?: number
   cinturaCm?: number
@@ -40,6 +46,8 @@ export interface Ajustes {
   diaRecordatorio: number
   horaRecordatorio: string
   ultimoRespaldo?: string
+  /** La persona cuya ficha se abre al iniciar la app. */
+  personaPrincipalId?: string
 }
 
 export type CampoNumerico =
@@ -48,6 +56,12 @@ export type CampoNumerico =
   | 'musculoKg'
   | 'grasaVisceral'
   | 'aguaPct'
+  | 'musculoTotalKg'
+  | 'masaOseaKg'
+  | 'proteinaPct'
+  | 'metabolismoBasalKcal'
+  | 'edadCorporal'
+  | 'frecuenciaCardiacaLpm'
   | 'cuelloCm'
   | 'pechoCm'
   | 'cinturaCm'
@@ -60,19 +74,27 @@ export type CampoNumerico =
   | 'musloDerCm'
 
 export const CAMPOS_BASCULA: CampoNumerico[] = ['pesoKg', 'grasaPct', 'musculoKg', 'grasaVisceral', 'aguaPct']
+/** Lo demás que entregan básculas como la Xiaomi S400. */
+export const CAMPOS_BASCULA_EXTRA: CampoNumerico[] = ['musculoTotalKg', 'masaOseaKg', 'proteinaPct', 'metabolismoBasalKcal', 'edadCorporal', 'frecuenciaCardiacaLpm']
 export const CAMPOS_PERIMETROS: CampoNumerico[] = [
   'cuelloCm', 'pechoCm', 'brazoIzqCm', 'brazoDerCm', 'brazoCm', 'cinturaCm', 'caderaCm', 'musloIzqCm', 'musloDerCm', 'musloCm',
 ]
 /** Medidas de antes de separar por lado: se conservan y se muestran, pero ya no se piden. */
 export const CAMPOS_SIN_LADO: CampoNumerico[] = ['brazoCm', 'musloCm']
-export const CAMPOS_NUMERICOS: CampoNumerico[] = [...CAMPOS_BASCULA, ...CAMPOS_PERIMETROS]
+export const CAMPOS_NUMERICOS: CampoNumerico[] = [...CAMPOS_BASCULA, ...CAMPOS_BASCULA_EXTRA, ...CAMPOS_PERIMETROS]
 
 export const ETIQUETAS: Record<CampoNumerico, { nombre: string; unidad: string }> = {
   pesoKg: { nombre: 'Peso', unidad: 'kg' },
   grasaPct: { nombre: 'Grasa corporal', unidad: '%' },
-  musculoKg: { nombre: 'Masa muscular', unidad: 'kg' },
+  musculoKg: { nombre: 'Músculo esquelético', unidad: 'kg' },
   grasaVisceral: { nombre: 'Grasa visceral', unidad: 'nivel' },
   aguaPct: { nombre: 'Agua corporal', unidad: '%' },
+  musculoTotalKg: { nombre: 'Masa muscular total', unidad: 'kg' },
+  masaOseaKg: { nombre: 'Masa ósea', unidad: 'kg' },
+  proteinaPct: { nombre: 'Proteína', unidad: '%' },
+  metabolismoBasalKcal: { nombre: 'Metabolismo basal', unidad: 'kcal' },
+  edadCorporal: { nombre: 'Edad corporal', unidad: 'años' },
+  frecuenciaCardiacaLpm: { nombre: 'Frecuencia cardíaca', unidad: 'lpm' },
   cuelloCm: { nombre: 'Cuello', unidad: 'cm' },
   pechoCm: { nombre: 'Pecho', unidad: 'cm' },
   cinturaCm: { nombre: 'Cintura', unidad: 'cm' },

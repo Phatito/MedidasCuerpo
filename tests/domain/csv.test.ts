@@ -153,3 +153,29 @@ describe('medidas por lado', () => {
     expect(filasAMediciones(filas, sugerirAsignacion(columnas), 'p1').mediciones).toEqual(ms)
   })
 })
+
+describe('músculo esquelético, músculo total y medidas nuevas de la báscula', () => {
+  test('"Masa muscular" va al total y la esquelética a musculoKg', () => {
+    expect(sugerirAsignacion(['Fecha', 'Peso', 'Masa muscular', 'Masa muscular esquelética'])).toMatchObject({ musculoTotalKg: 2, musculoKg: 3 })
+  })
+  test('"Músculo" a secas sigue yendo a musculoKg', () => {
+    expect(sugerirAsignacion(['Fecha', 'Peso', 'Músculo (kg)'])).toMatchObject({ musculoKg: 2, musculoTotalKg: null })
+  })
+  test('en inglés', () => {
+    expect(sugerirAsignacion(['date', 'weight', 'Muscle mass', 'Skeletal muscle'])).toMatchObject({ musculoTotalKg: 2, musculoKg: 3 })
+    expect(sugerirAsignacion(['date', 'weight', 'SMM'])).toMatchObject({ musculoKg: 2 })
+  })
+  test('masa ósea, proteína, metabolismo, edad corporal y frecuencia cardíaca', () => {
+    expect(sugerirAsignacion(['Fecha', 'Peso', 'Masa ósea', 'Proteína (%)', 'Metabolismo basal', 'Edad corporal', 'Frecuencia cardíaca'])).toMatchObject({
+      masaOseaKg: 2, proteinaPct: 3, metabolismoBasalKcal: 4, edadCorporal: 5, frecuenciaCardiacaLpm: 6,
+    })
+    expect(sugerirAsignacion(['date', 'weight', 'Bone mass', 'Protein', 'BMR', 'Body age', 'Heart rate'])).toMatchObject({
+      masaOseaKg: 2, proteinaPct: 3, metabolismoBasalKcal: 4, edadCorporal: 5, frecuenciaCardiacaLpm: 6,
+    })
+  })
+  test('exportar e importar conserva los seis campos nuevos', () => {
+    const ms = [m('2026-11-01', { pesoKg: 90, musculoTotalKg: 64, masaOseaKg: 3.5, proteinaPct: 15, metabolismoBasalKcal: 1850, edadCorporal: 30, frecuenciaCardiacaLpm: 80, origen: 'csv' })]
+    const { columnas, filas } = parseCsv(medicionesACsv(ms))
+    expect(filasAMediciones(filas, sugerirAsignacion(columnas), 'p1').mediciones).toEqual(ms)
+  })
+})

@@ -11,3 +11,17 @@ test('los límites son inclusivos', () => {
 test('grasa visceral 60 se rechaza', () => expect(validarValor('grasaVisceral', 60)).not.toBeNull())
 test('estatura 30 cm se rechaza', () => expect(validarValor('estaturaCm', 30)).not.toBeNull())
 test('el mensaje nombra el rango', () => expect(validarValor('pesoKg', 900)).toContain('400'))
+
+test.each([
+  ['musculoTotalKg', 5, 200],
+  ['masaOseaKg', 0.5, 10],
+  ['proteinaPct', 5, 40],
+  ['metabolismoBasalKcal', 500, 5000],
+  ['edadCorporal', 5, 120],
+  ['frecuenciaCardiacaLpm', 30, 220],
+] as const)('campo nuevo %s acepta de %d a %d', (campo, min, max) => {
+  expect(validarValor(campo, min)).toBeNull()
+  expect(validarValor(campo, max)).toBeNull()
+  expect(validarValor(campo, min - 0.1)).not.toBeNull()
+  expect(validarValor(campo, max + 1)).not.toBeNull()
+})

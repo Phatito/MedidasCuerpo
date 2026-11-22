@@ -104,3 +104,35 @@ describe('meta de peso y campos por lado en el respaldo', () => {
     expect(() => leerRespaldo(json)).toThrow(MENSAJE)
   })
 })
+
+describe('campos nuevos y persona principal', () => {
+  test('un respaldo antiguo sin campos nuevos ni persona principal se restaura', async () => {
+    const r = leerRespaldo(JSON.stringify(await exportarRespaldo()))
+    expect(r.ajustes.personaPrincipalId).toBeUndefined()
+    await restaurarRespaldo(r)
+    expect(await listarPersonas()).toEqual([persona()])
+  })
+  test('la persona principal se conserva', async () => {
+    await guardarAjustes({ diaRecordatorio: 2, horaRecordatorio: '08:00', personaPrincipalId: 'p1' })
+    const r = leerRespaldo(JSON.stringify(await exportarRespaldo()))
+    expect(r.ajustes.personaPrincipalId).toBe('p1')
+    await borrarTodo()
+    await restaurarRespaldo(r)
+    expect((await leerAjustes()).personaPrincipalId).toBe('p1')
+  })
+  test('una persona principal que no está en el respaldo se descarta', async () => {
+    const datos = await exportarRespaldo()
+    const r = leerRespaldo(JSON.stringify({ ...datos, ajustes: { ...datos.ajustes, personaPrincipalId: 'nadie' } }))
+    expect(r.ajustes.personaPrincipalId).toBeUndefined()
+  })
+  test('los campos nuevos viajan en el respaldo y se validan', async () => {
+    await guardarMediciones([m('2026-11-19', { pesoKg: 90, masaOseaKg: 3.5, metabolismoBasalKcal: 1850 })])
+    const json = JSON.stringify(await exportarRespaldo())
+    await borrarTodo()
+    await restaurarRespaldo(leerRespaldo(json))
+    expect((await listarMediciones('p1')).at(-1)).toMatchObject({ masaOseaKg: 3.5, metabolismoBasalKcal: 1850 })
+    const malo = JSON.parse(json)
+    malo.mediciones[0].masaOseaKg = 50
+    expect(() => leerRespaldo(JSON.stringify(malo))).toThrow(MENSAJE)
+  })
+})
