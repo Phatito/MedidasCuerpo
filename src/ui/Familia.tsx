@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { diasEntre, fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { estadoMedicion } from '../domain/reminders'
 import type { Medicion, Persona } from '../domain/types'
-import { borrarPersona, guardarPersona, leerAjustes, listarTodasLasMediciones } from '../storage/db'
+import { borrarPersona, guardarAjustes, guardarPersona, leerAjustes, listarTodasLasMediciones } from '../storage/db'
 import { PersonaForm } from './PersonaForm'
 import { inicial } from './SelectorPerfil'
 
@@ -99,6 +99,17 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
                 <span className="avatar big" aria-hidden="true">{inicial(p.nombre)}</span>
                 <h3 title={p.nombre}>{p.nombre}</h3>
                 <span className={`pill ${estado.pendiente ? 'due' : 'ok'}`}>{estado.pendiente ? 'Le toca medirse' : 'Al día'}</span>
+                <button
+                  type="button"
+                  className="estrella"
+                  aria-label="Marcar como persona principal"
+                  aria-pressed={ajustes?.personaPrincipalId === p.id}
+                  title={ajustes?.personaPrincipalId === p.id ? 'Persona principal: su ficha se abre al iniciar' : 'Marcar como persona principal'}
+                  disabled={!ajustes}
+                  onClick={() => ajustes && guardarAjustes({ ...ajustes, personaPrincipalId: p.id })}
+                >
+                  {ajustes?.personaPrincipalId === p.id ? '★' : '☆'}
+                </button>
               </div>
               {u ? (
                 <div>

@@ -258,3 +258,9 @@ details.guide b { color: var(--fg); font-weight: 600; }
 .modo:hover { border-color: var(--dim); }
 .modo[aria-selected='true'] { border: 2px solid var(--accent); background: var(--soft); }
 .modo[aria-selected='true'] span { color: var(--fg); }
+.estrella {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--edge); background: transparent;
+  color: var(--dim); font-size: 1.3rem; line-height: 1; cursor: pointer;
+}
+.estrella[aria-pressed='true'] { color: var(--warn); border-color: var(--warn); }
+.estrella:hover { border-color: var(--dim); }

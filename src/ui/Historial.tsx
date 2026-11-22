@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { derivar } from '../domain/metrics'
 import { fechaLegible, formatear } from '../domain/numbers'
-import type { Persona } from '../domain/types'
+import { CAMPOS_BASCULA_EXTRA, ETIQUETAS, type CampoNumerico, type Persona } from '../domain/types'
 import { borrarMedicion, listarMediciones } from '../storage/db'
 
 interface Props {
@@ -29,6 +29,8 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
 
   // Las columnas de medidas antiguas sin lado solo se muestran si alguna medición las tiene.
   const haySinLado = { brazoCm: mediciones.some((m) => m.brazoCm != null), musloCm: mediciones.some((m) => m.musloCm != null) }
+  // Lo mismo para el agua, el cuello, el pecho y lo demás que entregan básculas como la Xiaomi.
+  const extras = (['aguaPct', 'cuelloCm', 'pechoCm', ...CAMPOS_BASCULA_EXTRA] as CampoNumerico[]).filter((c) => mediciones.some((m) => m[c] != null))
 
   return (
     <div className="card table-scroll">
@@ -48,6 +50,9 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
             <th>Muslo der. (cm)</th>
             {haySinLado.brazoCm && <th>Brazo (sin lado)</th>}
             {haySinLado.musloCm && <th>Muslo (sin lado)</th>}
+            {extras.map((c) => (
+              <th key={c}>{ETIQUETAS[c].nombre} ({ETIQUETAS[c].unidad})</th>
+            ))}
             <th>IMC</th>
             <th><span className="small">Acciones</span></th>
           </tr>
@@ -73,6 +78,9 @@ export function Historial({ persona, onEditar, onMedir }: Props) {
                 <td>{celda(m.musloDerCm)}</td>
                 {haySinLado.brazoCm && <td>{celda(m.brazoCm)}</td>}
                 {haySinLado.musloCm && <td>{celda(m.musloCm)}</td>}
+                {extras.map((c) => (
+                  <td key={c}>{celda(m[c], c === 'metabolismoBasalKcal' || c === 'edadCorporal' || c === 'frecuenciaCardiacaLpm' ? 0 : 1)}</td>
+                ))}
                 <td>{celda(d.imc)}</td>
                 <td>
                   {porBorrar === m.id ? (

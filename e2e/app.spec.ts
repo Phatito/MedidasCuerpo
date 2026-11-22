@@ -774,3 +774,74 @@ test('los campos nuevos de la báscula se guardan y se ven en la ficha', async (
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.locator('.tile[data-clave="masaOseaKg"]')).toContainText('2,4')
 })
+
+// ---------- Mediciones, persona principal y ajustes ----------
+
+test('la estrella en Familia cambia la persona principal', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  await ir(page, 'Familia')
+  const beto = page.locator('article.person', { hasText: 'Beto' })
+  await beto.getByRole('button', { name: 'Marcar como persona principal' }).click()
+  await expect(beto.getByRole('button', { name: 'Marcar como persona principal' })).toHaveAttribute('aria-pressed', 'true')
+  await page.goto('./')
+  await expect(page.locator('.perfil-nombre')).toHaveText('Beto')
+})
+
+test('elegir la persona principal en Ajustes y datos', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  await ir(page, 'Datos')
+  await expect(page.getByRole('heading', { name: 'Ajustes y datos' })).toBeVisible()
+  await page.getByLabel('Persona principal').selectOption({ label: 'Beto' })
+  await page.goto('./')
+  await expect(page.locator('.perfil-nombre')).toHaveText('Beto')
+})
+
+test('borrar la persona principal deja como inicio a la siguiente', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  await ir(page, 'Familia')
+  const ana = page.locator('article.person', { hasText: 'Ana' })
+  await ana.getByRole('button', { name: 'Eliminar' }).click()
+  await ana.getByRole('button', { name: 'Sí, borrar' }).click()
+  await expect(ana).toHaveCount(0)
+  await page.goto('./')
+  await expect(page.locator('.perfil-nombre')).toHaveText('Beto')
+  await expect(figura(page)).toBeVisible()
+})
+
+test('Editar en Todas las mediciones abre Registrar en esa fecha', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72,5', '88')
+  await ir(page, 'Historial')
+  await expect(page.getByRole('heading', { name: 'Todas las mediciones · Ana' })).toBeVisible()
+  await page.getByRole('button', { name: 'Editar' }).click()
+  await expect(page.getByRole('heading', { name: 'Registrar medición · Ana' })).toBeVisible()
+  await expect(page.getByLabel('Fecha')).toHaveValue(haceDias(7))
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
+})
+
+test('las columnas de los campos nuevos aparecen solo si hay datos', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72', '88')
+  await ir(page, 'Historial')
+  await expect(page.getByRole('columnheader', { name: 'Masa ósea (kg)' })).toHaveCount(0)
+  await ir(page, 'Medir')
+  await page.getByLabel('Fecha').fill(haceDias(1))
+  await page.getByLabel('Peso (kg)').fill('72')
+  await page.getByText('Más de la báscula').click()
+  await page.getByLabel('Masa ósea (kg)').fill('2,4')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await ir(page, 'Historial')
+  await expect(page.getByRole('columnheader', { name: 'Masa ósea (kg)' })).toBeVisible()
+})
+
+test('la tabla de mediciones no desborda la página a 400 px', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await medir(page, haceDias(0), '72', '88')
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})

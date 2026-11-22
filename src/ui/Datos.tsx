@@ -78,7 +78,27 @@ export function Datos({ personas, personaActual }: Props) {
 
   return (
     <>
-      <h2>Datos</h2>
+      <h2>Ajustes y datos</h2>
+
+      {personas.length > 0 && (
+        <section className="card stack">
+          <h3>Persona principal</h3>
+          <div className="field" style={{ maxWidth: 320 }}>
+            <label htmlFor="ajustes-principal">Persona principal</label>
+            <select
+              id="ajustes-principal"
+              value={ajustes?.personaPrincipalId ?? ''}
+              disabled={!ajustes}
+              onChange={(e) => ajustes && guardarAjustes({ ...ajustes, personaPrincipalId: e.target.value })}
+            >
+              {personas.map((p) => (
+                <option key={p.id} value={p.id}>{p.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <p className="muted small">Su ficha es la que se abre al iniciar la app.</p>
+        </section>
+      )}
 
       <section className="card stack">
         <h3>Recordatorio semanal</h3>
