@@ -37,11 +37,10 @@ Solo el usuario se pesa en la báscula, con la cuenta principal de Xiaomi.
 
 ## Lo que hay en la captura
 
-El informe muestra, de arriba abajo (ejemplo real del usuario, números
-privados que no van al repositorio):
+El informe muestra, de arriba abajo (valores de ejemplo inventados):
 
-- nombre y **fecha y hora** (`17/11/2026 18:07`);
-- **peso** en números grandes, con el decimal más pequeño (`108` `,6` `kg`);
+- nombre y **fecha y hora** (`15/11/2026 07:45`);
+- **peso** en números grandes, con el decimal más pequeño (`82` `,4` `kg`);
 - tarjetas con un valor encima de su rótulo, en dos columnas: IMC,
   Porcentaje de grasa corporal, Masa de agua corporal (kg), Grasa corporal
   (kg), Contenido mineral óseo, Masa proteica, Masa muscular, Porcentaje de

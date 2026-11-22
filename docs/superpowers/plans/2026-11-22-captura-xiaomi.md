@@ -68,7 +68,7 @@ Helper en el test: `const p = (texto: string, x0: number, y0: number, alto = 20)
 
 ```ts
 test('lee los cinco campos y comprueba peso y porcentajes', ...)
-// líneas: ['Daniel'], ['15/11/2026','07:45'], ['82',x=250,alto 60] + [',4',x=330,alto 30],
+// líneas: ['Ana'], ['15/11/2026','07:45'], ['82',x=250,alto 60] + [',4',x=330,alto 30],
 //  ['25,1',20] ['22,7%',320] / ['IMC',20] ['Porcentaje','de','grasa','corporal' desde 320],
 //  ['45,0kg',300] / ['Masa','de','agua','corporal',300], ['18,7rg',300] / ['Grasa','corporal',300],
 //  ['54,6%',20] ['16,9%',320] / ['Agua','corporal',20] ['Porcentaje','de','proteínas',320],

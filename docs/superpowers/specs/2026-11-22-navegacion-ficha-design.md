@@ -80,7 +80,7 @@ angostas, una columna en este orden: peso, gráfico, tarjetas, figura.
    - peso de tendencia grande;
    - cambio desde la primera medición;
    - "Última pesada X kg";
-   - fichas de IMC con su categoría y de meta ("Meta 95 kg · faltan 9,6");
+   - fichas de IMC con su categoría y de meta ("Meta X kg · faltan Y");
    - botón principal **"+ Registrar medición"**.
 
    Lo que hoy muestra la tarjeta Meta (fecha estimada o avisos) va como
