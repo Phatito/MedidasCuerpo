@@ -252,6 +252,9 @@ test('una pantalla Medir que quedó abierta pasa al día de hoy al volver a ella
   await page.getByLabel('Peso (kg)').fill('72,5')
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.getByText('Medición guardada')).toBeVisible()
+  // Guardar vuelve a la ficha; se abre Registrar otra vez y se deja abierto.
+  await ir(page, 'Medir')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
 
   // Una semana después la ventana sigue abierta y la persona vuelve a ella.
   await page.clock.setFixedTime(new Date(2026, 10, 11, 10, 0))
@@ -725,4 +728,49 @@ test('la ficha no tiene desplazamiento horizontal a 400 px', async ({ page }) =>
   await ir(page, 'Ficha')
   await expect(page.locator('.hero')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})
+
+// ---------- Registrar medición ----------
+
+test('registrar se abre aparte con tres formas de cargar', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await expect(page.getByRole('heading', { name: 'Registrar medición · Ana' })).toBeVisible()
+  const pestanas = page.getByRole('tablist', { name: 'Cómo cargar' })
+  await expect(pestanas.getByRole('tab')).toHaveText([/Escribir/, /Captura de Xiaomi Home/, /Archivo/])
+  await expect(pestanas.getByRole('tab', { name: /Escribir/ })).toHaveAttribute('aria-selected', 'true')
+  await pestanas.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
+  await expect(page.getByText('Muy pronto')).toBeVisible()
+})
+
+test('guardar vuelve a la ficha con el aviso', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.locator('.hero')).toContainText('70,0')
+  await expect(page.getByRole('status').filter({ hasText: 'Medición guardada' })).toBeVisible()
+})
+
+test('importar un archivo desde Registrar sin pasar por Ajustes', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByRole('tab', { name: /Archivo/ }).click()
+  await expect(page.getByLabel('Persona')).toHaveCount(0)
+  await page.getByLabel('Archivo CSV').setInputFiles(CSV_EXCEL)
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await expect(page.locator('.hero')).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /importad/ })).toBeVisible()
+  await ir(page, 'Historial')
+  await expect(filas(page)).not.toHaveCount(0)
+})
+
+test('los campos nuevos de la báscula se guardan y se ven en la ficha', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  await page.getByText('Más de la báscula').click()
+  await page.getByLabel('Masa ósea (kg)').fill('2,4')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.locator('.tile[data-clave="masaOseaKg"]')).toContainText('2,4')
 })

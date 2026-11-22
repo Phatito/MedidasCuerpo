@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { fechaLegible, formatear, hoyIso, idMedicion, parseNumero } from '../domain/numbers'
-import { CAMPOS_BASCULA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, CAMPOS_SIN_LADO, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
+import { CAMPOS_BASCULA, CAMPOS_BASCULA_EXTRA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, CAMPOS_SIN_LADO, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
 import { guardarMedicion, listarMediciones } from '../storage/db'
 
@@ -18,13 +18,15 @@ interface Props {
   borrador?: Borrador
   onBorrador?: (b: Borrador | null) => void
   onVerEvolucion: () => void
+  /** Se llama tras guardar bien; Registrar lo usa para volver a la ficha. */
+  onGuardada?: (fecha: string) => void
 }
 
 type Textos = Record<CampoNumerico, string>
 const VACIO = Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, ''])) as Textos
 const aTexto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion }: Props) {
+export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [fecha, setFecha] = useState(fechaInicial ?? borrador?.fecha ?? hoyIso())
   const [textos, setTextos] = useState<Textos>(borrador?.textos ?? VACIO)
@@ -113,6 +115,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
     onBorrador?.(null)
     setRecuperado(false)
     setGuardada(true)
+    onGuardada?.(fecha)
   }
 
   const campo = (c: CampoNumerico) => {
@@ -166,6 +169,11 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
         <fieldset>
           <legend>Báscula</legend>
           <div className="form">{CAMPOS_BASCULA.map(campo)}</div>
+          <details className="guide" open={CAMPOS_BASCULA_EXTRA.some((c) => textos[c] !== '') || undefined}>
+            <summary>Más de la báscula</summary>
+            <div className="form">{CAMPOS_BASCULA_EXTRA.map(campo)}</div>
+            <p className="muted small">Masa muscular total, masa ósea, proteína, metabolismo basal, edad corporal y frecuencia cardíaca, como en el informe de básculas como la Xiaomi.</p>
+          </details>
           <p className="muted small">Solo el peso es obligatorio. Si tu báscula o tu reporte InBody entrega los demás valores, cópialos aquí.</p>
         </fieldset>
       </div>

@@ -1,26 +1,19 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useState, type ChangeEvent } from 'react'
-import { CAMPOS_CSV, decodificarTexto, filasAMediciones, medicionesACsv, nombreCampoCsv, parseCsv, sugerirAsignacion, type Asignacion, type CampoCsv } from '../domain/csv'
+import { useState, type ChangeEvent } from 'react'
+import { medicionesACsv } from '../domain/csv'
 import { hoyIso } from '../domain/numbers'
 import { DIAS_SEMANA, generarIcs } from '../domain/reminders'
 import type { Persona } from '../domain/types'
 import { exportarRespaldo, leerRespaldo, restaurarRespaldo, type Respaldo } from '../storage/backup'
-import { contarExistentes, guardarAjustes, guardarMediciones, leerAjustes, listarMediciones } from '../storage/db'
+import { guardarAjustes, leerAjustes, listarMediciones } from '../storage/db'
 import { descargar } from './descargar'
+import { ImportarArchivo, plural } from './ImportarArchivo'
 
 interface Props {
   personas: Persona[]
   personaActual: Persona | null
 }
 
-interface Csv {
-  nombre: string
-  columnas: string[]
-  filas: string[][]
-  asignacion: Asignacion
-}
-
-const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
 export function Datos({ personas, personaActual }: Props) {
   const ajustes = useLiveQuery(leerAjustes, [])
@@ -28,52 +21,10 @@ export function Datos({ personas, personaActual }: Props) {
   // Tras restaurar un respaldo la persona elegida puede ya no existir: se usa la primera disponible.
   const persona = personas.find((p) => p.id === personaId) ?? personas[0] ?? null
 
-  const [csv, setCsv] = useState<Csv | null>(null)
-  const [existentes, setExistentes] = useState(0)
-  const [avisoCsv, setAvisoCsv] = useState<{ tipo: 'ok' | 'bad'; texto: string } | null>(null)
-  const [claveCsv, setClaveCsv] = useState(0)
 
   const [pendiente, setPendiente] = useState<Respaldo | null>(null)
   const [avisoRespaldo, setAvisoRespaldo] = useState<{ tipo: 'ok' | 'bad'; texto: string } | null>(null)
   const [claveRespaldo, setClaveRespaldo] = useState(0)
-
-  const resultado = csv && persona ? filasAMediciones(csv.filas, csv.asignacion, persona.id, { hoy: hoyIso(), columnas: csv.columnas.length }) : null
-  const ids = resultado?.mediciones.map((m) => m.id).join('|') ?? ''
-
-  useEffect(() => {
-    let vigente = true
-    const lista = ids ? ids.split('|') : []
-    contarExistentes(lista).then((n) => vigente && setExistentes(n))
-    return () => {
-      vigente = false
-    }
-  }, [ids])
-
-  async function elegirCsv(e: ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0]
-    if (!archivo) return
-    setAvisoCsv(null)
-    const { columnas, filas } = parseCsv(decodificarTexto(new Uint8Array(await archivo.arrayBuffer())))
-    if (columnas.length === 0 || filas.length === 0) {
-      setCsv(null)
-      setAvisoCsv({ tipo: 'bad', texto: 'El archivo está vacío o no tiene filas de datos bajo el encabezado.' })
-      return
-    }
-    setCsv({ nombre: archivo.name, columnas, filas, asignacion: sugerirAsignacion(columnas) })
-  }
-
-  async function confirmarImportacion() {
-    if (!resultado || !persona || resultado.mediciones.length === 0) return
-    try {
-      await guardarMediciones(resultado.mediciones)
-    } catch {
-      setAvisoCsv({ tipo: 'bad', texto: 'No se pudieron guardar las mediciones. Puede que el navegador se haya quedado sin espacio; no se importó nada.' })
-      return
-    }
-    setAvisoCsv({ tipo: 'ok', texto: `Se importaron ${plural(resultado.mediciones.length, 'medición', 'mediciones')} para ${persona.nombre}.` })
-    setCsv(null)
-    setClaveCsv((k) => k + 1)
-  }
 
   async function exportarCsv() {
     if (!persona) return
@@ -176,59 +127,7 @@ export function Datos({ personas, personaActual }: Props) {
         <p className="muted small">
           Sirve para traer lo que exporte la app de tu báscula o cinta, o una planilla propia. Necesita una columna de fecha y una de peso.
         </p>
-        {personas.length === 0 ? (
-          <p className="muted">Agrega primero a una persona en la pestaña Familia.</p>
-        ) : (
-          <>
-            {selectorPersona('datos-persona-importar')}
-            <div className="field" style={{ maxWidth: 420 }}>
-              <label htmlFor="datos-csv">Archivo CSV</label>
-              <input key={claveCsv} id="datos-csv" type="file" accept=".csv,text/csv,text/plain" onChange={elegirCsv} />
-            </div>
-            {csv && resultado && (
-              <div className="stack">
-                <p className="small">
-                  <strong>{csv.nombre}</strong>: revisa a qué columna del archivo corresponde cada dato.
-                </p>
-                <div className="form">
-                  {CAMPOS_CSV.map((campo: CampoCsv) => (
-                    <div className="field" key={campo}>
-                      <label htmlFor={`csv-${campo}`}>{nombreCampoCsv(campo)}</label>
-                      <select
-                        id={`csv-${campo}`}
-                        aria-label={`Columna para ${nombreCampoCsv(campo)}`}
-                        value={csv.asignacion[campo] ?? ''}
-                        onChange={(e) => setCsv({ ...csv, asignacion: { ...csv.asignacion, [campo]: e.target.value === '' ? null : Number(e.target.value) } })}
-                      >
-                        <option value="">No importar</option>
-                        {csv.columnas.map((c, i) => (
-                          <option key={i} value={i}>{c || `Columna ${i + 1}`}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-                <p className="notice num">
-                  {resultado.mediciones.length - existentes} nuevas, {existentes} reemplazan, {resultado.errores.length}{' '}
-                  {resultado.errores.length === 1 ? 'omitida' : 'omitidas'}
-                </p>
-                {resultado.errores.length > 0 && (
-                  <ul className="small muted" style={{ margin: 0, paddingLeft: 20 }}>
-                    {resultado.errores.slice(0, 20).map((e) => (
-                      <li key={e.fila}>Fila {e.fila}: {e.motivo}</li>
-                    ))}
-                    {resultado.errores.length > 20 && <li>…y {resultado.errores.length - 20} filas más.</li>}
-                  </ul>
-                )}
-                <div className="row">
-                  <button className="btn primary" disabled={resultado.mediciones.length === 0} onClick={confirmarImportacion}>Confirmar importación</button>
-                  <button className="btn" onClick={() => { setCsv(null); setClaveCsv((k) => k + 1) }}>Cancelar</button>
-                </div>
-              </div>
-            )}
-            {avisoCsv && <p className={`notice ${avisoCsv.tipo}`} role="status">{avisoCsv.texto}</p>}
-          </>
-        )}
+        <ImportarArchivo personas={personas} personaInicial={personaActual} />
       </section>
 
       <section className="card stack">

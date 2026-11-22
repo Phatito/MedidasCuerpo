@@ -7,7 +7,8 @@ import { Datos } from './Datos'
 import { Familia } from './Familia'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
-import { Medir, type Borrador } from './Medir'
+import type { Borrador } from './Medir'
+import { Registrar } from './Registrar'
 import { SelectorPerfil } from './SelectorPerfil'
 
 const rutaActual = () => leerRuta(window.location.hash)
@@ -15,6 +16,8 @@ const rutaActual = () => leerRuta(window.location.hash)
 export function App() {
   const [ruta, setRuta] = useState<Ruta>(rutaActual)
   const [familiaNueva, setFamiliaNueva] = useState(0)
+  // Aviso para mostrar en una pantalla concreta (por ejemplo "Medición guardada." al volver a la ficha).
+  const [aviso, setAviso] = useState<{ hash: string; texto: string } | null>(null)
   const [sinAlmacenamiento, setSinAlmacenamiento] = useState(false)
   // Lo escrito en Registrar y aún no guardado, por persona: cambiar de persona no debe borrarlo.
   const borradores = useRef(new Map<string, Borrador>())
@@ -59,7 +62,12 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destino && escribirRuta(destino)])
 
+  // La pantalla desde la que se llegó a la actual (dentro de la app), para que Guardar sepa adónde volver.
+  const anterior = useRef<string | null>(null)
+
   function navegar(r: Ruta) {
+    setAviso(null)
+    anterior.current = window.location.hash
     if (escribirRuta(r) !== window.location.hash) history.pushState({ app: true }, '', escribirRuta(r))
     setRuta(r)
   }
@@ -139,20 +147,27 @@ export function App() {
                 persona={personaDeRuta}
                 onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
                 onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
+                aviso={aviso && aviso.hash === escribirRuta(vista) ? aviso.texto : null}
               />
             )}
             {vista.pantalla === 'registrar' && personaDeRuta && (
-              <>
-                <h2>Registrar medición · {personaDeRuta.nombre}</h2>
-                <Medir
-                  key={`${personaDeRuta.id}-${vista.fecha ?? ''}`}
-                  persona={personaDeRuta}
-                  fechaInicial={vista.fecha}
-                  borrador={vista.fecha ? undefined : borradores.current.get(personaDeRuta.id)}
-                  onBorrador={(b) => (b ? borradores.current.set(personaDeRuta.id, b) : borradores.current.delete(personaDeRuta.id))}
-                  onVerEvolucion={() => navegar(fichaDe(personaDeRuta.id))}
-                />
-              </>
+              <Registrar
+                key={`${personaDeRuta.id}-${vista.fecha ?? ''}`}
+                persona={personaDeRuta}
+                fecha={vista.fecha}
+                borrador={borradores.current.get(personaDeRuta.id)}
+                onBorrador={(b) => (b ? borradores.current.set(personaDeRuta.id, b) : borradores.current.delete(personaDeRuta.id))}
+                onListo={(texto) => {
+                  const ficha = fichaDe(personaDeRuta.id)
+                  // Si se vino desde la ficha, se vuelve atrás; si no (por ejemplo desde Todas las mediciones), se va a la ficha.
+                  if (anterior.current === escribirRuta(ficha) && history.state?.app) history.back()
+                  else {
+                    history.replaceState(history.state, '', escribirRuta(ficha))
+                    setRuta(ficha)
+                  }
+                  setAviso(texto ? { hash: escribirRuta(ficha), texto } : null)
+                }}
+              />
             )}
             {vista.pantalla === 'mediciones' && personaDeRuta && (
               <>

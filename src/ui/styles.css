@@ -246,3 +246,15 @@ details.guide b { color: var(--fg); font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) {
   .btn, .perfil-item, .perfil-boton { transition: background-color 0.12s, border-color 0.12s, color 0.12s, filter 0.12s; }
 }
+
+/* Registrar medición: tres formas de cargar como pestañas grandes. */
+.registrar { padding-block: 18px; }
+.modos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; }
+.modo {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 64px; padding: 14px 16px; border-radius: var(--r);
+  border: 1px solid var(--edge); background: var(--card); color: var(--fg); font: inherit; cursor: pointer;
+}
+.modo span { color: var(--dim); }
+.modo:hover { border-color: var(--dim); }
+.modo[aria-selected='true'] { border: 2px solid var(--accent); background: var(--soft); }
+.modo[aria-selected='true'] span { color: var(--fg); }
