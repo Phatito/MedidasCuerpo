@@ -909,3 +909,20 @@ test('editar una medición antigua no borra el borrador de la nueva', async ({ p
   await ir(page, 'Medir')
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('70')
 })
+
+// ---------- Lector de capturas ----------
+
+test('el lector se sirve desde el propio sitio y queda fuera del precache', async ({ request }) => {
+  for (const archivo of ['ocr/worker.min.js', 'ocr/tesseract-core-simd-lstm.wasm.js', 'ocr/tesseract-core-lstm.wasm.js', 'ocr/spa.traineddata.gz']) {
+    const r = await request.get(archivo)
+    expect(r.status(), archivo).toBe(200)
+    // No la página de la app (el servidor responde con ella a cualquier ruta desconocida).
+    const cuerpo = await r.body()
+    expect(cuerpo.subarray(0, 15).toString().toLowerCase(), archivo).not.toContain('<!doctype')
+    expect(cuerpo.length, archivo).toBeGreaterThan(100_000)
+  }
+  const sw = await (await request.get('sw.js')).text()
+  // Ninguna entrada del precache es del lector; sí hay una regla para guardarlo la primera vez que se use.
+  expect(sw).not.toMatch(/url:"ocr\//)
+  expect(sw).toContain('lector-ocr')
+})

@@ -13,7 +13,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png', 'favicon.svg', 'apple-touch-icon.png', 'logo.svg'],
       // La tipografía también se guarda en el dispositivo: sin esto la app sin conexión caería a la fuente del sistema.
-      workbox: { globPatterns: ['**/*.{js,css,html,png,woff2}'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,woff2}'],
+        // El lector de capturas (unos 6 MB) no se precarga: se guarda la primera vez que se usa y desde ahí funciona sin conexión.
+        globIgnores: ['ocr/**'],
+        runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.includes('/ocr/'), handler: 'CacheFirst', options: { cacheName: 'lector-ocr' } }],
+      },
       manifest: {
         name: 'MedidasCuerpo',
         short_name: 'Medidas',
