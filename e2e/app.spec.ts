@@ -15,7 +15,7 @@ async function agregarAna(page: Page) {
 test('agregar a la primera persona', async ({ page }) => {
   await page.goto('./')
   await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Medir' })).toBeDisabled()
+  await expect(page.locator('.perfil-boton')).toHaveCount(0)
   await agregarAna(page)
   await expect(page.getByText('Le toca medirse')).toBeVisible()
 })
@@ -30,7 +30,31 @@ test('una estatura fuera de rango no se guarda', async ({ page }) => {
 })
 
 const filas = (page: Page) => page.locator('tbody tr')
-const ir = (page: Page, nombre: string) => page.getByRole('navigation').getByRole('button', { name: nombre, exact: true }).click()
+// Navegación sin pestañas: selector de perfil, botones de la ficha y ⚙.
+const perfiles = (page: Page) => page.getByRole('menu', { name: 'Perfiles' })
+async function abrirPerfiles(page: Page) {
+  if (!(await perfiles(page).isVisible())) await page.locator('.perfil-boton').click()
+}
+async function elegirPerfil(page: Page, nombre: string) {
+  await abrirPerfiles(page)
+  await perfiles(page).getByRole('menuitem', { name: new RegExp(nombre) }).click()
+  await expect(page.locator('.perfil-nombre')).toHaveText(nombre)
+}
+async function irAFicha(page: Page) {
+  await abrirPerfiles(page)
+  await perfiles(page).locator('[aria-current="true"]').click()
+}
+async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Familia' | 'Datos' | 'Evolución') {
+  if (destino === 'Ficha' || destino === 'Evolución') return irAFicha(page)
+  if (destino === 'Datos') return page.getByRole('button', { name: 'Ajustes y datos' }).click()
+  if (destino === 'Familia') {
+    await abrirPerfiles(page)
+    return perfiles(page).getByRole('menuitem', { name: 'Administrar familia…' }).click()
+  }
+  await irAFicha(page)
+  if (destino === 'Medir') return page.getByRole('main').getByRole('button', { name: /Registrar medición/ }).first().click()
+  return page.getByRole('button', { name: 'Ver todas las mediciones →' }).click()
+}
 
 test('registrar, actualizar y validar una medición', async ({ page }) => {
   await agregarAna(page)
@@ -308,8 +332,12 @@ test('el resumen de importación no cuenta dos veces una fecha repetida ni acept
 // ---------- Rediseño ----------
 
 async function agregarPersona(page: Page, nombre: string, sexo: 'hombre' | 'mujer' = 'hombre', estatura = '170') {
-  await ir(page, 'Familia')
-  await page.getByRole('button', { name: 'Agregar persona' }).click()
+  // Sin personas todavía no hay selector de perfil: se agrega desde Familia.
+  if ((await page.locator('.perfil-boton').count()) === 0) await page.getByRole('button', { name: 'Agregar persona' }).click()
+  else {
+    await abrirPerfiles(page)
+    await perfiles(page).getByRole('menuitem', { name: '+ Agregar persona' }).click()
+  }
   await page.getByLabel('Nombre').fill(nombre)
   await page.getByLabel('Sexo').selectOption(sexo)
   await page.getByLabel('Estatura (cm)').fill(estatura)
@@ -317,35 +345,41 @@ async function agregarPersona(page: Page, nombre: string, sexo: 'hombre' | 'muje
   await expect(page.getByRole('heading', { name: nombre, exact: true })).toBeVisible()
 }
 
-const fila = (page: Page) => page.getByLabel('Personas')
-
-test('la fila de personas marca a quien le toca y abre la ficha', async ({ page }) => {
+test('el selector de perfil marca a quien le toca y abre su ficha', async ({ page }) => {
   await agregarAna(page)
-  const ana = fila(page).getByRole('button', { name: /Ana/ })
-  await expect(ana).toContainText('le toca')
+  await abrirPerfiles(page)
+  const ana = perfiles(page).getByRole('menuitem', { name: /Ana/ })
+  await expect(ana).toContainText('Le toca medirse')
+  await expect(ana).toContainText('★ principal')
   await ana.click()
-  await expect(page.getByRole('navigation').getByRole('button', { name: 'Ficha', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(ana).toHaveAttribute('aria-pressed', 'true')
+  await expect(figura(page)).toBeVisible()
+  await abrirPerfiles(page)
+  await expect(perfiles(page).getByRole('menuitem', { name: /Ana/ })).toHaveAttribute('aria-current', 'true')
+  await page.keyboard.press('Escape')
+  await expect(perfiles(page)).toBeHidden()
 })
 
-test('cambiar de persona en Medir no arrastra lo escrito', async ({ page }) => {
+test('cambiar de persona en Registrar no arrastra lo escrito', async ({ page }) => {
   await agregarAna(page)
   await agregarPersona(page, 'Beto')
-  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await elegirPerfil(page, 'Ana')
   await ir(page, 'Medir')
   await page.getByLabel('Peso (kg)').fill('72,5')
-  await fila(page).getByRole('button', { name: /Beto/ }).click()
-  await expect(page.getByRole('heading', { name: /Medir: Beto/ })).toBeVisible()
+  await elegirPerfil(page, 'Beto')
+  await ir(page, 'Medir')
+  await expect(page.getByRole('heading', { name: /Registrar medición · Beto/ })).toBeVisible()
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
   // Lo escrito para Ana no se pierde: vuelve al regresar a ella.
-  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await elegirPerfil(page, 'Ana')
+  await ir(page, 'Medir')
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
   await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeVisible()
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.getByText('Medición guardada')).toBeVisible()
   // Una vez guardado ya no hay borrador que recuperar.
-  await fila(page).getByRole('button', { name: /Beto/ }).click()
-  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await elegirPerfil(page, 'Beto')
+  await elegirPerfil(page, 'Ana')
+  await ir(page, 'Medir')
   await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeHidden()
 })
 
@@ -353,7 +387,11 @@ test('doce personas con nombres largos no desbordan a 400 px', async ({ page }) 
   await page.setViewportSize({ width: 400, height: 800 })
   await page.goto('./')
   for (let i = 1; i <= 12; i++) await agregarPersona(page, `Maximiliano Alejandro ${i}`)
-  await expect(fila(page).getByRole('button')).toHaveCount(12)
+  await abrirPerfiles(page)
+  // 12 personas más "Agregar persona" y "Administrar familia…".
+  await expect(perfiles(page).getByRole('menuitem')).toHaveCount(14)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.keyboard.press('Escape')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   await ir(page, 'Datos')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
@@ -382,8 +420,6 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await expect(page.locator('.tile', { hasText: 'Peso' })).toContainText('72,4')
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
   await expect(page.locator('svg.chart.compact circle.dot')).toHaveCount(2)
-  await page.getByRole('button', { name: 'Ver todo en Evolución' }).click()
-  await expect(page.getByRole('heading', { name: /Evolución: Ana/ })).toBeVisible()
   await expect(page.locator('svg.chart .area')).toHaveCount(1)
 })
 
@@ -393,8 +429,8 @@ test('sin mediciones la ficha invita a registrar la primera', async ({ page }) =
   await expect(figura(page)).toBeVisible()
   await expect(figura(page).locator('[data-medida]')).toHaveCount(0)
   await expect(page.getByText('Todavía no hay mediciones de Ana.')).toBeVisible()
-  await page.getByRole('button', { name: 'Registrar medición de esta semana' }).click()
-  await expect(page.getByRole('heading', { name: /Medir: Ana/ })).toBeVisible()
+  await page.getByRole('button', { name: /Registrar medición/ }).first().click()
+  await expect(page.getByRole('heading', { name: /Registrar medición · Ana/ })).toBeVisible()
 })
 
 test('un hombre recibe la figura de hombre', async ({ page }) => {
@@ -487,7 +523,7 @@ test('una medición antigua sin lado sigue visible y editable', async ({ page })
   await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'r.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(respaldo)) })
   await page.getByRole('button', { name: 'Sí, restaurar' }).click()
   await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
-  await fila(page).getByRole('button', { name: /Ana/ }).click()
+  await elegirPerfil(page, 'Ana')
   await ir(page, 'Historial')
   await expect(page.locator('thead')).toContainText('Brazo (sin lado)')
   await expect(filas(page).first()).toContainText('34,0')
@@ -599,4 +635,52 @@ test('la guía para medir está en la pantalla Medir', async ({ page }) => {
   await ir(page, 'Medir')
   await page.getByText('Cómo medir cada zona').click()
   await expect(page.getByText('a la altura del ombligo')).toBeVisible()
+})
+
+// ---------- Navegación sin pestañas ----------
+
+test('no hay barra de pestañas', async ({ page }) => {
+  await agregarAna(page)
+  await expect(page.getByRole('navigation', { name: 'Secciones' })).toHaveCount(0)
+})
+
+test('al abrir la app se ve la ficha de la persona principal', async ({ page }) => {
+  await agregarAna(page)
+  await agregarPersona(page, 'Beto')
+  // Abrir la app de nuevo, desde su dirección inicial.
+  await page.goto('./')
+  await expect(page.locator('.perfil-nombre')).toHaveText('Ana')
+  await expect(figura(page)).toBeVisible()
+  await expect(page).toHaveURL(/#\/p\//)
+})
+
+test('el botón Atrás del navegador vuelve a la pantalla anterior', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Ficha')
+  await expect(figura(page)).toBeVisible()
+  await ir(page, 'Datos')
+  await expect(page.getByRole('heading', { name: 'Datos' })).toBeVisible()
+  await page.goBack()
+  await expect(figura(page)).toBeVisible()
+})
+
+test('Volver regresa a la ficha', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await expect(figura(page)).toBeVisible()
+})
+
+test('una dirección inválida lleva al inicio', async ({ page }) => {
+  await agregarAna(page)
+  await page.goto('./#/p/no-existe')
+  await expect(figura(page)).toBeVisible()
+  await expect(page.locator('.perfil-nombre')).toHaveText('Ana')
+  await page.goto('./#/cualquier/cosa')
+  await expect(figura(page)).toBeVisible()
+})
+
+test('sin personas se abre Familia', async ({ page }) => {
+  await page.goto('./#/p/alguien')
+  await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
 })

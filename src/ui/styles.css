@@ -1,4 +1,4 @@
-/* Layout: barra superior con pestañas en píldora, fila de personas y una columna de contenido de 1040 px sobre fondo azul noche. */
+/* Layout: barra superior con logo, selector de perfil y ajustes; sin pestañas. Contenido sobre fondo azul noche. */
 :root {
   --bg: #0e1220;
   --card: #171c30;
@@ -19,6 +19,7 @@
   --sil-line: #5d49c9;
   --font: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 16px;
+  --sombra: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
@@ -36,28 +37,43 @@ h4 { font-size: 1.02rem; font-weight: 700; }
 .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
 .top { border-bottom: 1px solid var(--edge); background: var(--bg); }
 .top .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 14px; }
-.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.brand {
+  display: flex; align-items: center; gap: 10px; margin-right: auto; min-height: 44px; padding: 0; border: 0; background: none;
+  color: var(--fg); font: inherit; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; cursor: pointer;
+}
 .brand img { width: 30px; height: 30px; border-radius: 9px; }
-nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-nav.tabs button {
-  border: 0; background: transparent; color: var(--dim); font: inherit; font-size: 0.9rem; font-weight: 600;
-  padding: 7px 14px; border-radius: 999px; cursor: pointer;
+.icon-btn {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1px solid var(--edge); background: transparent; color: var(--fg);
 }
-nav.tabs button:hover:not(:disabled):not([aria-current]) { background: var(--soft); color: var(--fg); }
-nav.tabs button[aria-current='page'] { background: var(--accent); color: var(--on-accent); }
-nav.tabs button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.people { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 18px; }
-.who {
-  display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 5px 14px 5px 5px; border-radius: 999px;
-  background: var(--card); border: 1px solid var(--edge); color: var(--dim); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+.icon-btn:hover { background: var(--soft); }
+.perfil { position: relative; min-width: 0; }
+.perfil-boton {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; max-width: 100%; padding: 6px 14px 6px 6px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--card); color: var(--fg); font: inherit; font-weight: 700; cursor: pointer;
 }
-.who:hover { color: var(--fg); border-color: var(--dim); }
-.who[aria-pressed='true'] { border-color: var(--accent); color: var(--fg); font-weight: 800; }
-.who .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.who .due { color: var(--warn); font-weight: 700; white-space: nowrap; }
+.perfil-boton[aria-expanded='true'] { border-color: var(--accent); }
+.perfil-boton .avatar, .perfil-item[aria-current='true'] .avatar { background: var(--accent); color: var(--on-accent); }
+.perfil-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.perfil-menu {
+  position: absolute; z-index: 20; top: calc(100% + 8px); right: 0; width: min(340px, calc(100vw - 32px)); padding: 8px;
+  display: flex; flex-direction: column; gap: 2px; background: var(--card); border: 1px solid var(--edge); border-radius: var(--r);
+  box-shadow: 0 20px 50px var(--sombra);
+}
+.perfil-menu hr { width: 100%; border: 0; border-top: 1px solid var(--edge); margin: 6px 0; }
+.perfil-item {
+  display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--fg); font: inherit; text-align: left; cursor: pointer;
+}
+.perfil-item:hover, .perfil-item:focus-visible { background: var(--soft); outline: none; }
+.perfil-item[aria-current='true'] { background: var(--soft); }
+.perfil-item.accion { color: var(--cyan); font-weight: 700; }
+.perfil-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.perfil-texto b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ok-text { color: var(--good); }
+.warn-text { color: var(--warn); }
+.btn.volver { margin-top: 18px; align-self: flex-start; }
 .avatar { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 800; background: var(--soft); color: var(--fg); }
-.who[aria-pressed='true'] .avatar { background: var(--accent); color: var(--on-accent); }
 .avatar.big { width: 44px; height: 44px; font-size: 1.1rem; }
 
 main.wrap { padding-block: 22px 72px; display: flex; flex-direction: column; gap: 18px; }
@@ -176,9 +192,9 @@ details.guide b { color: var(--fg); font-weight: 600; }
   .ficha { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
+  .brand-nombre { display: none; }
   .wrap { padding: 0 16px; }
-  .brand { margin-right: 0; width: 100%; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .btn, nav.tabs button, .who { transition: background-color 0.12s, border-color 0.12s, color 0.12s, filter 0.12s; }
+  .btn, .perfil-item, .perfil-boton { transition: background-color 0.12s, border-color 0.12s, color 0.12s, filter 0.12s; }
 }

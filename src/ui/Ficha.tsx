@@ -6,12 +6,13 @@ import type { Objetivo, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { Cuerpo } from './Cuerpo'
 import { Grafico } from './Grafico'
-import { inicial } from './PersonasBar'
+import { inicial } from './SelectorPerfil'
 
 interface Props {
   persona: Persona
   onMedir: () => void
   onVerEvolucion: () => void
+  onVerMediciones?: () => void
 }
 
 const OBJETIVO: Record<Objetivo, string> = { bajar_grasa: 'bajar grasa', ganar_musculo: 'ganar músculo', mantener: 'mantener' }
@@ -52,7 +53,7 @@ function textoMeta(m: ProyeccionMeta): string {
   }
 }
 
-export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
+export function Ficha({ persona, onMedir, onVerEvolucion, onVerMediciones }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   if (mediciones == null) return <p className="muted">Cargando…</p>
   const r = resumenFicha(persona, mediciones, { hoy: hoyIso() })
@@ -80,6 +81,9 @@ export function Ficha({ persona, onMedir, onVerEvolucion }: Props) {
             {ZONA[a.zona]} {a.mayor === 'izq' ? 'izquierdo' : 'derecho'} {formatear(a.diferencia)} cm mayor que el {a.mayor === 'izq' ? 'derecho' : 'izquierdo'}.
           </p>
         ))}
+        {onVerMediciones && r.ultima && (
+          <button type="button" className="btn link" style={{ alignSelf: 'flex-start', paddingLeft: 0 }} onClick={onVerMediciones}>Ver todas las mediciones →</button>
+        )}
       </section>
 
       <div className="side">

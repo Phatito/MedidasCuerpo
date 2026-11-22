@@ -5,21 +5,23 @@ import { estadoMedicion } from '../domain/reminders'
 import type { Medicion, Persona } from '../domain/types'
 import { borrarPersona, guardarPersona, leerAjustes, listarTodasLasMediciones } from '../storage/db'
 import { PersonaForm } from './PersonaForm'
-import { inicial } from './PersonasBar'
+import { inicial } from './SelectorPerfil'
 
 interface Props {
   personas: Persona[]
   onMedir: (personaId: string) => void
   onIrDatos: () => void
   onVerFicha: (personaId: string) => void
+  /** Abrir directamente el formulario de una persona nueva. */
+  nueva?: boolean
 }
 
 const DIAS_SIN_RESPALDO = 30
 
-export function Familia({ personas, onMedir, onIrDatos, onVerFicha }: Props) {
+export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = false }: Props) {
   const ajustes = useLiveQuery(leerAjustes, [])
   const mediciones = useLiveQuery(listarTodasLasMediciones, [], [] as Medicion[])
-  const [editando, setEditando] = useState<Persona | 'nueva' | null>(null)
+  const [editando, setEditando] = useState<Persona | 'nueva' | null>(nueva ? 'nueva' : null)
   const [porBorrar, setPorBorrar] = useState<string | null>(null)
   const [fallo, setFallo] = useState<string | null>(null)
   const hoy = hoyIso()
