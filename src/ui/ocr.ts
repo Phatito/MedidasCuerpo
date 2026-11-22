@@ -37,12 +37,25 @@ export async function reconocerImagen(imagen: Blob, alProgreso?: (fraccion: numb
 async function preparar(imagen: Blob): Promise<HTMLCanvasElement> {
   const mapa = await createImageBitmap(imagen)
   const { ancho, alto } = tamanoOcr(mapa.width, mapa.height)
+  // Se reduce a la mitad paso a paso: una reducción grande de una vez deja las cifras finas mal dibujadas ("33,6" → "33").
+  let fuente: CanvasImageSource = mapa
+  let [w, h] = [mapa.width, mapa.height]
+  while (w / 2 >= ancho) {
+    const paso = document.createElement('canvas')
+    paso.width = Math.round(w / 2)
+    paso.height = Math.round(h / 2)
+    const c = paso.getContext('2d')!
+    c.imageSmoothingQuality = 'high'
+    c.drawImage(fuente, 0, 0, paso.width, paso.height)
+    fuente = paso
+    ;[w, h] = [paso.width, paso.height]
+  }
   const lienzo = document.createElement('canvas')
   lienzo.width = ancho
   lienzo.height = alto
   const ctx = lienzo.getContext('2d', { willReadFrequently: true })!
   ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(mapa, 0, 0, ancho, alto)
+  ctx.drawImage(fuente, 0, 0, ancho, alto)
   mapa.close()
   const pixeles = ctx.getImageData(0, 0, ancho, alto)
   const d = pixeles.data

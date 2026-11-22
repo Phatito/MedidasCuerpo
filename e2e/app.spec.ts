@@ -740,7 +740,7 @@ test('registrar se abre aparte con tres formas de cargar', async ({ page }) => {
   await expect(pestanas.getByRole('tab')).toHaveText([/Escribir/, /Captura de Xiaomi Home/, /Archivo/])
   await expect(pestanas.getByRole('tab', { name: /Escribir/ })).toHaveAttribute('aria-selected', 'true')
   await pestanas.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
-  await expect(page.getByText('Muy pronto')).toBeVisible()
+  await expect(page.getByLabel('Elegir la captura de Xiaomi Home')).toBeVisible()
 })
 
 test('guardar vuelve a la ficha con el aviso', async ({ page }) => {
@@ -925,4 +925,105 @@ test('el lector se sirve desde el propio sitio y queda fuera del precache', asyn
   // Ninguna entrada del precache es del lector; sí hay una regla para guardarlo la primera vez que se use.
   expect(sw).not.toMatch(/url:"ocr\//)
   expect(sw).toContain('lector-ocr')
+})
+
+const CAPTURA = fileURLToPath(new URL('./fixtures/captura-xiaomi.png', import.meta.url))
+const CAPTURA_CLARA = fileURLToPath(new URL('./fixtures/captura-xiaomi-clara.png', import.meta.url))
+const CAPTURA_CHICA = fileURLToPath(new URL('./fixtures/captura-xiaomi-chica.png', import.meta.url))
+const LEIDA = 'Revisa los valores y pulsa Guardar.'
+
+async function leerCaptura(page: Page, archivo: string) {
+  await page.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
+  await page.getByLabel('Elegir la captura de Xiaomi Home').setInputFiles(archivo)
+}
+const marca = (page: Page, etiqueta: string) => page.locator('.field', { has: page.getByLabel(etiqueta, { exact: true }) }).locator('.marca')
+
+test('lee la captura de Xiaomi Home y rellena Registrar sin guardar', async ({ page }) => {
+  test.setTimeout(120_000)
+  const ajenas: string[] = []
+  page.on('request', (r) => {
+    if (!r.url().startsWith('http://localhost:4173/') && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) ajenas.push(r.url())
+  })
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByRole('tab', { name: /Escribir/ })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByLabel('Fecha')).toHaveValue('2026-11-15')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('82,4')
+  await expect(page.getByLabel('Grasa corporal (%)')).toHaveValue('22,7')
+  await expect(page.getByLabel('Agua corporal (%)')).toHaveValue('54,6')
+  await expect(page.getByLabel('Músculo esquelético (kg)')).toHaveValue('33,6')
+  await expect(page.getByLabel('Grasa visceral (nivel)')).toHaveValue('9')
+  await expect(marca(page, 'Peso (kg)')).toHaveText('de la captura')
+  await expect(marca(page, 'Músculo esquelético (kg)')).toHaveText('revisa con la imagen')
+  await expect(page.getByLabel('Nota (opcional)')).toHaveValue('Xiaomi Home 07:45')
+  await expect(page.getByRole('img', { name: 'Tu captura' })).toBeVisible()
+  // Nada se guardó todavía.
+  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await expect(page.getByText('Todavía no hay mediciones de Ana.')).toBeVisible()
+  await ir(page, 'Medir')
+  // Lo leído antes quedó como borrador sin guardar: leer otra vez pide confirmar.
+  page.once('dialog', (d) => d.accept())
+  await leerCaptura(page, CAPTURA)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await ir(page, 'Historial')
+  await expect(filas(page)).toHaveCount(1)
+  expect(ajenas).toEqual([])
+})
+
+test('la captura conserva la cintura guardada ese día', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await medir(page, '2026-11-15', '80', '88')
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByLabel('Cintura (cm)')).toHaveValue('88')
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('82,4')
+})
+
+test('con cambios sin guardar la captura pide confirmar; si no, no toca nada', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByLabel('Peso (kg)').fill('70')
+  page.once('dialog', (d) => d.dismiss())
+  await leerCaptura(page, CAPTURA)
+  await expect(page.getByText('Leyendo la captura…')).toHaveCount(0)
+  await page.getByRole('tab', { name: /Escribir/ }).click()
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('70')
+})
+
+test('lee también la captura en modo claro', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA_CLARA)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('82,4')
+})
+
+test('una captura comprimida muestra un error y no cambia el formulario', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, CAPTURA_CHICA)
+  await expect(page.getByText('No pude leer esta imagen. Usa la captura completa del informe de Xiaomi Home, sin recortar ni comprimir.')).toBeVisible({ timeout: 90_000 })
+  await page.getByRole('tab', { name: /Escribir/ }).click()
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
+})
+
+test('pegar la captura con Ctrl+V la lee', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  const bytes = [...(await readFile(CAPTURA))]
+  await page.evaluate((datos) => {
+    const dt = new DataTransfer()
+    dt.items.add(new File([new Uint8Array(datos)], 'captura.png', { type: 'image/png' }))
+    document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }))
+  }, bytes)
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('82,4')
 })

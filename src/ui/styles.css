@@ -271,3 +271,19 @@ details.guide > summary { min-height: 44px; padding-block: 11px; cursor: pointer
 .aviso-app { margin-top: 16px; }
 .tile .fecha-vieja { font-weight: 600; }
 h2[tabindex='-1']:focus { outline: none; }
+
+/* Captura de Xiaomi Home */
+.archivo-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; padding-inline: 22px; cursor: pointer; }
+.archivo-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.archivo-btn:focus-within { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.marca { font-size: 0.75rem; font-weight: 800; }
+.marca.desde-captura { color: var(--st-ok); }
+.marca.revisar { color: var(--st-alto); }
+.captura-leida { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.captura-mini { flex: none; padding: 0; border: 1px solid var(--edge); border-radius: 12px; background: none; cursor: zoom-in; overflow: hidden; }
+.captura-mini img { display: block; width: 120px; height: auto; }
+.captura-mini.ampliada { cursor: zoom-out; }
+.captura-mini.ampliada img { width: min(420px, 80vw); }
+.captura-leida .stack { flex: 1 1 260px; min-width: 0; }
+.notice.info { background: var(--soft); color: var(--fg); }
+progress { width: 100%; accent-color: var(--accent); }

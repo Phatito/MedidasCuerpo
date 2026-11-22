@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { fechaLegible, formatear, hoyIso, idMedicion, parseNumero } from '../domain/numbers'
 import { CAMPOS_BASCULA, CAMPOS_BASCULA_EXTRA, CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, CAMPOS_SIN_LADO, ETIQUETAS, type CampoNumerico, type Medicion, type Persona } from '../domain/types'
+import type { CampoCaptura, LecturaCaptura } from '../domain/capturaXiaomi'
 import { validarValor } from '../domain/validation'
 import { guardarMedicion, listarMediciones } from '../storage/db'
 
@@ -20,13 +21,15 @@ interface Props {
   onVerEvolucion: () => void
   /** Se llama tras guardar bien; Registrar lo usa para volver a la ficha. */
   onGuardada?: (fecha: string) => void
+  /** Lo leído de una captura de Xiaomi Home; cada lectura nueva trae otro `id`. */
+  lectura?: { id: number; datos: LecturaCaptura; imagenUrl: string }
 }
 
 type Textos = Record<CampoNumerico, string>
 const VACIO = Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, ''])) as Textos
 const aTexto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada }: Props) {
+export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada, lectura }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [fecha, setFecha] = useState(fechaInicial ?? borrador?.fecha ?? hoyIso())
   const [textos, setTextos] = useState<Textos>(borrador?.textos ?? VACIO)
@@ -35,6 +38,9 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
   const [errores, setErrores] = useState<Partial<Record<CampoNumerico | 'fecha', string>>>({})
   const [guardada, setGuardada] = useState(false)
   const [falloGuardar, setFalloGuardar] = useState(false)
+  // Marcas de los campos que vienen de una captura: comprobados o para revisar con la imagen.
+  const [marcas, setMarcas] = useState<Partial<Record<CampoNumerico, 'ok' | 'revisar'>>>({})
+  const [ampliada, setAmpliada] = useState(false)
   // "Sucio": la persona escribió algo que aún no se guarda. Mientras lo esté, nada reemplaza lo escrito.
   const sucio = useRef(borrador != null)
   const diaVisto = useRef(hoyIso())
@@ -59,6 +65,27 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
     if (sucio.current) onBorrador?.({ fecha, textos, nota })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fecha, textos, nota])
+
+  // Una captura leída: la fecha pasa a la de la captura, se carga lo guardado ese día y encima van los campos leídos.
+  // Un campo que no se pudo leer conserva lo guardado. Nada se guarda hasta pulsar Guardar.
+  useEffect(() => {
+    if (!lectura || !cargadas) return
+    const { datos } = lectura
+    const dia = datos.fecha ?? fecha
+    const guardada = mediciones?.find((m) => m.fecha === dia)
+    const base = guardada ? (Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, aTexto(guardada[c])])) as Textos) : VACIO
+    const leidos = Object.entries(datos.valores) as [CampoCaptura, number][]
+    sucio.current = true
+    setFecha(dia)
+    setTextos({ ...base, ...Object.fromEntries(leidos.map(([c, v]) => [c, aTexto(v)])) })
+    const notaGuardada = guardada?.nota ?? ''
+    setNota(notaGuardada || (datos.hora ? `Xiaomi Home ${datos.hora}` : ''))
+    setMarcas(Object.fromEntries(leidos.map(([c]) => [c, datos.revisar.includes(c) ? 'revisar' : 'ok'])))
+    setErrores({})
+    setGuardada(false)
+    setRecuperado(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lectura?.id, cargadas])
 
   // Si la ventana quedó abierta de un día para otro, al volver a ella el formulario pasa al día de hoy
   // (salvo que haya algo sin guardar o que la persona haya elegido otra fecha).
@@ -138,6 +165,11 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
             setGuardada(false)
           }}
         />
+        {marcas[c] && (
+          <span className={`marca ${marcas[c] === 'revisar' ? 'revisar' : 'desde-captura'}`}>
+            {marcas[c] === 'revisar' ? 'revisa con la imagen' : 'de la captura'}
+          </span>
+        )}
         {errores[c] ? (
           <span className="error">{errores[c]}</span>
         ) : (
@@ -154,6 +186,20 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
   return (
     <form className="stack" onSubmit={enviar} noValidate>
       {recuperado && <p className="notice" role="status">Recuperamos lo que habías escrito sin guardar.</p>}
+      {lectura && Object.keys(marcas).length > 0 && (
+        <div className="card captura-leida">
+          <button type="button" className={`captura-mini ${ampliada ? 'ampliada' : ''}`} onClick={() => setAmpliada(!ampliada)} aria-pressed={ampliada} aria-label={ampliada ? 'Achicar la captura' : 'Ampliar la captura'}>
+            <img src={lectura.imagenUrl} alt="Tu captura" />
+          </button>
+          <div className="stack">
+            <p className="notice info">Revisa los valores y pulsa Guardar.</p>
+            <p className="muted small">
+              Los campos marcados <span className="marca desde-captura">de la captura</span> cuadran con otras cifras del mismo informe; los marcados{' '}
+              <span className="marca revisar">revisa con la imagen</span> no se pudieron comprobar: compáralos con tu captura.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="card stack">
         <div className="form">
           <div className="field">
