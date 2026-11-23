@@ -85,10 +85,23 @@ export function leerRespaldo(json: string): Respaldo {
 }
 
 export async function restaurarRespaldo(r: Respaldo): Promise<void> {
-  await db.transaction('rw', db.personas, db.mediciones, db.ajustes, async () => {
+  await db.transaction('rw', [db.personas, db.mediciones, db.ajustes, db.cambios], async () => {
+    // Lo que había y no viene en el respaldo queda como borrado, para que la nube también lo borre.
+    const ahora = Date.now()
+    const restaurados = new Set([...r.personas.map((p) => `persona:${p.id}`), ...r.mediciones.map((m) => `medicion:${m.id}`), 'ajustes'])
+    const antes = (await db.cambios.toArray()).filter((c) => !c.borrado && !restaurados.has(c.idLogico))
+    const locales = [
+      ...((await db.personas.toCollection().primaryKeys()) as string[]).map((id) => `persona:${id}`),
+      ...((await db.mediciones.toCollection().primaryKeys()) as string[]).map((id) => `medicion:${id}`),
+    ].filter((id) => !restaurados.has(id))
     await Promise.all([db.personas.clear(), db.mediciones.clear(), db.ajustes.clear()])
     await db.personas.bulkPut(r.personas)
     await db.mediciones.bulkPut(r.mediciones)
     await db.ajustes.put({ ...r.ajustes, clave: 'principal' })
+    const borrados = new Set([...antes.map((c) => c.idLogico), ...locales])
+    await db.cambios.bulkPut([
+      ...[...borrados].map((idLogico) => ({ idLogico, editadoEn: ahora, pendiente: 1 as const, borrado: 1 as const })),
+      ...[...restaurados].map((idLogico) => ({ idLogico, editadoEn: ahora, pendiente: 1 as const, borrado: 0 as const })),
+    ])
   })
 }
