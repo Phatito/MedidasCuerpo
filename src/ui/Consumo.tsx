@@ -3,6 +3,7 @@ import { conConsumo, consumoVigente, KCAL_MAX, KCAL_MIN, sinConsumo } from '../d
 import { fechaLegible, hoyIso, parseNumero } from '../domain/numbers'
 import type { Persona } from '../domain/types'
 import { guardarPersona } from '../storage/db'
+import { Icono } from './Icono'
 
 const miles = (n: number) => n.toLocaleString('es-CL')
 
@@ -45,7 +46,8 @@ export function Consumo({ persona }: { persona: Persona }) {
   return (
     <div className="consumo">
       <button type="button" className="chip-btn consumo-boton" aria-expanded={abierto} onClick={abrir}>
-        {vigente != null ? `Consumo: ${miles(vigente)} kcal/día ✎` : 'Anotar consumo ✎'}
+        {vigente != null ? `Consumo: ${miles(vigente)} kcal/día` : 'Anotar consumo'}
+        <Icono nombre="editar" />
       </button>
       {abierto && (
         <form className="stack consumo-form" onSubmit={guardar} noValidate>

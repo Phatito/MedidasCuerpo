@@ -1,34 +1,42 @@
-/* Layout: barra superior con logo, selector de perfil y ajustes; sin pestañas. Contenido sobre fondo azul noche. */
+/* Mesura como hoja de moldes de costura: papel frío, tinta casi negra, banda cobalto del sobre del molde.
+   Cada persona es una línea del molde; cada medida, una marca rotulada sobre esa línea. */
 :root {
-  --bg: #0e1220;
-  --card: #171c30;
-  --edge: #262d48;
-  --soft: #232a45;
-  --fg: #f2f4fb;
-  --dim: #8f97b3;
-  --accent: #7c5cff;
+  --bg: #eef1f5;
+  --card: #ffffff;
+  --edge: #d2d8e1;
+  --soft: #e7ebf1;
+  --fg: #14171c;
+  --dim: #535d6c;
+  --accent: #1f45c9;
+  --accent-hondo: #17369e;
   --on-accent: #ffffff;
-  --cyan: #35e3ff;
-  --good: #3fe0a5;
-  --good-bg: #14352e;
-  --warn: #ffb454;
-  --warn-bg: #3a2c12;
-  --bad: #ff7b7b;
-  --sil-top: #8f73ff;
-  --sil-bottom: #3a2f8f;
-  --sil-line: #5d49c9;
-  --font: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --r: 16px;
-  --sombra: rgba(0, 0, 0, 0.5);
-  /* Estados de salud: cian, verde, naranja y rojo, que además difieren en claridad. */
-  --st-bajo: #5ad8f5;
-  --st-ok: #3fe0a5;
-  --st-alto: #ffb454;
-  --st-muy: #ff7b7b;
-  --hero-from: #2a2160;
-  --hero-to: #171c30;
-  color-scheme: dark;
+  --cyan: #0b6a82;
+  --good: #0d7a4e;
+  --good-bg: #ddf2e8;
+  --warn: #9a5200;
+  --warn-bg: #fcead2;
+  --bad: #c21f3a;
+  /* La pieza del molde: relleno de papel calco, línea de corte en tinta y costura en cobalto. */
+  --pieza: #e2e9fb;
+  --corte: #14171c;
+  --costura: #1f45c9;
+  --sil-top: #e2e9fb;
+  --sil-bottom: #e2e9fb;
+  --sil-line: #14171c;
+  --font: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r: 10px;
+  --sombra: rgba(16, 28, 66, 0.22);
+  /* Estados de salud: azul, verde, ámbar y rojo, con contraste AA sobre blanco. */
+  --st-bajo: #1a73a8;
+  --st-ok: #11804f;
+  --st-alto: #a85a00;
+  --st-muy: #c21f3a;
+  --hero-from: #ffffff;
+  --hero-to: #ffffff;
+  color-scheme: light;
 }
+::selection { background: #c9d6fb; color: var(--fg); }
+html { scrollbar-color: #b8c1cf var(--bg); accent-color: var(--accent); }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5; }
@@ -308,7 +316,7 @@ progress { width: 100%; accent-color: var(--accent); }
 .semana-card h4, .semana-pantalla h4 { font-size: 0.95rem; margin-bottom: 4px; }
 .semana-cambio { display: flex; flex-direction: column; gap: 6px; }
 .semana-cifras { display: flex; gap: 8px; flex-wrap: wrap; }
-.cifra { padding: 6px 12px; border-radius: 12px; background: var(--soft); font-size: 0.9rem; border-left: 4px solid; }
+.cifra { padding: 6px 12px; border-radius: var(--r); background: var(--card); font-size: 0.9rem; border: 1.5px solid; }
 .cifra.grasa { border-color: var(--st-alto); }
 .cifra.magra { border-color: var(--cyan); }
 .semana-acciones, .semana-revision { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
@@ -370,3 +378,121 @@ progress { width: 100%; accent-color: var(--accent); }
 .tile.tocable:hover { border-color: var(--dim); }
 .chip-link { border: 0; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; min-height: 32px; }
 .medida-pantalla .tile .v { font-size: 2.2rem; }
+
+
+/* ---------- Mundo: hoja de moldes ---------- */
+body { font-stretch: 100%; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-stretch: 88%; }
+h2 { font-size: 1.65rem; font-weight: 750; letter-spacing: -0.015em; }
+/* Las cifras se rotulan como en un molde: angostas, firmes y tabulares. */
+.hero-v, .cuadrito-v, .tile .v, .person .peso, .chart .last, .body-fig .val { font-stretch: 72%; font-weight: 720; letter-spacing: -0.01em; }
+.hero-v { font-size: 4.2rem; line-height: 0.95; }
+.cuadrito-v { font-size: 2.1rem; line-height: 1; }
+.tile .v { font-size: 2rem; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+
+/* Banda del sobre: la barra superior es cobalto. */
+.top { background: var(--accent); border-bottom: 0; color: var(--on-accent); }
+.top .brand { color: var(--on-accent); font-stretch: 80%; font-size: 1.3rem; font-weight: 760; letter-spacing: 0; }
+.top .brand img { width: 34px; height: 34px; padding: 3px; border-radius: 9px; background: #fff; }
+.top .icon-btn { color: var(--on-accent); border-color: rgba(255, 255, 255, 0.45); }
+.top .icon-btn:hover { background: rgba(255, 255, 255, 0.14); }
+.top .perfil-boton { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.45); color: var(--on-accent); }
+.top .perfil-boton .avatar { background: #fff; color: var(--accent); }
+.top .perfil-boton[aria-expanded='true'] { border-color: #fff; }
+.top :focus-visible { outline-color: #fff; }
+.perfil-menu { color: var(--fg); box-shadow: 0 18px 40px var(--sombra); }
+
+/* Controles: esquinas de 10 px, sin píldoras. */
+.btn { border-radius: var(--r); background: var(--card); border: 1.5px solid var(--edge); min-height: 44px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); }
+.btn.primary:hover:not(:disabled) { filter: none; background: var(--accent-hondo); border-color: var(--accent-hondo); }
+.btn.link { background: transparent; color: var(--accent); }
+.chip-btn, .chip-select { border-radius: var(--r); background: var(--card); border: 1.5px solid var(--edge); }
+.chip { border-radius: 8px; }
+.pill { border-radius: 6px; }
+.field input, .field select, .field textarea { background: var(--card); border: 1.5px solid var(--edge); border-radius: var(--r); min-height: 44px; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px #c9d6fb; }
+.card, .tile, .cuadrito, .modo { border: 1.5px solid var(--edge); }
+.icon-btn, .estrella { border-radius: var(--r); }
+.avatar { border-radius: 8px; }
+
+/* Hoja principal de la ficha: blanca, con la línea de corte en tinta arriba. */
+.ficha-c .hero { background: var(--card); border-color: var(--corte); }
+.peso-boton { color: var(--fg); }
+.peso-boton:hover, .cuadrito:hover, .linea-semana:hover, .enlace:hover { filter: none; }
+.peso-boton:hover .ver-mas, .enlace:hover > span:last-child { color: var(--accent); }
+.hero-k, .cuadrito-k, .tile .k { color: var(--dim); font-weight: 650; letter-spacing: 0.01em; }
+.hero-cambio.bien, .cuadrito-cambio.bien, .tile .d.bien { color: var(--good); }
+.hero-cambio.atencion, .cuadrito-cambio.atencion, .tile .d.atencion { color: var(--warn); }
+.linea-semana { background: var(--soft); border: 1.5px dashed #9fb0d6; }
+.linea-semana:hover { border-style: solid; border-color: var(--accent); }
+.linea-semana b { font-weight: 750; color: var(--accent); }
+.icono { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.peso-boton .ver-mas, .linea-semana > .icono, .enlace > .icono { color: var(--dim); }
+.cuadrito { background: var(--card); }
+.cuadrito:hover, .tile.tocable:hover { border-color: var(--accent); }
+/* El cuadrito con un cambio guarda su marca de color (una muesca del molde) hasta la próxima medición. */
+.cuadrito:has(.cuadrito-cambio.bien) { box-shadow: inset 0 -3px 0 var(--good); }
+.cuadrito:has(.cuadrito-cambio.atencion) { box-shadow: inset 0 -3px 0 var(--warn); }
+.enlaces { background: var(--card); }
+.medir-fijo { border-radius: var(--r); }
+
+/* Gráficos con la gramática del molde: tendencia en línea continua, pesadas como muescas. */
+.chart .grid-line { stroke: var(--edge); stroke-dasharray: 2 4; }
+.chart .area { fill: var(--accent); opacity: 0.07; }
+.chart .line { stroke: var(--accent); stroke-width: 2.25; }
+.chart .dot { fill: var(--card); stroke: var(--accent); stroke-width: 2; }
+.chart .dot.end { fill: var(--accent); }
+.chart .trend { stroke: var(--accent); stroke-width: 3; }
+.chart:has(.trend) .line { stroke: var(--fg); stroke-width: 1.25; stroke-dasharray: 3 4; opacity: 0.55; }
+.chart:has(.trend) .dot { stroke: var(--fg); fill: var(--card); }
+.chart .avg { stroke: var(--warn); }
+.chart .avg-dot { fill: var(--warn); stroke: var(--card); }
+.chart .last { fill: var(--fg); }
+.legend i { border-top-color: var(--accent); }
+.legend i.trend { border-top-color: var(--accent); }
+.legend i.medicion { border-top: 2px dashed var(--fg); opacity: 0.6; }
+
+/* Barra de rango: tramos finos, el punto es una muesca de tinta. */
+.rango { height: 5px; }
+.rango .tramo { opacity: 1; border-radius: 2px; }
+.rango .punto { width: 12px; height: 12px; background: var(--fg); border: 2.5px solid var(--card); }
+
+/* La figura como pieza de molde: relleno de papel calco, línea de corte y costura punteada. */
+.body-fig .pieza { fill: var(--pieza); }
+.body-fig .corte { fill: none; stroke: var(--corte); stroke-width: 1.6; stroke-linejoin: round; }
+.body-fig .costura-ancha { fill: none; stroke: var(--costura); stroke-width: 15; stroke-dasharray: 5 4; }
+.body-fig .costura-tapa { fill: none; stroke: var(--pieza); stroke-width: 12; }
+.body-fig .hilo { stroke: var(--costura); stroke-width: 1.2; fill: none; }
+.body-fig .hilo-punta { fill: var(--costura); }
+.body-fig .band { stroke: var(--costura); stroke-width: 2.5; }
+.body-fig .pin { fill: var(--card); stroke: var(--costura); stroke-width: 2; }
+.body-fig .lead { stroke: var(--fg); opacity: 0.55; }
+.body-fig .lab { fill: var(--dim); font-weight: 650; letter-spacing: 0.02em; }
+.body-fig .val { fill: var(--fg); font-size: 16px; }
+.body-fig .chg { fill: var(--dim); }
+.body-fig .chg.bien { fill: var(--good); }
+.body-fig .chg.atencion { fill: var(--warn); }
+
+/* Tu semana y barras. */
+.b-magra { fill: var(--accent); }
+.ley.magra::before { background: var(--accent); }
+.cifra.magra { border-color: var(--accent); }
+.insight.bien { border-color: var(--good); background: #f4fbf7; }
+.insight.atencion { border-color: var(--warn); background: #fff8ee; }
+.notice.ok { color: #0a5c3a; }
+.notice.warn { color: #7a4100; }
+.modo[aria-selected='true'] { border: 2px solid var(--accent); background: #eef2fd; }
+.dialogo-fondo { background: rgba(16, 28, 66, 0.4); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cuadrito, .tile.tocable, .linea-semana, .enlace, .chip-btn { transition: border-color 0.15s ease-out, background-color 0.15s ease-out; }
+  /* El momento del mundo: la línea de corte de la figura se traza al abrir la ficha. */
+  .body-fig .corte { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: trazar 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; }
+  @keyframes trazar { to { stroke-dashoffset: 0; } }
+}
+.consumo-boton { display: inline-flex; align-items: center; gap: 8px; }
+.consumo-boton .icono { width: 16px; height: 16px; }
+details.guide summary { color: var(--accent); }

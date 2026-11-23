@@ -80,7 +80,7 @@ export function Grafico({ puntos, unidad, compacto = false, tendencia, lienzoChi
         <p className="muted small">Registra otra medición para ver la línea.</p>
       ) : (
         <div className="legend">
-          <span><i />Cada medición ({unidad})</span>
+          <span><i className={tendencia && tendencia.length > 1 ? 'medicion' : undefined} />Cada medición ({unidad})</span>
           {tendencia && tendencia.length > 1 && <span><i className="trend" />Tendencia</span>}
           {!tendencia && promedio.length > 0 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
         </div>

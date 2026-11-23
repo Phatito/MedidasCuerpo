@@ -67,6 +67,35 @@ const ROTULO: Record<CampoPerimetro, string> = {
   musloCm: 'Muslo',
 }
 
+/**
+ * Contorno completo de la figura en un solo trazo: la mitad derecha y su espejo recorrido al revés.
+ * Así la línea de corte del molde no dibuja la costura central ni los cruces entre piezas.
+ */
+function contorno(mitad: string): string {
+  const tokens = mitad.match(/[MLQZ]|-?\d+(?:\.\d+)?/g) ?? []
+  type Seg = { tipo: 'L' | 'Q'; c?: [number, number]; a: [number, number] }
+  let inicio: [number, number] = [0, 0]
+  const segs: Seg[] = []
+  for (let i = 0; i < tokens.length; ) {
+    const t = tokens[i++]
+    const n = () => Number(tokens[i++])
+    if (t === 'M') inicio = [n(), n()]
+    else if (t === 'L') segs.push({ tipo: 'L', a: [n(), n()] })
+    else if (t === 'Q') segs.push({ tipo: 'Q', c: [n(), n()], a: [n(), n()] })
+  }
+  const espejo = ([x, y]: [number, number]): [number, number] => [200 - x, y]
+  const p = ([x, y]: [number, number]) => `${x} ${y}`
+  let d = `M${p(inicio)}`
+  for (const g of segs) d += g.tipo === 'L' ? ` L${p(g.a)}` : ` Q${p(g.c!)} ${p(g.a)}`
+  // De vuelta por el lado izquierdo: cada tramo al revés, desde su punta hasta su origen.
+  for (let k = segs.length - 1; k >= 0; k--) {
+    const desde = k === 0 ? inicio : segs[k - 1].a
+    const g = segs[k]
+    d += g.tipo === 'L' ? ` L${p(espejo(desde))}` : ` Q${p(espejo(g.c!))} ${p(espejo(desde))}`
+  }
+  return d + ' Z'
+}
+
 const IZQ_X = -15
 const DER_X = 215
 const CODO = 18
@@ -86,16 +115,23 @@ export function Cuerpo({ sexo, medidas }: Props) {
   return (
     <svg className="body-fig" data-sexo={sexo} viewBox="-110 10 420 430" role="img" aria-label={descripcion}>
       <defs>
-        <linearGradient id="cuerpo-relleno" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" style={{ stopColor: 'var(--sil-top)' }} />
-          <stop offset="1" style={{ stopColor: 'var(--sil-bottom)' }} />
-        </linearGradient>
+        <clipPath id={`pieza-${sexo}`}>
+          <path d={contorno(SILUETA[sexo])} />
+        </clipPath>
       </defs>
+      {/* Pieza del molde: papel calco, costura punteada hacia dentro, línea de corte y línea del hilo. */}
       <g className="sil">
-        <circle cx="100" cy="42" r="25" />
-        <rect x="89" y="62" width="22" height="20" rx="6" />
-        <path d={SILUETA[sexo]} />
-        <path d={SILUETA[sexo]} transform="translate(200 0) scale(-1 1)" />
+        <circle className="pieza" cx="100" cy="42" r="25" />
+        <rect className="pieza" x="89" y="60" width="22" height="24" />
+        <path className="pieza" d={contorno(SILUETA[sexo])} />
+        <g clipPath={`url(#pieza-${sexo})`}>
+          <path className="costura-ancha" d={contorno(SILUETA[sexo])} />
+          <path className="costura-tapa" d={contorno(SILUETA[sexo])} />
+        </g>
+        <path className="corte" d={`${contorno(SILUETA[sexo])} M89 66 L89 80 M111 66 L111 80`} />
+        <circle className="corte" cx="100" cy="42" r="25" />
+        <path className="hilo" d="M100 112 L100 222" />
+        <path className="hilo-punta" d="M100 106 L95.5 116 L104.5 116 Z M100 228 L95.5 218 L104.5 218 Z" />
       </g>
       {medidas.map((m) => {
         const z = ZONAS[sexo][m.campo]

@@ -9,7 +9,7 @@ import type { Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { OBJETIVO } from './Cifra'
 import { Cuerpo } from './Cuerpo'
-import { inicial } from './SelectorPerfil'
+import { Icono } from './Icono'
 
 interface Props {
   persona: Persona
@@ -84,7 +84,6 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
     <div className="ficha-c">
       <section className="card hero" aria-labelledby="ficha-nombre">
         <div className="who-head">
-          <span className="avatar" aria-hidden="true">{inicial(persona.nombre)}</span>
           <div style={{ minWidth: 0 }}>
             <h2 id="ficha-nombre">{persona.nombre}</h2>
             <p className="muted small">
@@ -112,7 +111,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
                 </span>
               )}
             </span>
-            <span className="ver-mas" aria-hidden="true">›</span>
+            <Icono nombre="abrir" className="ver-mas" />
           </button>
         ) : (
           <div className="stack">
@@ -122,9 +121,11 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         )}
         {lineaSemana && (
           <button type="button" className="linea-semana" onClick={onVerSemana}>
-            <span className="linea-semana-k">Tu semana</span>
-            <span className="linea-semana-t">{lineaSemana}</span>
-            <span aria-hidden="true">›</span>
+            <Icono nombre="semana" />
+            <span className="linea-semana-t">
+              <b>Tu semana.</b> {lineaSemana}
+            </span>
+            <Icono nombre="abrir" />
           </button>
         )}
       </section>
@@ -155,11 +156,11 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         <nav className="card enlaces" aria-label="Más detalle">
           <button type="button" className="enlace" onClick={onVerCifras}>
             <span>Todas las cifras</span>
-            <span aria-hidden="true">›</span>
+            <Icono nombre="abrir" />
           </button>
           <button type="button" className="enlace" onClick={onVerMediciones}>
             <span>Todas las mediciones</span>
-            <span aria-hidden="true">›</span>
+            <Icono nombre="abrir" />
           </button>
         </nav>
       )}
