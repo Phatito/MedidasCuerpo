@@ -1,0 +1,9 @@
+# Servidor de sincronización de Mesura (Cloudflare Worker + D1). Solo guarda texto cifrado.
+name = "mesura-sync"
+main = "worker.ts"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mesura"
+database_id = "PENDIENTE"
