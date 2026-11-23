@@ -2,21 +2,24 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import type { Clasificacion } from '../domain/estados'
 import { resumenFicha, type ClaveTarjeta, type TarjetaFicha } from '../domain/ficha'
-import { interpretar, NOTA_ORIENTACION } from '../domain/insights'
+import { esMenor, interpretar, NOTA_ORIENTACION } from '../domain/insights'
 import { derivar } from '../domain/metrics'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { serieMetrica, valorMetrica, type Metrica, type Periodo } from '../domain/series'
 import { tendenciaPeso, type ProyeccionMeta } from '../domain/trend'
 import { CAMPOS_NUMERICOS, ETIQUETAS, type Objetivo, type Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
+import { Consumo } from './Consumo'
 import { Cuerpo } from './Cuerpo'
 import { Grafico } from './Grafico'
 import { inicial } from './SelectorPerfil'
+import { TarjetaSemana } from './TuSemana'
 
 interface Props {
   persona: Persona
   onMedir: () => void
   onVerMediciones: () => void
+  onVerSemana: () => void
 }
 
 const OBJETIVO: Record<Objetivo, string> = { bajar_grasa: 'bajar grasa', ganar_musculo: 'ganar músculo', mantener: 'mantener' }
@@ -126,7 +129,7 @@ function useAngosto(px: number): boolean {
   return angosto
 }
 
-export function Ficha({ persona, onMedir, onVerMediciones }: Props) {
+export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [elegida, setElegida] = useState<Metrica>('pesoKg')
   const [periodo, setPeriodo] = useState<Periodo>('3m')
@@ -215,6 +218,8 @@ export function Ficha({ persona, onMedir, onVerMediciones }: Props) {
               <p className="muted small">Con la primera verás aquí sus números; con la segunda, cómo van cambiando.</p>
             </div>
           )}
+          {/* El consumo de kcal sirve para estimar el gasto real; a menores no se les dan kcal. */}
+          {!esMenor(persona, hoy) && <Consumo persona={persona} />}
           <button type="button" className="btn primary grande" onClick={onMedir}>+ Registrar medición</button>
         </section>
 
@@ -242,6 +247,7 @@ export function Ficha({ persona, onMedir, onVerMediciones }: Props) {
       </div>
 
       <div className="col-der">
+        {r.ultima && <TarjetaSemana persona={persona} mediciones={mediciones} onVerInforme={onVerSemana} />}
         {r.ultima && (
           <section className="card stack" aria-label="Gráfico">
             <div className="grafico-controles">

@@ -5,6 +5,7 @@ export type Ruta =
   | { pantalla: 'ficha'; personaId: string }
   | { pantalla: 'registrar'; personaId: string; fecha?: string }
   | { pantalla: 'mediciones'; personaId: string }
+  | { pantalla: 'semana'; personaId: string }
   | { pantalla: 'familia' }
   | { pantalla: 'ajustes' }
   | { pantalla: 'inicio' }
@@ -25,6 +26,7 @@ export function leerRuta(hash: string): Ruta {
   }
   if (partes.length === 2) return { pantalla: 'ficha', personaId }
   if (partes[2] === 'mediciones') return { pantalla: 'mediciones', personaId }
+  if (partes[2] === 'semana') return { pantalla: 'semana', personaId }
   if (partes[2] === 'registrar') {
     const fecha = new URLSearchParams(consulta).get('fecha')
     return fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? { pantalla: 'registrar', personaId, fecha } : { pantalla: 'registrar', personaId }
@@ -44,6 +46,8 @@ export function escribirRuta(r: Ruta): string {
       return `#/p/${encodeURIComponent(r.personaId)}`
     case 'mediciones':
       return `#/p/${encodeURIComponent(r.personaId)}/mediciones`
+    case 'semana':
+      return `#/p/${encodeURIComponent(r.personaId)}/semana`
     case 'registrar':
       return `#/p/${encodeURIComponent(r.personaId)}/registrar${r.fecha ? `?fecha=${r.fecha}` : ''}`
   }

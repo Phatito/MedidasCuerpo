@@ -1284,3 +1284,76 @@ test('el aviso de datos de otra cuenta se cierra con Escape sin entrar', async (
   await expect(pc.getByRole('dialog')).toHaveCount(0)
   await expect(pc.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
 })
+
+// ---------- Tu semana ----------
+
+async function importarConGrasa(page: Page) {
+  await ir(page, 'Datos')
+  // Números inventados.
+  const f = (n: number) => haceDias(n).split('-').reverse().join('/')
+  const csv = `Fecha;Peso;Grasa (%)\n${f(7)};80;25\n${f(0)};79;24\n`
+  await page.getByLabel('Archivo CSV').setInputFiles({ name: 's.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await expect(page.getByText('Se importaron 2 mediciones para Ana.')).toBeVisible()
+  await ir(page, 'Ficha')
+}
+
+test('anotar y cambiar el consumo de kcal', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '70', '80')
+  await ir(page, 'Ficha')
+  await page.getByRole('button', { name: 'Anotar consumo ✎' }).click()
+  await page.getByLabel('kcal al día').fill('2500')
+  await page.getByRole('button', { name: 'Guardar consumo' }).click()
+  await expect(page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' }).click()
+  await page.getByLabel('kcal al día').fill('2200')
+  await page.getByLabel('Desde', { exact: true }).fill(haceDias(-1))
+  await page.getByRole('button', { name: 'Guardar consumo' }).click()
+  await page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' }).click()
+  const historial = page.getByRole('list', { name: 'Historial de consumo' })
+  await expect(historial.getByRole('listitem')).toHaveCount(2)
+  await expect(historial).toContainText('2.200 desde el')
+  await historial.getByRole('button', { name: /Quitar/ }).last().click()
+  await expect(historial.getByRole('listitem')).toHaveCount(1)
+  // Fuera de rango no se guarda.
+  await page.getByLabel('kcal al día').fill('9000')
+  await page.getByRole('button', { name: 'Guardar consumo' }).click()
+  await expect(page.getByText('Debe estar entre 800 y 6.000')).toBeVisible()
+})
+
+test('la tarjeta Tu semana muestra grasa y masa magra y abre el informe completo', async ({ page }) => {
+  await agregarAna(page)
+  await importarConGrasa(page)
+  const tarjeta = page.locator('.semana-card')
+  await expect(tarjeta.getByRole('heading', { name: /Tu semana/ })).toBeVisible()
+  await expect(tarjeta).toContainText('Grasa')
+  await expect(tarjeta).toContainText('Masa magra')
+  await expect(tarjeta).toContainText('Anota cuánto comes')
+  await tarjeta.getByRole('button', { name: 'Ver informe completo →' }).click()
+  await expect(page).toHaveURL(/#\/p\/.+\/semana$/)
+  await expect(page.getByRole('heading', { level: 2, name: /Tu semana/ })).toBeVisible()
+  await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
+  await expect(page.getByText('Cómo se calcula')).toBeVisible()
+  await page.getByRole('button', { name: '← Volver' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
+})
+
+test('con una sola medición la tarjeta pide la segunda', async ({ page }) => {
+  await agregarAna(page)
+  await medir(page, haceDias(0), '70', '80')
+  await ir(page, 'Ficha')
+  await expect(page.getByText('Con tu segunda medición verás aquí tu semana')).toBeVisible()
+})
+
+test('Tu semana no desborda a 400 px', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await importarConGrasa(page)
+  await expect(page.locator('.semana-card')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.getByRole('button', { name: 'Ver informe completo →' }).click()
+  await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+})

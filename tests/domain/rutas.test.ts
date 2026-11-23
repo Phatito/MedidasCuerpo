@@ -3,6 +3,10 @@ import { escribirRuta, leerRuta, personaInicio } from '../../src/domain/rutas'
 import { persona } from './helpers'
 
 describe('leerRuta', () => {
+  test('informe Tu semana, ida y vuelta', () => {
+    expect(leerRuta('#/p/abc/semana')).toEqual({ pantalla: 'semana', personaId: 'abc' })
+    expect(escribirRuta({ pantalla: 'semana', personaId: 'a b' })).toBe('#/p/a%20b/semana')
+  })
   test('ficha de una persona', () => expect(leerRuta('#/p/abc')).toEqual({ pantalla: 'ficha', personaId: 'abc' }))
   test('registrar con fecha', () =>
     expect(leerRuta('#/p/abc/registrar?fecha=2026-11-17')).toEqual({ pantalla: 'registrar', personaId: 'abc', fecha: '2026-11-17' }))

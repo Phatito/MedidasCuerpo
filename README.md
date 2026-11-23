@@ -71,6 +71,17 @@ ahí se llega a todo.
   del peso y la línea celeste del gráfico de peso.
 - **Meta:** con un peso objetivo en la persona, la ficha muestra cuánto falta y
   la fecha estimada al ritmo de las últimas cuatro semanas.
+- **Tu semana:** tarjeta en la ficha (y pantalla con el informe completo) que
+  compara la última medición con la anterior: cuánto cambió la grasa y la
+  masa magra, si la pesada se aleja de la tendencia (agua o sal, no grasa),
+  hasta dos acciones concretas y cómo te fue con las de la semana pasada.
+- **Consumo de kcal:** en la ficha, "Anotar consumo ✎" guarda cuánto comes al
+  día en total (por ejemplo 2.500) desde una fecha; se cambia cuando quieras y
+  queda el historial. Con 3 o más semanas de consumo y pesadas, la app estima
+  tu **gasto real** (consumo − cambio de la tendencia × 7.700 kcal/kg) y te
+  recomienda kcal según tu objetivo, nunca menos de 1.200 (mujeres) o 1.500
+  (hombres). Es orientación, no indicación médica; a menores no se les dan
+  kcal ni acciones.
 - **Todas las mediciones:** tabla con edición y eliminación.
 - **Ajustes y datos** (⚙): persona principal, importar y exportar CSV,
   respaldo, y recordatorio semanal como evento de calendario.

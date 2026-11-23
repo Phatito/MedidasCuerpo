@@ -13,6 +13,7 @@ import { Historial } from './Historial'
 import type { Borrador } from './Medir'
 import { Registrar } from './Registrar'
 import { SelectorPerfil } from './SelectorPerfil'
+import { PantallaSemana } from './TuSemana'
 
 const rutaActual = () => leerRuta(window.location.hash)
 
@@ -195,6 +196,7 @@ export function App() {
                 persona={personaDeRuta}
                 onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
                 onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
+                onVerSemana={() => navegar({ pantalla: 'semana', personaId: personaDeRuta.id })}
               />
             )}
             {vista.pantalla === 'registrar' && personaDeRuta && (
@@ -226,6 +228,7 @@ export function App() {
                 />
               </>
             )}
+            {vista.pantalla === 'semana' && personaDeRuta && <PantallaSemana persona={personaDeRuta} />}
             {vista.pantalla === 'ajustes' && <Datos personas={personas} personaActual={persona} />}
           </>
         )}
