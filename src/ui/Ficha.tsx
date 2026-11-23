@@ -20,11 +20,13 @@ interface Props {
   onVerCifras: () => void
 }
 
+// Nombre completo para el lector de pantalla; en la celda va el corto.
+const LARGO: Partial<Record<Metrica, string>> = { grasaVisceral: 'Grasa visceral', musculoKg: 'Músculo esquelético' }
 const NOMBRE: Partial<Record<Metrica, string>> = {
   grasaPct: 'Grasa',
   musculoKg: 'Músculo',
   cinturaCm: 'Cintura',
-  grasaVisceral: 'Grasa visceral',
+  grasaVisceral: 'Visceral',
   imc: 'IMC',
   aguaPct: 'Agua',
   grasaKg: 'Grasa',
@@ -38,7 +40,7 @@ function CuadritoBoton({ c, onAbrir }: { c: Cuadrito; onAbrir: () => void }) {
   const nombre = NOMBRE[c.medida] ?? c.medida
   const unidad = UNIDAD[c.medida] ?? ''
   return (
-    <button type="button" className="cuadrito" data-medida={c.medida} onClick={onAbrir} aria-label={`${nombre}${c.estimada ? ' (estimada)' : ''}: ${formatear(c.valor, dec)} ${unidad}${c.clasificacion ? `, ${c.clasificacion.nombre}` : ''}. Ver gráfico`}>
+    <button type="button" className="cuadrito" data-medida={c.medida} onClick={onAbrir} aria-label={`${LARGO[c.medida] ?? nombre}${c.estimada ? ' (estimada)' : ''}: ${formatear(c.valor, dec)} ${unidad}${c.clasificacion ? `, ${c.clasificacion.nombre}` : ''}. Ver gráfico`}>
       <span className="cuadrito-k">{nombre}{c.estimada && ' (est.)'}</span>
       <span className="cuadrito-v num">
         {formatear(c.valor, dec)} <small>{unidad}</small>

@@ -1,38 +1,38 @@
 /* Mesura como hoja de moldes de costura: papel frío, tinta casi negra, banda cobalto del sobre del molde.
    Cada persona es una línea del molde; cada medida, una marca rotulada sobre esa línea. */
 :root {
-  /* Tiza de sastre sobre paño oscuro: fondo de lana azul tinta, hojas un tono más claras,
-     líneas y cifras en tiza blanca, cobalto para las acciones. */
-  --bg: #0f131b;
-  --card: #171c27;
-  --edge: #2b3242;
-  --soft: #1f2532;
-  --fg: #eef1f6;
-  --dim: #a3acbd;
-  --accent: #3d5cf0;
-  --accent-hondo: #2f4bd6;
-  --accent-tiza: #93a8ff;
+  /* Tiza de sastre sobre paño de lana: fondo carbón neutro, hojas apenas levantadas y definidas por líneas
+     de tiza, todo trazo en tiza blanca; acciones en tiza azul; estados en tonos de tiza, nunca neón. */
+  --bg: #16171a;
+  --card: #1b1c20;
+  --edge: #3a3a3d;
+  --soft: #222327;
+  --fg: #ece9e2;
+  --dim: #aaa69d;
+  --accent: #3d6ab0;
+  --accent-hondo: #345c9b;
+  --accent-tiza: #9cbde8;
   --on-accent: #ffffff;
-  --cyan: #7fd3ea;
-  --good: #52d69c;
-  --good-bg: #13372a;
-  --warn: #f2b45a;
-  --warn-bg: #3b2a12;
-  --bad: #ff7a88;
+  --cyan: #9cbde8;
+  --good: #9cc79a;
+  --good-bg: #1f2a20;
+  --warn: #e2c36b;
+  --warn-bg: #2c2717;
+  --bad: #e58a7f;
   /* La pieza del molde: paño, línea de corte en tiza y costura en tiza azul. */
-  --pieza: #1d2540;
-  --corte: #e9edf5;
-  --costura: #93a8ff;
+  --pieza: #24262c;
+  --corte: #ece9e2;
+  --costura: #9cbde8;
   --font: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 10px;
-  --sombra: rgba(0, 0, 0, 0.55);
-  /* Estados de salud sobre fondo oscuro, con contraste AA. */
-  --st-bajo: #6cc3f5;
-  --st-ok: #52d69c;
-  --st-alto: #f2b45a;
-  --st-muy: #ff7a88;
-  --seleccion: #2c3f8f;
-  --hover-celda: #1c2232;
+  --sombra: rgba(0, 0, 0, 0.6);
+  /* Estados de salud en tiza: azul, verde apagado, amarillo y rojo, con contraste AA sobre el paño. */
+  --st-bajo: #8fbbe6;
+  --st-ok: #9cc79a;
+  --st-alto: #e2c36b;
+  --st-muy: #e58a7f;
+  --seleccion: #34507d;
+  --hover-celda: #222327;
   color-scheme: dark;
 }
 ::selection { background: var(--seleccion); color: var(--fg); }
@@ -424,7 +424,7 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .hero-k, .cuadrito-k, .tile .k { color: var(--dim); font-weight: 650; letter-spacing: 0.01em; }
 .hero-cambio.bien, .cuadrito-cambio.bien, .tile .d.bien { color: var(--good); }
 .hero-cambio.atencion, .cuadrito-cambio.atencion, .tile .d.atencion { color: var(--warn); }
-.linea-semana { background: var(--soft); border: 1.5px dashed #4a5672; }
+.linea-semana { background: var(--soft); border: 1.5px dashed #5a5853; }
 .linea-semana:hover { border-style: solid; border-color: var(--accent); }
 .linea-semana b { font-weight: 750; color: var(--accent); }
 .icono { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -475,11 +475,11 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .b-magra { fill: var(--accent); }
 .ley.magra::before { background: var(--accent); }
 .cifra.magra { border-color: var(--accent); }
-.insight.bien { border-color: var(--good); background: #142a22; }
-.insight.atencion { border-color: var(--warn); background: #2c2414; }
+.insight.bien { border-color: var(--good); background: var(--good-bg); }
+.insight.atencion { border-color: var(--warn); background: var(--warn-bg); }
 .notice.ok { color: var(--good); }
 .notice.warn { color: var(--warn); }
-.modo[aria-selected='true'] { border: 2px solid var(--accent-tiza); background: #1c2440; }
+.modo[aria-selected='true'] { border: 2px solid var(--accent-tiza); background: var(--soft); }
 .dialogo-fondo { background: rgba(4, 6, 12, 0.7); }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -553,8 +553,8 @@ details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px)
 .tiles > .tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 /* ---------- Versión oscura: tiza sobre paño ---------- */
-.top { background: #1b2a78; }
-.top .perfil-boton .avatar { color: #1b2a78; }
+.top { background: #1d2a48; }
+.top .perfil-boton .avatar { color: #1d2a48; }
 .btn.link, a, details.guide summary, .linea-semana b, .perfil-item.accion { color: var(--accent-tiza); }
 .peso-boton:hover .ver-mas, .enlace:hover > span:last-child { color: var(--accent-tiza); }
 .cuadrito:hover, .tile.tocable:hover, .linea-semana:hover { border-color: var(--accent-tiza); }
@@ -605,3 +605,15 @@ details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px)
 .insight.bien { border-color: color-mix(in srgb, var(--good) 45%, var(--card)); }
 .insight.atencion { border-color: color-mix(in srgb, var(--warn) 45%, var(--card)); }
 .semana-pantalla { max-width: 860px; }
+
+/* ---------- Ronda 3: paño y tiza ---------- */
+/* Las hojas se definen por su línea de corte en tiza, no por un relleno más claro. */
+.card, .tile, .cuadrito, .modo, .enlaces { border-color: #45443f; }
+.ficha-c .hero { border-color: var(--corte); }
+.cuadritos, .tiles { border-color: var(--corte); }
+/* La fila de cifras es una franja reglada de la misma hoja: solo líneas, sin caja propia. */
+.hero .cuadritos { gap: 0; background: none; border: 0; border-top: 1.5px solid var(--edge); border-bottom: 1.5px solid var(--edge); border-radius: 0; overflow: visible; margin-inline: -2px; }
+.hero .cuadrito { background: none; border: 0; border-left: 1.5px solid var(--edge); border-radius: 0; justify-content: flex-start; }
+.hero .cuadrito:first-child { border-left: 0; padding-left: 2px; }
+.hero .cuadrito:hover { background: var(--hover-celda); }
+.hero .cuadrito-k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

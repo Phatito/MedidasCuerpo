@@ -11,9 +11,9 @@ Scope: the whole app UI, Operate mode. Audience: the owner and his family, on th
 
 ## Direction contract
 
-THESIS: Mesura reads like a dressmaker's pattern sheet: each person is a pattern line, each measurement a labeled mark on that line. It refuses the category default of dark health-dashboard cards with neon accents.
+THESIS: Mesura reads like a dressmaker's pattern sheet: each person is a pattern line, each measurement a labeled mark on that line. The owner asked "prefiero colores oscuros", so it is rendered as tailor's chalk on dark wool. It still refuses the category default of dark health-dashboard cards with neon accents.
 
-OWN-WORLD: Cool white pattern paper (#F3F5F8 ground, white sheets), ink near-black, a cobalt envelope band for the shell header. Pattern-line inks carry meaning: cobalt for actions and the current person, red/green/amber only for states. Lines are drawn like pattern lines: solid for now, dashed for before, triangular notch marks for changes. Archivo variable: condensed widths for figures and labels, normal width for reading. Thin 1.5 px rules, square-ish 10 px corners, no glow.
+OWN-WORLD: Charcoal wool ground (#16171a, neutral, never blue slate); sheets barely lifted (#1b1c20) and defined by chalk cutting lines, not lighter fills; all line ink in warm chalk white (#ece9e2). A deep navy wool band (#1d2a48) for the shell header. Actions in chalk blue (fill #3d6ab0, text #9cbde8). States only in tailor's chalk tones: chalk red #e58a7f, chalk yellow #e2c36b, chalk blue #8fbbe6, muted green #9cc79a. Lines drawn like pattern lines: solid for now, dashed for before, triangular notch marks for changes. Archivo variable: condensed widths for figures and labels, normal width for reading. 1.5 px rules, 10 px corners, no glow.
 
 STORY: Open the app, read weight trend and its notch (change), four key figures, and the body pattern with its girths; tap any figure to open its chart; register the next measurement.
 
