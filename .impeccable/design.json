@@ -142,7 +142,7 @@
       "cut-rule": {
         "role": "neutral",
         "displayName": "Cut Rule",
-        "canonical": "#3a3a3d",
+        "canonical": "#3a3b3f",
         "tonalRamp": [
           "#0b0b0d",
           "#252527",
@@ -217,7 +217,7 @@
       "chalk": {
         "role": "neutral",
         "displayName": "Chalk",
-        "canonical": "#ece9e2",
+        "canonical": "#eceef1",
         "tonalRamp": [
           "#0d0b07",
           "#272520",
@@ -232,7 +232,7 @@
       "graphite": {
         "role": "neutral",
         "displayName": "Graphite",
-        "canonical": "#aaa69d",
+        "canonical": "#a8abb2",
         "tonalRamp": [
           "#0c0b0a",
           "#262522",
@@ -307,7 +307,7 @@
       "state-bad": {
         "role": "tertiary",
         "displayName": "Chalk Red",
-        "canonical": "#e58a7f",
+        "canonical": "#ec8692",
         "tonalRamp": [
           "#150705",
           "#3a1b17",
@@ -367,7 +367,7 @@
       "range-very-high": {
         "role": "tertiary",
         "displayName": "Range Very High Red",
-        "canonical": "#e58a7f",
+        "canonical": "#ec8692",
         "tonalRamp": [
           "#150705",
           "#3a1b17",
@@ -469,7 +469,7 @@
       "refersTo": "button-secondary",
       "description": "Back and secondary actions; sheet fill drawn by its edge.",
       "html": "<button class=\"ds-btn-secondary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>Volver</button>",
-      "css": ".ds-btn-secondary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 18px;border-radius:10px;border:1.5px solid #45443f;background:#1b1c20;color:#ece9e2;font-size:.9rem;font-weight:700;cursor:pointer}.ds-btn-secondary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-secondary:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
+      "css": ".ds-btn-secondary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 18px;border-radius:10px;border:1.5px solid #45443f;background:#1b1c20;color:#eceef1;font-size:.9rem;font-weight:700;cursor:pointer}.ds-btn-secondary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-secondary:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Toggle Chips",
@@ -477,7 +477,7 @@
       "refersTo": "chip-toggle",
       "description": "Metric and period selectors above a chart; pressed fills cobalt.",
       "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">Peso</button><button class=\"ds-chip\" aria-pressed=\"true\">Grasa</button><button class=\"ds-chip\" aria-pressed=\"false\">Músculo</button></div>",
-      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #3a3a3d;background:#1b1c20;color:#ece9e2;font-size:.875rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out,background-color .15s ease-out}.ds-chip[aria-pressed='true']{background:#3d6ab0;border-color:#3d6ab0;color:#fff}.ds-chip:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
+      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #3a3b3f;background:#1b1c20;color:#eceef1;font-size:.875rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out,background-color .15s ease-out}.ds-chip[aria-pressed='true']{background:#3d6ab0;border-color:#3d6ab0;color:#fff}.ds-chip:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Input Field",
@@ -485,7 +485,7 @@
       "refersTo": "input-field",
       "description": "Labeled measurement input; 3:1 field edge, cobalt border and selection-navy ring on focus.",
       "html": "<label class=\"ds-field\"><span>Cintura (cm)</span><input inputmode=\"decimal\" value=\"95,0\"></label>",
-      "css": ".ds-field{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:5px}.ds-field span{font-size:.8rem;font-weight:600;color:#aaa69d}.ds-field input{font:inherit;color:#ece9e2;background:#1b1c20;border:1.5px solid #77736b;border-radius:10px;min-height:44px;padding:9px 12px}.ds-field input:focus{border-color:#3d6ab0;outline:none;box-shadow:0 0 0 3px #34507d}"
+      "css": ".ds-field{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:5px}.ds-field span{font-size:.8rem;font-weight:600;color:#a8abb2}.ds-field input{font:inherit;color:#eceef1;background:#1b1c20;border:1.5px solid #77736b;border-radius:10px;min-height:44px;padding:9px 12px}.ds-field input:focus{border-color:#3d6ab0;outline:none;box-shadow:0 0 0 3px #34507d}"
     },
     {
       "name": "Envelope Band",
@@ -501,7 +501,7 @@
       "refersTo": "figure-band-cell",
       "description": "The ficha sheet drawn by a chalk cutting line; the four key figures as a ruled band of the same sheet.",
       "html": "<section class=\"ds-sheet\"><span class=\"k\">Peso de tendencia</span><span class=\"hero\">92,5 <small>kg</small></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,5 kg desde el 16/11</span><div class=\"ds-band-row\"><button class=\"ds-cell\"><span class=\"k\">Grasa</span><span class=\"v\">26,2 <small>%</small></span><span class=\"st bad\">Muy alto</span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,3</span></button><button class=\"ds-cell\"><span class=\"k\">Músculo</span><span class=\"v\">36,3 <small>kg</small></span></button><button class=\"ds-cell\"><span class=\"k\">Cintura</span><span class=\"v\">95,0 <small>cm</small></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 1,0</span></button><button class=\"ds-cell\"><span class=\"k\">Visceral</span><span class=\"v\">14 <small>nivel</small></span><span class=\"st warn\">Alto</span></button></div></section>",
-      "css": ".ds-sheet{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:4px;max-width:520px;padding:18px;border-radius:10px;border:1.5px solid #ece9e2;background:#1b1c20;color:#ece9e2}.ds-sheet .k{font-size:.78rem;font-weight:650;font-stretch:82%;color:#aaa69d}.ds-sheet .hero{font-size:4.2rem;font-weight:720;font-stretch:72%;line-height:.95;letter-spacing:-.01em;font-variant-numeric:tabular-nums}.ds-sheet small{font-size:.7rem;font-weight:600;color:#aaa69d}.ds-sheet .d{font-size:.8rem;font-weight:700;color:#aaa69d;font-variant-numeric:tabular-nums}.ds-sheet .d.good{color:#9cc79a}.ds-sheet .d svg{width:.8em;height:.8em;fill:currentColor}.ds-band-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;border-top:1.5px solid #3a3a3d;border-bottom:1.5px solid #3a3a3d}.ds-cell{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:82px;padding:10px 8px;border:0;border-left:1.5px solid #3a3a3d;background:none;color:#ece9e2;text-align:left;cursor:pointer;transition:background-color .15s ease-out}.ds-cell:first-child{border-left:0;padding-left:2px}.ds-cell:hover{background:#222327}.ds-cell:focus-visible{outline:2.5px solid #9cbde8;outline-offset:-3px}.ds-cell .k{font-size:.72rem;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ds-cell .v{font-size:1.55rem;font-weight:720;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}.ds-cell .st{font-size:.72rem;font-weight:800}.ds-cell .st.bad{color:#e58a7f}.ds-cell .st.warn{color:#e2c36b}.ds-cell .d{font-size:.72rem}"
+      "css": ".ds-sheet{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:4px;max-width:520px;padding:18px;border-radius:10px;border:1.5px solid #eceef1;background:#1b1c20;color:#eceef1}.ds-sheet .k{font-size:.78rem;font-weight:650;font-stretch:82%;color:#a8abb2}.ds-sheet .hero{font-size:4.2rem;font-weight:720;font-stretch:72%;line-height:.95;letter-spacing:-.01em;font-variant-numeric:tabular-nums}.ds-sheet small{font-size:.7rem;font-weight:600;color:#a8abb2}.ds-sheet .d{font-size:.8rem;font-weight:700;color:#a8abb2;font-variant-numeric:tabular-nums}.ds-sheet .d.good{color:#9cc79a}.ds-sheet .d svg{width:.8em;height:.8em;fill:currentColor}.ds-band-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;border-top:1.5px solid #3a3b3f;border-bottom:1.5px solid #3a3b3f}.ds-cell{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:82px;padding:10px 8px;border:0;border-left:1.5px solid #3a3b3f;background:none;color:#eceef1;text-align:left;cursor:pointer;transition:background-color .15s ease-out}.ds-cell:first-child{border-left:0;padding-left:2px}.ds-cell:hover{background:#222327}.ds-cell:focus-visible{outline:2.5px solid #9cbde8;outline-offset:-3px}.ds-cell .k{font-size:.72rem;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ds-cell .v{font-size:1.55rem;font-weight:720;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}.ds-cell .st{font-size:.72rem;font-weight:800}.ds-cell .st.bad{color:#ec8692}.ds-cell .st.warn{color:#e2c36b}.ds-cell .d{font-size:.72rem}"
     },
     {
       "name": "Week Line",
@@ -509,15 +509,15 @@
       "refersTo": "sheet",
       "description": "Tu semana as a seam: dashed border that becomes a solid chalk-blue cut on hover.",
       "html": "<button class=\"ds-week\"><svg viewBox=\"0 0 24 24\"><path d=\"M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3\"/></svg><span><b>Tu semana.</b> Anota cuánto comes al día para estimar tu gasto real.</span><svg viewBox=\"0 0 24 24\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
-      "css": ".ds-week{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-height:48px;padding:10px 12px;width:100%;text-align:left;border-radius:10px;background:#1b1c20;border:1.5px dashed #5a5853;color:#ece9e2;font-size:.9rem;cursor:pointer;transition:border-color .15s ease-out}.ds-week b{font-weight:750;color:#9cbde8}.ds-week svg{width:20px;height:20px;flex:none;fill:none;stroke:#aaa69d;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-week:hover{border-style:solid;border-color:#9cbde8}.ds-week:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
+      "css": ".ds-week{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-height:48px;padding:10px 12px;width:100%;text-align:left;border-radius:10px;background:#1b1c20;border:1.5px dashed #5a5853;color:#eceef1;font-size:.9rem;cursor:pointer;transition:border-color .15s ease-out}.ds-week b{font-weight:750;color:#9cbde8}.ds-week svg{width:20px;height:20px;flex:none;fill:none;stroke:#a8abb2;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-week:hover{border-style:solid;border-color:#9cbde8}.ds-week:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Range Bar",
       "kind": "custom",
       "refersTo": "figure-cell",
       "description": "Four chalk-tone segments with a chalk dot for the current value, always paired with the state word.",
-      "html": "<div class=\"ds-range\" role=\"img\" aria-label=\"Muy alto\"><i style=\"background:#8fbbe6\"></i><i style=\"background:#9cc79a\"></i><i style=\"background:#e2c36b\"></i><i style=\"background:#e58a7f\"></i><b style=\"left:86%\"></b></div>",
-      "css": ".ds-range{position:relative;display:flex;gap:3px;height:5px;width:280px;margin:12px}.ds-range i{flex:1;border-radius:2px}.ds-range b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#ece9e2;border:2.5px solid #1b1c20}"
+      "html": "<div class=\"ds-range\" role=\"img\" aria-label=\"Muy alto\"><i style=\"background:#8fbbe6\"></i><i style=\"background:#9cc79a\"></i><i style=\"background:#e2c36b\"></i><i style=\"background:#ec8692\"></i><b style=\"left:86%\"></b></div>",
+      "css": ".ds-range{position:relative;display:flex;gap:3px;height:5px;width:280px;margin:12px}.ds-range i{flex:1;border-radius:2px}.ds-range b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#eceef1;border:2.5px solid #1b1c20}"
     }
   ],
   "narrative": {
