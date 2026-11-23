@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Icono } from './Icono'
 import { fechaLegible, hoyIso } from '../domain/numbers'
 import { estadoMedicion } from '../domain/reminders'
 import type { Persona } from '../domain/types'
@@ -97,7 +98,7 @@ export function SelectorPerfil({ personas, actual, principalId, ultimaFecha, onE
                     {pendiente ? 'Le toca medirse' : `Al día · ${fechaLegible(fecha!).slice(0, 5)}`}
                   </span>
                 </span>
-                {p.id === principalId && <span className="muted small">★ principal</span>}
+                {p.id === principalId && <span className="muted small principal-marca"><Icono nombre="estrella" className="llena" /> principal</span>}
               </button>
             )
           })}

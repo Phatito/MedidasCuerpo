@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Icono } from './Icono'
 import { useState } from 'react'
 import { diasEntre, fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { estadoMedicion } from '../domain/reminders'
@@ -108,7 +109,7 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
                   disabled={!ajustes}
                   onClick={() => ajustes && guardarAjustes({ ...ajustes, personaPrincipalId: p.id })}
                 >
-                  {ajustes?.personaPrincipalId === p.id ? '★' : '☆'}
+                  <Icono nombre="estrella" className={ajustes?.personaPrincipalId === p.id ? 'llena' : ''} />
                 </button>
               </div>
               {u ? (

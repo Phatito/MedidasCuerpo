@@ -364,7 +364,7 @@ test('el selector de perfil marca a quien le toca y abre su ficha', async ({ pag
   await abrirPerfiles(page)
   const ana = perfiles(page).getByRole('menuitem', { name: /Ana/ })
   await expect(ana).toContainText('Le toca medirse')
-  await expect(ana).toContainText('★ principal')
+  await expect(ana).toContainText('principal')
   await ana.click()
   await expect(figura(page)).toBeVisible()
   await abrirPerfiles(page)

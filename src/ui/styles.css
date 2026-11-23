@@ -617,3 +617,12 @@ details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px)
 .hero .cuadrito:first-child { border-left: 0; padding-left: 2px; }
 .hero .cuadrito:hover { background: var(--hover-celda); }
 .hero .cuadrito-k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Estrella de la persona principal, dibujada. */
+.estrella { display: inline-grid; place-items: center; }
+.icono.llena { fill: var(--warn); stroke: var(--warn); }
+.estrella[aria-pressed='true'] .icono { fill: var(--warn); }
+.principal-marca { display: inline-flex; align-items: center; gap: 4px; }
+.principal-marca .icono { width: 14px; height: 14px; }
+/* Los bordes de los campos se distinguen del fondo (3:1). */
+.field input, .field select, .field textarea, .chip-select { border-color: #77736b; }
