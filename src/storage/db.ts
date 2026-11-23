@@ -35,8 +35,8 @@ class BaseDatos extends Dexie {
   cambios!: Table<Cambio, string>
   sesion!: Table<FilaSesion, string>
 
-  constructor() {
-    super('medidascuerpo')
+  constructor(nombre = 'medidascuerpo') {
+    super(nombre)
     this.version(1).stores({
       personas: 'id, creadaEn',
       mediciones: 'id, personaId, [personaId+fecha]',
@@ -50,7 +50,13 @@ class BaseDatos extends Dexie {
   }
 }
 
-export const db = new BaseDatos()
+// `let` para que las pruebas simulen otro dispositivo con otra base (usarBaseDeDatos).
+export let db = new BaseDatos()
+
+/** Solo para pruebas: cambia a otra base local, como si fuera otro dispositivo. */
+export function usarBaseDeDatos(nombre: string): void {
+  db = new BaseDatos(nombre)
+}
 
 const idPersona = (id: string) => `persona:${id}`
 const idMedicion = (id: string) => `medicion:${id}`
