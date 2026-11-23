@@ -432,6 +432,9 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
   await expect(figura(page)).toHaveAttribute('aria-label', /cintura 86,5 cm \(bajó 1,5\)/)
   await expect(page.locator('.hero')).toContainText('72,4')
+  await expect(page.locator('.cuadrito[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
+  // La interpretación y el gráfico están en la pantalla de la medida.
+  await page.locator('.cuadrito[data-medida="cinturaCm"]').click()
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
   await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
   await expect(page.locator('svg.chart .area')).toHaveCount(1)
@@ -459,12 +462,14 @@ test('el gráfico de la ficha se lee en un teléfono', async ({ page }) => {
   await agregarAna(page)
   await medir(page, haceDias(7), '72,5', '88')
   await medir(page, haceDias(0), '72,4', '86,5')
-  await ir(page, 'Ficha')
+  await ir(page, 'Evolución')
   const px = await page.locator('svg.chart text.axis').first().evaluate((t) => {
     const svg = t.closest('svg')!
     return (parseFloat(getComputedStyle(t).fontSize) * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width
   })
   expect(px).toBeGreaterThanOrEqual(10)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await ir(page, 'Ficha')
   const etiqueta = await figura(page).locator('text.lab').first().evaluate((t) => {
     const svg = t.closest('svg')!
     return (parseFloat(getComputedStyle(t).fontSize) * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width
@@ -590,10 +595,10 @@ test('el peso se lee por su tendencia', async ({ page }) => {
   await agregarAna(page)
   for (const [dias, peso] of [[14, '74'], [7, '72'], [0, '74']] as const) await medir(page, haceDias(dias), peso, '88')
   await ir(page, 'Ficha')
-  const tarjeta = page.locator('.hero')
-  await expect(tarjeta).toContainText('Última pesada: 74,0 kg')
   // 74 → 72 → 74 con pesadas semanales deja la tendencia en 73,5: la subida puntual se suaviza.
-  await expect(tarjeta.locator('.hero-v')).toContainText('73,5')
+  await expect(page.locator('.hero .hero-v')).toContainText('73,5')
+  await page.locator('.peso-boton').click()
+  await expect(page.getByText('Última pesada: 74,0 kg')).toBeVisible()
   await expect(page.locator('svg.chart path.trend')).toHaveCount(1)
   await expect(page.getByText('La tendencia es un promedio que da más importancia a las pesadas recientes')).toBeVisible()
   await elegirMetrica(page, 'Cintura')
@@ -603,17 +608,18 @@ test('el peso se lee por su tendencia', async ({ page }) => {
 test('la meta muestra fecha estimada o avisa si el ritmo va en contra', async ({ page }) => {
   await agregarAna(page)
   for (const [dias, peso] of [[28, '74'], [21, '73,5'], [14, '73'], [7, '72,5'], [0, '72']] as const) await medir(page, haceDias(dias), peso, '88')
-  await ir(page, 'Ficha')
-  await expect(page.getByRole('heading', { name: 'Meta' })).toHaveCount(0)
+  await ir(page, 'Evolución')
+  await expect(page.locator('.meta-texto')).toHaveCount(0)
   const fijarMeta = async (kg: string) => {
     await ir(page, 'Familia')
     await page.getByRole('button', { name: 'Editar' }).click()
     await page.getByLabel('Peso objetivo (kg, opcional)').fill(kg)
     await page.getByRole('button', { name: 'Guardar persona' }).click()
     await page.getByRole('button', { name: 'Ver ficha' }).click()
+    await page.locator('.peso-boton').click()
   }
   await fijarMeta('70')
-  const meta = page.locator('.card', { has: page.getByRole('heading', { name: 'Meta' }) })
+  const meta = page.locator('.meta-texto')
   await expect(meta).toContainText('70,0 kg')
   await expect(meta).toContainText(/Fecha estimada: \d{2}\/\d{2}\/\d{4}/)
   await expect(meta).toContainText('por semana')
@@ -634,7 +640,7 @@ test('una pesada sin perímetros no borra la figura', async ({ page }) => {
   await expect(page.getByText('Medición guardada')).toBeVisible()
   await ir(page, 'Ficha')
   await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('88,0 cm')
-  await expect(page.getByText(/Perímetros del \d{2}\/\d{2}\/\d{4}, la última vez que se midieron/)).toBeVisible()
+  await expect(figura(page).locator('xpath=ancestor::section[1]')).toContainText(`del ${haceDias(7).split('-').reverse().join('/')}`)
   await expect(page.getByText('Registra perímetros para verlos sobre la figura.')).toHaveCount(0)
   // En Medir, el valor anterior de la cintura sigue a la vista aunque la última medición fuera solo peso.
   await ir(page, 'Medir')
@@ -723,20 +729,23 @@ test('la ficha muestra todas las medidas de la báscula con su estado', async ({
   const csv = `Fecha;Peso;Grasa (%);Grasa visceral;Masa ósea;Metabolismo basal;Proteína (%)\n${haceDias(0).split('-').reverse().join('/')};70;30;16;2,4;1400;17\n`
   await page.getByLabel('Archivo CSV').setInputFiles({ name: 'b.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
   await page.getByRole('button', { name: 'Confirmar importación' }).click()
-  await ir(page, 'Ficha')
+  await ir(page, 'Cifras')
   const tile = (clave: string) => page.locator(`.tile[data-clave="${clave}"]`)
   await expect(tile('grasaVisceral')).toContainText('Muy alto')
   await expect(tile('grasaVisceral').getByRole('img')).toHaveAttribute('aria-label', /Tu valor está en Muy alto/)
   await expect(tile('metabolismoBasalKcal')).toContainText('1400')
   await expect(tile('masaOseaKg')).toContainText('2,4')
   await expect(tile('proteinaPct')).toContainText('Estándar')
-  await expect(page.locator('.hero')).toContainText('IMC')
+  // Cada tarjeta abre su gráfico.
+  await tile('masaOseaKg').getByRole('button').click()
+  await expect(page.getByRole('heading', { level: 2, name: /Masa ósea/ })).toBeVisible()
+  await expect(page.locator('svg.chart')).toBeVisible()
 })
 
 test('el gráfico cambia de período', async ({ page }) => {
   await agregarAna(page)
   for (const dias of [400, 200, 30, 0]) await medir(page, haceDias(dias), '72', '88')
-  await ir(page, 'Ficha')
+  await ir(page, 'Evolución')
   const periodo = page.getByRole('group', { name: 'Período' })
   await expect(periodo.getByRole('button', { name: '3 meses' })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
@@ -798,6 +807,7 @@ test('los campos nuevos de la báscula se guardan y se ven en la ficha', async (
   await page.getByText('Más de la báscula').click()
   await page.getByLabel('Masa ósea (kg)').fill('2,4')
   await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await ir(page, 'Cifras')
   await expect(page.locator('.tile[data-clave="masaOseaKg"]')).toContainText('2,4')
 })
 
@@ -892,9 +902,11 @@ test('los enlaces y desplegables de la ficha miden al menos 44 px', async ({ pag
   await agregarAna(page)
   await medir(page, haceDias(0), '72', '88')
   await ir(page, 'Ficha')
-  for (const objetivo of [page.getByRole('button', { name: 'Ver todas las mediciones →' }), page.getByText('Cómo leer estas cifras')]) {
+  for (const objetivo of [page.getByRole('button', { name: 'Todas las mediciones' }), page.getByRole('button', { name: 'Todas las cifras' }), page.locator('.cuadrito').first(), page.locator('.linea-semana')]) {
     expect((await objetivo.boundingBox())!.height).toBeGreaterThanOrEqual(44)
   }
+  await ir(page, 'Cifras')
+  expect((await page.getByText('Cómo leer estas cifras').boundingBox())!.height).toBeGreaterThanOrEqual(44)
 })
 
 test('un nombre largo no parte el encabezado en varias filas', async ({ page }) => {
@@ -1327,7 +1339,7 @@ async function importarConGrasa(page: Page) {
 test('anotar y cambiar el consumo de kcal', async ({ page }) => {
   await agregarAna(page)
   await medir(page, haceDias(0), '70', '80')
-  await ir(page, 'Ficha')
+  await ir(page, 'Evolución')
   await page.getByRole('button', { name: 'Anotar consumo ✎' }).click()
   await page.getByLabel('kcal al día').fill('2500')
   await page.getByRole('button', { name: 'Guardar consumo' }).click()
@@ -1352,13 +1364,11 @@ test('anotar y cambiar el consumo de kcal', async ({ page }) => {
 test('la tarjeta Tu semana muestra grasa y masa magra y abre el informe completo', async ({ page }) => {
   await agregarAna(page)
   await importarConGrasa(page)
-  const tarjeta = page.locator('.semana-card')
-  await expect(tarjeta.getByRole('heading', { name: /Tu semana/ })).toBeVisible()
-  await expect(tarjeta).toContainText('Grasa')
-  await expect(tarjeta).toContainText('Masa magra')
-  await expect(tarjeta).toContainText('Anota cuánto comes')
-  await tarjeta.getByRole('button', { name: 'Ver informe completo →' }).click()
+  await expect(page.locator('.linea-semana')).toContainText('Anota cuánto comes')
+  await page.locator('.linea-semana').click()
   await expect(page).toHaveURL(/#\/p\/.+\/semana$/)
+  await expect(page.locator('.semana-pantalla')).toContainText('Grasa')
+  await expect(page.locator('.semana-pantalla')).toContainText('Masa magra')
   await expect(page.getByRole('heading', { level: 2, name: /Tu semana/ })).toBeVisible()
   await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
   await expect(page.getByText('Cómo se calcula')).toBeVisible()
@@ -1377,9 +1387,11 @@ test('Tu semana no desborda a 400 px', async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 800 })
   await agregarAna(page)
   await importarConGrasa(page)
-  await expect(page.locator('.semana-card')).toBeVisible()
+  await expect(page.locator('.cuadrito').first()).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
-  await page.getByRole('button', { name: 'Ver informe completo →' }).click()
+  // La ficha cabe en unas dos pantallas de teléfono.
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(1800)
+  await page.locator('.linea-semana').click()
   await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
@@ -1387,7 +1399,7 @@ test('Tu semana no desborda a 400 px', async ({ page }) => {
 test('editar a la persona conserva su consumo de kcal', async ({ page }) => {
   await agregarAna(page)
   await medir(page, haceDias(0), '70', '80')
-  await ir(page, 'Ficha')
+  await ir(page, 'Evolución')
   await page.getByRole('button', { name: 'Anotar consumo ✎' }).click()
   await page.getByLabel('kcal al día').fill('2500')
   await page.getByRole('button', { name: 'Guardar consumo' }).click()
@@ -1398,7 +1410,8 @@ test('editar a la persona conserva su consumo de kcal', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar persona' }).click()
   await expect(page.getByRole('button', { name: 'Guardar persona' })).toHaveCount(0)
   await ir(page, 'Ficha')
-  await expect(page.getByText('objetivo: mantener')).toBeVisible()
+  await expect(page.getByText('Objetivo: mantener')).toBeVisible()
+  await page.locator('.peso-boton').click()
   await expect(page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' })).toBeVisible()
 })
 
@@ -1413,7 +1426,8 @@ test('la tarjeta revisa la semana pasada y el editor de consumo se lee bien', as
   await page.getByRole('button', { name: 'Confirmar importación' }).click()
   await expect(page.getByText('Se importaron 3 mediciones para Ana.')).toBeVisible()
   await ir(page, 'Ficha')
-  const tarjeta = page.locator('.semana-card')
+  await page.locator('.linea-semana').click()
+  const tarjeta = page.locator('.semana-pantalla')
   await expect(tarjeta.getByRole('heading', { name: 'La semana pasada' })).toBeVisible()
   await expect(tarjeta).toContainText('Pendiente:')
   await expect(tarjeta).toContainText('bajó')

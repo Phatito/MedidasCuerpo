@@ -44,12 +44,12 @@ export function cuadritos(p: Persona, ms: Medicion[], hoy: string): Cuadrito[] {
 }
 
 const DE_MEDIDA: Partial<Record<Metrica, Mensaje['codigo'][]>> = {
-  pesoKg: ['primera_medicion', 'tendencia', 'ritmo_rapido', 'baja_sin_datos', 'sube_sin_datos', 'sin_cambios', 'imc', 'desde_inicio', 'baja_peso_grasa'],
+  pesoKg: ['primera_medicion', 'tendencia', 'ritmo_rapido', 'baja_sin_datos', 'sube_sin_datos', 'sin_cambios', 'recomposicion', 'imc', 'desde_inicio', 'baja_peso_grasa'],
   grasaPct: ['gana_grasa', 'baja_sin_grasa', 'recomposicion'],
   grasaKg: ['gana_grasa', 'baja_sin_grasa', 'recomposicion'],
   musculoKg: ['pierde_musculo', 'gana_musculo'],
   pesoSinGrasaKg: ['pierde_musculo', 'gana_musculo'],
-  cinturaCm: ['alerta_cintura'],
+  cinturaCm: ['recomposicion', 'alerta_cintura'],
   grasaVisceral: ['alerta_visceral'],
   imc: ['imc'],
 }

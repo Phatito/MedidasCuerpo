@@ -4,6 +4,7 @@ import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { informeSemanal, type InformeSemanal } from '../domain/semana'
 import type { Medicion, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
+import { Consumo } from './Consumo'
 
 const miles = (n: number) => n.toLocaleString('es-CL')
 const ddmm = (f: string) => fechaLegible(f).slice(0, 5)
@@ -186,6 +187,7 @@ export function PantallaSemana({ persona }: { persona: Persona }) {
               {fechaLegible(inf.anterior)} → {fechaLegible(inf.fecha)}
             </p>
             <Partes inf={inf} persona={persona} hoy={hoy} />
+            <Consumo persona={persona} />
           </section>
           {inf.barras.length > 0 && (
             <section className="card stack" aria-labelledby="barras-titulo">

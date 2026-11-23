@@ -139,11 +139,11 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
       {puntos.length === 0 && <p className="muted">Todavía no hay datos de {nombre.toLowerCase()}.</p>}
 
       <Mensajes mensajes={mensajes} titulo="Qué indica" />
-      {(tarjeta?.clasificacion || mensajes.length > 0) && (
+      {mensajes.length > 0 && <p className="muted small">{NOTA_ORIENTACION}</p>}
+      {tarjeta?.clasificacion && (
         <details className="guide">
           <summary>Cómo leer estas cifras</summary>
           <p className="muted small">{GUIA_ESTADOS}</p>
-          <p className="muted small">{NOTA_ORIENTACION}</p>
         </details>
       )}
     </div>
