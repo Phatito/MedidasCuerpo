@@ -686,6 +686,23 @@ test('una dirección inválida lleva al inicio', async ({ page }) => {
 test('sin personas se abre Familia', async ({ page }) => {
   await page.goto('./#/p/alguien')
   await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
+  // Sin nadie a quien volver, no hay botón Volver.
+  await expect(page.getByRole('button', { name: /Volver/ })).toHaveCount(0)
+  // Desde Ajustes sí hay adónde volver: a Familia.
+  await page.getByRole('button', { name: 'Ajustes y datos' }).click()
+  await page.getByRole('button', { name: '← Volver' }).click()
+  await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
+})
+
+test('Volver desde Familia siempre lleva a una pantalla distinta', async ({ page }) => {
+  await agregarAna(page)
+  // Tras agregar a la primera persona se queda en Familia: Volver lleva a su ficha.
+  await page.getByRole('button', { name: '← Volver' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
+  // Entrar directo por la dirección y volver.
+  await page.goto('./#/familia')
+  await page.getByRole('button', { name: '← Volver' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
 })
 
 // ---------- Ficha completa ----------

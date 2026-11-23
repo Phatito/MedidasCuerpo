@@ -115,12 +115,15 @@ export function App() {
     setRuta(r)
   }
 
-  /** Vuelve a la pantalla anterior de la app; si se entró directo por la dirección, va a `alternativa`. */
-  function volver(alternativa: Ruta) {
-    if (history.state?.app) history.back()
+  /**
+   * Vuelve a `destino`. Si se llegó desde ahí dentro de la app, usa el Atrás del navegador (para no
+   * duplicar el historial); si no (entrada directa, recarga u otra ruta), va a `destino` sin más.
+   */
+  function volver(destino: Ruta) {
+    if (history.state?.app && anterior.current === escribirRuta(destino)) history.back()
     else {
-      history.replaceState(null, '', escribirRuta(alternativa))
-      setRuta(alternativa)
+      history.replaceState(null, '', escribirRuta(destino))
+      setRuta(destino)
     }
   }
 
@@ -131,6 +134,7 @@ export function App() {
   const fichaDe = (id: string): Ruta => ({ pantalla: 'ficha', personaId: id })
   const alInicio: Ruta = principal ? fichaDe(principal.id) : { pantalla: 'familia' }
   const vista = destino ? null : ruta
+  const atras: Ruta = persona ? fichaDe(persona.id) : alInicio
   const avisoVisible = !!(aviso && vista && aviso.hash === escribirRuta(vista))
 
   return (
@@ -175,8 +179,9 @@ export function App() {
           <p className="muted">Cargando tus datos…</p>
         ) : (
           <>
-            {vista.pantalla !== 'ficha' && (
-              <button type="button" className="btn volver" onClick={() => volver(persona ? fichaDe(persona.id) : alInicio)}>
+            {/* Volver solo aparece si lleva a otra pantalla: sin personas, Familia no tiene adónde volver. */}
+            {vista.pantalla !== 'ficha' && escribirRuta(atras) !== escribirRuta(vista) && (
+              <button type="button" className="btn volver" onClick={() => volver(atras)}>
                 {vista.pantalla === 'registrar' ? '← Volver a la ficha' : '← Volver'}
               </button>
             )}
