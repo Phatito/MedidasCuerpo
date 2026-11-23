@@ -14,6 +14,7 @@ import type { Borrador } from './Medir'
 import { Registrar } from './Registrar'
 import { SelectorPerfil } from './SelectorPerfil'
 import { PantallaSemana } from './TuSemana'
+import { PantallaMedida, TodasLasCifras } from './Medida'
 
 const rutaActual = () => leerRuta(window.location.hash)
 
@@ -202,6 +203,8 @@ export function App() {
                 onMedir={() => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id })}
                 onVerMediciones={() => navegar({ pantalla: 'mediciones', personaId: personaDeRuta.id })}
                 onVerSemana={() => navegar({ pantalla: 'semana', personaId: personaDeRuta.id })}
+                onVerMedida={(medida) => navegar({ pantalla: 'medida', personaId: personaDeRuta.id, medida })}
+                onVerCifras={() => navegar({ pantalla: 'cifras', personaId: personaDeRuta.id })}
               />
             )}
             {vista.pantalla === 'registrar' && personaDeRuta && (
@@ -234,6 +237,21 @@ export function App() {
               </>
             )}
             {vista.pantalla === 'semana' && personaDeRuta && <PantallaSemana persona={personaDeRuta} />}
+            {vista.pantalla === 'medida' && personaDeRuta && (
+              <PantallaMedida
+                persona={personaDeRuta}
+                medida={vista.medida}
+                // Cambiar de medida reemplaza la pantalla: Volver sigue llevando a la ficha.
+                onCambiar={(medida) => {
+                  const r: Ruta = { pantalla: 'medida', personaId: personaDeRuta.id, medida }
+                  history.replaceState(history.state, '', escribirRuta(r))
+                  setRuta(r)
+                }}
+              />
+            )}
+            {vista.pantalla === 'cifras' && personaDeRuta && (
+              <TodasLasCifras persona={personaDeRuta} onVerMedida={(medida) => navegar({ pantalla: 'medida', personaId: personaDeRuta.id, medida })} />
+            )}
             {vista.pantalla === 'ajustes' && <Datos personas={personas} personaActual={persona} />}
           </>
         )}

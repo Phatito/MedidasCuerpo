@@ -216,7 +216,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
   .ficha-a { grid-template-columns: minmax(0, 1fr); }
   /* En una columna: peso, gráfico, tarjetas y al final la figura. */
   .col-izq, .col-der { display: contents; }
-  .hero { order: 1; } .col-der > * { order: 2; } .figura { order: 3; }
+  .ficha-a .hero { order: 1; } .ficha-a .col-der > * { order: 2; } .ficha-a .figura { order: 3; }
 }
 .ficha .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: 12px; }
@@ -324,3 +324,49 @@ progress { width: 100%; accent-color: var(--accent); }
 .ley::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
 .ley.grasa::before { background: var(--st-alto); }
 .ley.magra::before { background: var(--cyan); }
+
+/* Ficha compacta: lo importante a la vista; cada cifra abre su pantalla. */
+.ficha-c { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-block: 18px; }
+@media (min-width: 900px) {
+  .ficha-c { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .ficha-c .figura { grid-column: 2; grid-row: 1 / span 4; }
+}
+.ficha-c .hero { gap: 10px; }
+.ficha-c .who-head { display: flex; align-items: center; gap: 12px; }
+.peso-boton, .linea-semana, .cuadrito, .enlace {
+  font: inherit; color: inherit; text-align: left; cursor: pointer; border: 0; background: none; width: 100%;
+}
+.peso-boton { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 4px 28px 4px 0; border-radius: 12px; }
+.peso-boton .hero-k { margin-top: 0; }
+.peso-boton .ver-mas, .linea-semana > span:last-child, .enlace > span:last-child { color: var(--dim); font-size: 1.4rem; line-height: 1; }
+.peso-boton .ver-mas { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.peso-cambios { color: var(--dim); }
+.linea-semana {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 48px;
+  padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.06);
+}
+.linea-semana-k { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan); }
+.linea-semana-t { font-size: 0.9rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cuadritos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cuadrito {
+  display: flex; flex-direction: column; gap: 4px; min-height: 96px; padding: 12px 14px;
+  background: var(--card); border: 1px solid var(--edge); border-radius: var(--r);
+}
+.cuadrito:hover, .peso-boton:hover, .linea-semana:hover, .enlace:hover { filter: brightness(1.12); }
+.cuadrito:focus-visible, .peso-boton:focus-visible, .linea-semana:focus-visible, .enlace:focus-visible, .tile-abrir:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.cuadrito-k { font-size: 0.78rem; font-weight: 700; color: var(--dim); }
+.cuadrito-v { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+.cuadrito-v small { font-size: 0.8rem; font-weight: 600; color: var(--dim); letter-spacing: 0; }
+.cuadrito-pie { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; min-height: 20px; }
+.cuadrito-cambio { font-size: 0.8rem; font-weight: 700; color: var(--dim); }
+.cuadrito-cambio.bien { color: var(--good); }
+.cuadrito-cambio.atencion { color: var(--warn); }
+.enlaces { display: flex; flex-direction: column; padding: 4px 18px; }
+.enlace { display: flex; justify-content: space-between; align-items: center; min-height: 52px; font-weight: 700; }
+.enlace + .enlace { border-top: 1px solid var(--edge); }
+.tile.tocable { position: relative; }
+.tile-abrir { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.tile-abrir::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); }
+.tile.tocable:hover { border-color: var(--dim); }
+.chip-link { border: 0; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; min-height: 32px; }
+.medida-pantalla .tile .v { font-size: 2.2rem; }

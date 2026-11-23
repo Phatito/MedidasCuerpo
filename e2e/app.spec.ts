@@ -45,8 +45,17 @@ async function irAFicha(page: Page) {
   await abrirPerfiles(page)
   await perfiles(page).locator('[aria-current="true"]').click()
 }
-async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Familia' | 'Datos' | 'Evolución') {
-  if (destino === 'Ficha' || destino === 'Evolución') return irAFicha(page)
+async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Familia' | 'Datos' | 'Evolución' | 'Cifras') {
+  if (destino === 'Ficha') return irAFicha(page)
+  // El gráfico vive en la pantalla de cada medida: se entra por el peso.
+  if (destino === 'Evolución') {
+    await irAFicha(page)
+    return page.locator('.peso-boton').click()
+  }
+  if (destino === 'Cifras') {
+    await irAFicha(page)
+    return page.getByRole('button', { name: 'Todas las cifras' }).click()
+  }
   if (destino === 'Datos') return page.getByRole('button', { name: 'Ajustes y datos' }).click()
   if (destino === 'Familia') {
     await abrirPerfiles(page)
@@ -54,7 +63,7 @@ async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Famili
   }
   await irAFicha(page)
   if (destino === 'Medir') return page.getByRole('main').getByRole('button', { name: /Registrar medición/ }).first().click()
-  return page.getByRole('button', { name: 'Ver todas las mediciones →' }).click()
+  return page.getByRole('button', { name: 'Todas las mediciones' }).click()
 }
 
 test('registrar, actualizar y validar una medición', async ({ page }) => {
