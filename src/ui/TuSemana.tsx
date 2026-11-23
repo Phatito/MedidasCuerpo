@@ -5,16 +5,17 @@ import { informeSemanal, type InformeSemanal } from '../domain/semana'
 import type { Medicion, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { Consumo } from './Consumo'
+import { Icono, Muesca } from './Icono'
 
 const miles = (n: number) => n.toLocaleString('es-CL')
 const ddmm = (f: string) => fechaLegible(f).slice(0, 5)
-/** Cambio en kg con flecha; el lector de pantalla oye "bajó" o "subió" en vez de la flecha. */
+/** Cambio en kg con la muesca del molde; el lector de pantalla oye "bajó" o "subió". */
 function Cambio({ kg }: { kg: number }) {
-  const [flecha, palabra] = kg < -0.05 ? ['▼', 'bajó'] : kg > 0.05 ? ['▲', 'subió'] : ['=', 'sin cambio:']
-  return (
+  return Math.abs(kg) < 0.05 ? (
+    <>sin cambio, {formatear(0)} kg</>
+  ) : (
     <>
-      <span aria-hidden="true">{flecha}</span>
-      <span className="sr-only">{palabra}</span> {formatear(Math.abs(kg))} kg
+      <Muesca cambio={kg} /> {formatear(Math.abs(kg))} kg
     </>
   )
 }
@@ -126,7 +127,7 @@ export function TarjetaSemana({ persona, mediciones, onVerInforme }: { persona: 
         <>
           <Partes inf={inf} persona={persona} hoy={hoy} />
           <button type="button" className="btn link" style={{ alignSelf: 'flex-start', paddingLeft: 0 }} onClick={onVerInforme}>
-            Ver informe completo →
+            Ver informe completo <Icono nombre="abrir" />
           </button>
           <p className="muted small">{NOTA}</p>
         </>
@@ -184,7 +185,7 @@ export function PantallaSemana({ persona }: { persona: Persona }) {
         <>
           <section className="card stack">
             <p className="muted small">
-              {fechaLegible(inf.anterior)} → {fechaLegible(inf.fecha)}
+              Del {fechaLegible(inf.anterior)} al {fechaLegible(inf.fecha)}
             </p>
             <Partes inf={inf} persona={persona} hoy={hoy} />
             <Consumo persona={persona} />

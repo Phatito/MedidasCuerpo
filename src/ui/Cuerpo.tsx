@@ -143,15 +143,30 @@ export function Cuerpo({ sexo, medidas }: Props) {
         const ancla = der ? 'start' : 'end'
         return (
           <g key={m.campo} data-medida={m.campo}>
+            {/* Antes: la medida anterior como línea punteada, a su escala, bajo la de ahora. */}
+            {m.cambio != null && m.valor - m.cambio > 0 && (() => {
+              const w = (z.w * (m.valor - m.cambio)) / m.valor
+              return <path className="band-antes" d={`M${z.x - w} ${z.y + 5} Q${z.x} ${z.y + 12} ${z.x + w} ${z.y + 5}`} />
+            })()}
             <path className="band" d={`M${z.x - z.w} ${z.y} Q${z.x} ${z.y + 7} ${z.x + z.w} ${z.y}`} />
             <path className="lead" d={`M${borde} ${z.y} L${codo} ${z.y} L${fin} ${z.rotuloY}`} />
-            <circle className="pin" cx={borde} cy={z.y} r={3.5} />
+            {/* Muesca del molde donde la línea de cota toca la pieza. */}
+            <path className="pin" d={der ? `M${borde} ${z.y} L${borde + 7} ${z.y - 4.5} L${borde + 7} ${z.y + 4.5} Z` : `M${borde} ${z.y} L${borde - 7} ${z.y - 4.5} L${borde - 7} ${z.y + 4.5} Z`} />
             <text className="lab" x={textoX} y={z.rotuloY - 8} textAnchor={ancla}>{ROTULO[m.campo]}</text>
             <text className="val" x={textoX} y={z.rotuloY + 10} textAnchor={ancla}>{formatear(m.valor)} cm</text>
             {m.cambio != null && (
-              <text className="chg" x={textoX} y={z.rotuloY + 26} textAnchor={ancla}>
-                {m.cambio < 0 ? '▼' : '▲'} {formatear(Math.abs(m.cambio))}
-              </text>
+              <g className="chg">
+                {(() => {
+                  // La muesca va hacia afuera del rótulo; el número, a su lado.
+                  const mx = der ? textoX : textoX - 9
+                  const my = z.rotuloY + 17
+                  const d = m.cambio < 0 ? `M${mx} ${my} h9 l-4.5 8 z` : `M${mx} ${my + 8} h9 l-4.5 -8 z`
+                  return <path className="chg-muesca" d={d} />
+                })()}
+                <text x={der ? textoX + 13 : textoX - 13} y={z.rotuloY + 26} textAnchor={ancla}>
+                  {formatear(Math.abs(m.cambio))}
+                </text>
+              </g>
             )}
           </g>
         )

@@ -34,7 +34,12 @@ export function Grafico({ puntos, unidad, compacto = false, tendencia, lienzoChi
   const y = (v: number) => M.arriba + (1 - (v - min) / (max - min)) * altoUtil
   const camino = (ps: { fecha: string; valor: number }[]) => ps.map((p, i) => `${i ? 'L' : 'M'}${x(p.fecha).toFixed(1)},${y(p.valor).toFixed(1)}`).join(' ')
 
-  const marcas = [0, 1, 2, 3].map((i) => min + ((max - min) * i) / 3)
+  // Marcas redondas (1, 2, 5 × 10ⁿ) dentro del rango visible.
+  const crudo = (max - min) / 3
+  const base = 10 ** Math.floor(Math.log10(crudo))
+  const paso = [1, 2, 5, 10].map((k) => k * base).find((k) => k >= crudo) ?? 10 * base
+  const marcas: number[] = []
+  for (let v = Math.ceil(min / paso) * paso; v <= max + 1e-9; v += paso) marcas.push(Math.round(v * 1e6) / 1e6)
   const promedio = puntos
     .map((p, i) =>
       i < VENTANA - 1 ? null : { fecha: p.fecha, valor: puntos.slice(i - VENTANA + 1, i + 1).reduce((s, q) => s + q.valor, 0) / VENTANA },
@@ -49,7 +54,7 @@ export function Grafico({ puntos, unidad, compacto = false, tendencia, lienzoChi
         {marcas.map((v) => (
           <g key={v}>
             <line className="grid-line" x1={M.izq} x2={ANCHO - M.der} y1={y(v)} y2={y(v)} />
-            <text className="axis" x={M.izq - 8} y={y(v) + 4} textAnchor="end">{formatear(v)}</text>
+            <text className="axis" x={M.izq - 8} y={y(v) + 4} textAnchor="end">{formatear(v, Number.isInteger(v) ? 0 : 1)}</text>
           </g>
         ))}
         {totalDias > 0 && (
@@ -80,7 +85,7 @@ export function Grafico({ puntos, unidad, compacto = false, tendencia, lienzoChi
         <p className="muted small">Registra otra medición para ver la línea.</p>
       ) : (
         <div className="legend">
-          <span><i className={tendencia && tendencia.length > 1 ? 'medicion' : undefined} />Cada medición ({unidad})</span>
+          <span><i className={(tendencia && tendencia.length > 1) || (!tendencia && promedio.length > 0) ? 'medicion' : undefined} />Cada medición ({unidad})</span>
           {tendencia && tendencia.length > 1 && <span><i className="trend" />Tendencia</span>}
           {!tendencia && promedio.length > 0 && <span><i className="avg" />Promedio de las últimas {VENTANA}</span>}
         </div>

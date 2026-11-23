@@ -6,6 +6,7 @@ import { fechaLegible, formatear } from '../domain/numbers'
 import type { Metrica } from '../domain/series'
 import type { ProyeccionMeta } from '../domain/trend'
 import { ETIQUETAS, type Objetivo } from '../domain/types'
+import { Muesca } from './Icono'
 
 export const OBJETIVO: Record<Objetivo, string> = { bajar_grasa: 'bajar grasa', ganar_musculo: 'ganar músculo', mantener: 'mantener' }
 export const TARJETA: Record<ClaveTarjeta, { nombre: string; unidad: string; decimales: 0 | 1; unidadCambio: string }> = {
@@ -33,9 +34,14 @@ export const etiqueta = (m: Metrica): { nombre: string; unidad: string } =>
 // Los niveles y conteos enteros (visceral, kcal, años, lpm) se muestran sin decimal; el resto, con uno.
 export const decimalesDe = (clave: ClaveTarjeta, n: number) => (TARJETA[clave].decimales === 0 && Number.isInteger(n) ? 0 : 1)
 
-export function lineaCambio(t: TarjetaFicha): string | null {
+export function LineaCambio({ t }: { t: TarjetaFicha }) {
   if (t.cambio == null || t.desde == null) return null
-  return `${t.cambio < 0 ? '▼' : '▲'} ${formatear(Math.abs(t.cambio), decimalesDe(t.clave, t.cambio))}${TARJETA[t.clave].unidadCambio} desde el ${fechaLegible(t.desde)}`
+  return (
+    <>
+      <Muesca cambio={t.cambio} /> {formatear(Math.abs(t.cambio), decimalesDe(t.clave, t.cambio))}
+      {TARJETA[t.clave].unidadCambio} desde el {fechaLegible(t.desde)}
+    </>
+  )
 }
 
 export function textoMeta(m: ProyeccionMeta): string {
@@ -70,7 +76,7 @@ export function BarraRango({ c }: { c: Clasificacion }) {
 /** Tarjeta de una cifra. Con `onAbrir`, toda la tarjeta se toca para ver su gráfico. */
 export function Tarjeta({ t, ultimaFecha, onAbrir }: { t: TarjetaFicha; ultimaFecha: string; onAbrir?: () => void }) {
   const def = TARJETA[t.clave]
-  const cambio = lineaCambio(t)
+  const hayCambio = t.cambio != null && t.desde != null
   return (
     <article className={`tile ${onAbrir ? 'tocable' : ''}`} data-clave={t.clave}>
       <h3 className="k">
@@ -93,7 +99,13 @@ export function Tarjeta({ t, ultimaFecha, onAbrir }: { t: TarjetaFicha; ultimaFe
         {t.clasificacion && <span className={`estado st-${t.clasificacion.estado}`}>{t.clasificacion.nombre}</span>}
       </div>
       {t.clasificacion && <BarraRango c={t.clasificacion} />}
-      {(cambio || t.referencia) && <p className="d">{[cambio, t.referencia].filter(Boolean).join(' · ')}</p>}
+      {(hayCambio || t.referencia) && (
+        <p className="d">
+          <LineaCambio t={t} />
+          {hayCambio && t.referencia && ' · '}
+          {t.referencia}
+        </p>
+      )}
       {/* Un valor que no es de la última medición dice de cuándo es, para no leerlo como actual. */}
       {t.fecha !== ultimaFecha && <p className="d fecha-vieja">del {fechaLegible(t.fecha)}</p>}
     </article>
@@ -108,7 +120,7 @@ export function Mensajes({ mensajes, titulo = 'Qué indican tus cambios' }: { me
       <h3>{titulo}</h3>
       {mensajes.map((msg) => (
         <article className={`card insight ${msg.tono}`} key={msg.codigo}>
-          <span className={`pill tag ${msg.tono}`}>{ROTULO[msg.tono]}</span>
+          <span className="sr-only">{ROTULO[msg.tono]}:</span>
           <h4 style={{ margin: 0, fontSize: '1.05rem' }}>{msg.titulo}</h4>
           <p>{msg.texto}</p>
         </article>

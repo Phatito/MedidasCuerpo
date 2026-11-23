@@ -9,7 +9,7 @@ import type { Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { OBJETIVO } from './Cifra'
 import { Cuerpo } from './Cuerpo'
-import { Icono } from './Icono'
+import { Icono, Muesca } from './Icono'
 
 interface Props {
   persona: Persona
@@ -33,8 +33,6 @@ const NOMBRE: Partial<Record<Metrica, string>> = {
 const UNIDAD: Partial<Record<Metrica, string>> = { grasaPct: '%', musculoKg: 'kg', cinturaCm: 'cm', grasaVisceral: 'nivel', imc: '', aguaPct: '%', grasaKg: 'kg', pesoSinGrasaKg: 'kg' }
 const ENTERO: Metrica[] = ['grasaVisceral']
 
-const flecha = (n: number) => (n < 0 ? '▼' : '▲')
-
 function CuadritoBoton({ c, onAbrir }: { c: Cuadrito; onAbrir: () => void }) {
   const dec = ENTERO.includes(c.medida) && Number.isInteger(c.valor) ? 0 : 1
   const nombre = NOMBRE[c.medida] ?? c.medida
@@ -49,7 +47,7 @@ function CuadritoBoton({ c, onAbrir }: { c: Cuadrito; onAbrir: () => void }) {
         {c.clasificacion && <span className={`estado st-${c.clasificacion.estado}`}>{c.clasificacion.nombre}</span>}
         {c.cambio != null && (
           <span className={`cuadrito-cambio num ${c.tono}`}>
-            {flecha(c.cambio)} {formatear(Math.abs(c.cambio), dec)}
+            <Muesca cambio={c.cambio} /> {formatear(Math.abs(c.cambio), dec)}
           </span>
         )}
       </span>
@@ -83,14 +81,12 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
   return (
     <div className="ficha-c">
       <section className="card hero" aria-labelledby="ficha-nombre">
-        <div className="who-head">
-          <div style={{ minWidth: 0 }}>
-            <h2 id="ficha-nombre">{persona.nombre}</h2>
-            <p className="muted small">
-              Objetivo: {OBJETIVO[persona.objetivo]}
-              {r.ultima && ` · medido el ${fechaLegible(r.ultima.fecha).slice(0, 5)}`}
-            </p>
-          </div>
+        <div className="pieza-rotulo">
+          <h2 id="ficha-nombre">{persona.nombre}</h2>
+          <p className="muted small">
+            Objetivo: {OBJETIVO[persona.objetivo]}
+            {r.ultima && ` · ${fechaLegible(r.ultima.fecha).slice(0, 5)}`}
+          </p>
         </div>
         {peso ? (
           <button type="button" className="peso-boton" onClick={() => onVerMedida('pesoKg')} aria-label={`Peso de tendencia: ${formatear(peso.valor)} kg. Ver gráfico de peso`}>
@@ -101,13 +97,13 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
             <span className="small num peso-cambios">
               {cambioSemana != null && Math.abs(cambioSemana) >= 0.05 && (
                 <span className={`hero-cambio ${cambioSemana < 0 ? (persona.objetivo === 'ganar_musculo' ? 'atencion' : 'bien') : persona.objetivo === 'bajar_grasa' ? 'atencion' : 'bien'}`}>
-                  {flecha(cambioSemana)} {formatear(Math.abs(cambioSemana))} kg desde el {fechaLegible(previaFecha!).slice(0, 5)}
+                  <Muesca cambio={cambioSemana} /> {formatear(Math.abs(cambioSemana))} kg desde el {fechaLegible(previaFecha!).slice(0, 5)}
                 </span>
               )}
               {peso.cambio != null && peso.desde && (
                 <span className="muted">
                   {' '}
-                  · {flecha(peso.cambio)} {formatear(Math.abs(peso.cambio))} kg desde el inicio
+                  · <Muesca cambio={peso.cambio} /> {formatear(Math.abs(peso.cambio))} kg desde el inicio
                 </span>
               )}
             </span>
@@ -119,16 +115,28 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
             <p className="muted small">Con la primera verás aquí sus números; con la segunda, cómo van cambiando.</p>
           </div>
         )}
-        {lineaSemana && (
-          <button type="button" className="linea-semana" onClick={onVerSemana}>
-            <Icono nombre="semana" />
-            <span className="linea-semana-t">
-              <b>Tu semana.</b> {lineaSemana}
-            </span>
-            <Icono nombre="abrir" />
-          </button>
-        )}
       </section>
+
+      <section className="card stack figura" aria-label="Perímetros">
+        <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
+        {r.fechaPerimetros && <p className="pieza-pie muted small">Perímetros del {fechaLegible(r.fechaPerimetros)}</p>}
+        {r.ultima && r.medidas.length === 0 && <p className="muted small">Registra perímetros para verlos sobre la figura.</p>}
+        {r.asimetrias.map((a) => (
+          <p className="muted small" key={a.zona}>
+            {a.zona === 'brazo' ? 'Brazo' : 'Muslo'} {a.mayor === 'izq' ? 'izquierdo' : 'derecho'} {formatear(a.diferencia)} cm mayor que el {a.mayor === 'izq' ? 'derecho' : 'izquierdo'}.
+          </p>
+        ))}
+      </section>
+
+      {lineaSemana && (
+        <button type="button" className="linea-semana" onClick={onVerSemana}>
+          <Icono nombre="semana" />
+          <span className="linea-semana-t">
+            <b>Tu semana.</b> {lineaSemana}
+          </span>
+          <Icono nombre="abrir" />
+        </button>
+      )}
 
       {cs.length > 0 && (
         <section aria-label="Cifras principales" className="cuadritos">
@@ -138,19 +146,6 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         </section>
       )}
 
-      <section className="card stack figura" aria-label="Perímetros">
-        <div className="head">
-          <h3>Perímetros</h3>
-          {r.fechaPerimetros && <span className="muted small">del {fechaLegible(r.fechaPerimetros)}</span>}
-        </div>
-        <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
-        {r.ultima && r.medidas.length === 0 && <p className="muted small">Registra perímetros para verlos sobre la figura.</p>}
-        {r.asimetrias.map((a) => (
-          <p className="muted small" key={a.zona}>
-            {a.zona === 'brazo' ? 'Brazo' : 'Muslo'} {a.mayor === 'izq' ? 'izquierdo' : 'derecho'} {formatear(a.diferencia)} cm mayor que el {a.mayor === 'izq' ? 'derecho' : 'izquierdo'}.
-          </p>
-        ))}
-      </section>
 
       {r.ultima && (
         <nav className="card enlaces" aria-label="Más detalle">
@@ -165,7 +160,9 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         </nav>
       )}
 
-      <button type="button" className="btn primary grande medir-fijo" onClick={onMedir}>+ Registrar medición</button>
+      <button type="button" className="btn primary grande medir-fijo" onClick={onMedir}>
+        <Icono nombre="mas" /> Registrar medición
+      </button>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { db, guardarAjustes, leerAjustes, listarPersonas, listarTodasLasMedicion
 import { Datos } from './Datos'
 import { Familia } from './Familia'
 import { IconoNube } from './IconoNube'
+import { Icono } from './Icono'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
 import type { Borrador } from './Medir'
@@ -183,7 +184,8 @@ export function App() {
             {/* Volver solo aparece si lleva a otra pantalla: sin personas, Familia no tiene adónde volver. */}
             {vista.pantalla !== 'ficha' && escribirRuta(atras) !== escribirRuta(vista) && (
               <button type="button" className="btn volver" onClick={() => volver(atras)}>
-                {vista.pantalla === 'registrar' ? '← Volver a la ficha' : '← Volver'}
+                <Icono nombre="volver" />
+                {vista.pantalla === 'registrar' ? 'Volver a la ficha' : 'Volver'}
               </button>
             )}
             {vista.pantalla === 'familia' && (

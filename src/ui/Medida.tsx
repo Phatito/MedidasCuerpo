@@ -11,6 +11,7 @@ import { CAMPOS_NUMERICOS, type Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { etiqueta, GUIA_ESTADOS, Mensajes, Tarjeta, TARJETA, textoMeta, useAngosto } from './Cifra'
 import { Consumo } from './Consumo'
+import { Muesca } from './Icono'
 import { Grafico } from './Grafico'
 
 const PERIODOS: { id: Periodo; nombre: string }[] = [
@@ -65,7 +66,7 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
           </span>
           {cuadrito?.cambio != null && (
             <p className={`d ${cuadrito.tono}`}>
-              {cuadrito.cambio < 0 ? '▼' : '▲'} {formatear(Math.abs(cuadrito.cambio))} {unidad} desde la medición anterior
+              <Muesca cambio={cuadrito.cambio} /> {formatear(Math.abs(cuadrito.cambio))} {unidad} desde la medición anterior
             </p>
           )}
           <p className="d">del {fechaLegible(puntos[puntos.length - 1].fecha)}</p>

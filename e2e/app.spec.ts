@@ -429,10 +429,10 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await medir(page, haceDias(7), '72,5', '88')
   await medir(page, haceDias(0), '72,4', '86,5')
   await ir(page, 'Ficha')
-  await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
+  await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('1,5')
   await expect(figura(page)).toHaveAttribute('aria-label', /cintura 86,5 cm \(bajó 1,5\)/)
   await expect(page.locator('.hero')).toContainText('72,4')
-  await expect(page.locator('.cuadrito[data-medida="cinturaCm"]')).toContainText('▼ 1,5')
+  await expect(page.locator('.cuadrito[data-medida="cinturaCm"]')).toContainText('bajó 1,5')
   // La interpretación y el gráfico están en la pantalla de la medida.
   await page.locator('.cuadrito[data-medida="cinturaCm"]').click()
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
@@ -685,7 +685,7 @@ test('el botón Atrás del navegador vuelve a la pantalla anterior', async ({ pa
 test('Volver regresa a la ficha', async ({ page }) => {
   await agregarAna(page)
   await ir(page, 'Medir')
-  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await page.getByRole('button', { name: 'Volver a la ficha' }).click()
   await expect(figura(page)).toBeVisible()
 })
 
@@ -705,18 +705,18 @@ test('sin personas se abre Familia', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Volver/ })).toHaveCount(0)
   // Desde Ajustes sí hay adónde volver: a Familia.
   await page.getByRole('button', { name: 'Ajustes y datos' }).click()
-  await page.getByRole('button', { name: '← Volver' }).click()
+  await page.getByRole('button', { name: 'Volver', exact: true }).click()
   await expect(page.getByText('Agrega a la primera persona para empezar a registrar mediciones.')).toBeVisible()
 })
 
 test('Volver desde Familia siempre lleva a una pantalla distinta', async ({ page }) => {
   await agregarAna(page)
   // Tras agregar a la primera persona se queda en Familia: Volver lleva a su ficha.
-  await page.getByRole('button', { name: '← Volver' }).click()
+  await page.getByRole('button', { name: 'Volver', exact: true }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
   // Entrar directo por la dirección y volver.
   await page.goto('./#/familia')
-  await page.getByRole('button', { name: '← Volver' }).click()
+  await page.getByRole('button', { name: 'Volver', exact: true }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
 })
 
@@ -892,7 +892,7 @@ test('al cambiar de pantalla el foco va al título de la nueva', async ({ page }
   await perfiles(page).getByRole('menuitem', { name: /Beto/ }).focus()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { name: 'Beto', level: 2 })).toBeFocused()
-  await page.getByRole('button', { name: '+ Registrar medición' }).click()
+  await page.getByRole('button', { name: 'Registrar medición' }).click()
   await expect(page.getByRole('heading', { name: 'Registrar medición · Beto' })).toBeFocused()
   await expect(page).toHaveTitle(/Registrar medición/)
 })
@@ -939,7 +939,7 @@ test('editar una medición antigua no borra el borrador de la nueva', async ({ p
   await medir(page, haceDias(7), '72,5', '88')
   await ir(page, 'Medir')
   await page.getByLabel('Peso (kg)').fill('70')
-  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await page.getByRole('button', { name: 'Volver a la ficha' }).click()
   await ir(page, 'Historial')
   await page.getByRole('button', { name: 'Editar' }).click()
   await page.getByLabel('Cintura (cm)').fill('87')
@@ -1001,7 +1001,7 @@ test('lee la captura de Xiaomi Home y rellena Registrar sin guardar', async ({ p
   await expect(page.getByLabel('Nota (opcional)')).toHaveValue('Xiaomi Home 07:45')
   await expect(page.getByRole('img', { name: 'Tu captura' })).toBeVisible()
   // Nada se guardó todavía.
-  await page.getByRole('button', { name: '← Volver a la ficha' }).click()
+  await page.getByRole('button', { name: 'Volver a la ficha' }).click()
   await expect(page.getByText('Todavía no hay mediciones de Ana.')).toBeVisible()
   await ir(page, 'Medir')
   // Lo leído antes quedó como borrador sin guardar: leer otra vez pide confirmar.
@@ -1372,7 +1372,7 @@ test('la tarjeta Tu semana muestra grasa y masa magra y abre el informe completo
   await expect(page.getByRole('heading', { level: 2, name: /Tu semana/ })).toBeVisible()
   await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
   await expect(page.getByText('Cómo se calcula')).toBeVisible()
-  await page.getByRole('button', { name: '← Volver' }).click()
+  await page.getByRole('button', { name: 'Volver', exact: true }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
 })
 
