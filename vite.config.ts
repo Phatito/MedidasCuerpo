@@ -25,8 +25,8 @@ export default defineConfig({
         runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.includes('/ocr/'), handler: 'CacheFirst', options: { cacheName: `lector-ocr-${VERSION_LECTOR}` } }],
       },
       manifest: {
-        name: 'MedidasCuerpo',
-        short_name: 'Medidas',
+        name: 'Mesura',
+        short_name: 'Mesura',
         description: 'Control semanal de peso y medidas corporales de la familia',
         lang: 'es',
         display: 'standalone',

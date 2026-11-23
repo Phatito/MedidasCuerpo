@@ -175,13 +175,13 @@ test('respaldo: descargar, rechazar un archivo ajeno y restaurar', async ({ page
 
   await ir(page, 'Datos')
   const [descarga] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Descargar respaldo' }).click()])
-  expect(descarga.suggestedFilename()).toMatch(/^medidascuerpo-\d{4}-\d{2}-\d{2}\.json$/)
+  expect(descarga.suggestedFilename()).toMatch(/^mesura-\d{4}-\d{2}-\d{2}\.json$/)
   const contenido = await readFile(await descarga.path(), 'utf8')
   expect(JSON.parse(contenido)).toMatchObject({ app: 'MedidasCuerpo', version: 1, personas: [{ nombre: 'Ana' }], mediciones: [{ pesoKg: 72.5 }] })
 
   // Un archivo que no es un respaldo se rechaza y no toca los datos.
   await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'otro.json', mimeType: 'application/json', buffer: Buffer.from('{"hola":1}') })
-  await expect(page.getByText('El archivo no es un respaldo de MedidasCuerpo')).toBeVisible()
+  await expect(page.getByText('El archivo no es un respaldo de Mesura')).toBeVisible()
   await ir(page, 'Familia')
   await expect(page.getByRole('heading', { name: 'Ana' })).toBeVisible()
   await expect(page.getByText('Todavía no has hecho un respaldo de tus datos.')).toBeHidden()
@@ -225,7 +225,7 @@ test('es instalable: tiene manifiesto y service worker', async ({ page, request 
   await page.goto('./')
   const manifiesto = await request.get('manifest.webmanifest')
   expect(manifiesto.ok()).toBe(true)
-  expect(await manifiesto.json()).toMatchObject({ name: 'MedidasCuerpo', display: 'standalone', start_url: '/MedidasCuerpo/' })
+  expect(await manifiesto.json()).toMatchObject({ name: 'Mesura', short_name: 'Mesura', display: 'standalone', start_url: '/MedidasCuerpo/' })
   await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration()) != null)).toBe(true)
 })
 
@@ -1092,4 +1092,22 @@ test('tras cancelar la confirmación se puede elegir el mismo archivo otra vez',
   page.once('dialog', (d) => void d.accept())
   await page.getByLabel('Elegir la captura de Xiaomi Home').setInputFiles(CAPTURA)
   await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 90_000 })
+})
+
+// ---------- Nombre ----------
+
+test('la app se llama Mesura', async ({ page }) => {
+  await page.goto('./')
+  await expect(page).toHaveTitle(/Mesura/)
+  await expect(page.getByRole('button', { name: 'Mesura, ir al inicio' })).toBeVisible()
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Mesura')
+})
+
+test('un respaldo hecho antes del cambio de nombre se sigue restaurando', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  const viejo = { app: 'MedidasCuerpo', version: 1, exportadoEn: '2026-11-01T00:00:00.000Z', personas: [{ id: 'v1', nombre: 'Vieja', sexo: 'mujer', fechaNacimiento: '', estaturaCm: 160, objetivo: 'mantener', creadaEn: '2026-01-01T00:00:00.000Z' }], mediciones: [], ajustes: { diaRecordatorio: 1, horaRecordatorio: '09:00' } }
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'medidascuerpo-2026-11-01.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(viejo)) })
+  await page.getByRole('button', { name: 'Sí, restaurar' }).click()
+  await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
 })

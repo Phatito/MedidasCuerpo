@@ -1,4 +1,7 @@
-# MedidasCuerpo
+# Mesura
+
+*Tu cuerpo, semana a semana.* (Antes se llamaba MedidasCuerpo; la dirección
+web sigue siendo la misma y los datos y respaldos de antes siguen funcionando.)
 
 Control semanal de peso, composición corporal y perímetros para ti y tu familia.
 Registra las mediciones de cada persona y la app explica en lenguaje claro qué
@@ -11,7 +14,7 @@ pérdida de grasa con músculo mantenido o ganado).
 
 1. Abre la dirección de arriba en Chrome o Edge.
 2. Haz clic en el ícono de instalar que aparece en la barra de direcciones
-   (o menú ⋮ → "Instalar MedidasCuerpo").
+   (o menú ⋮ → "Instalar Mesura").
 3. Queda con ícono y ventana propia, y funciona sin conexión.
 
 ## Dónde están tus datos

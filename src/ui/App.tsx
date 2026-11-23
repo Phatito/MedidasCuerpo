@@ -83,7 +83,7 @@ export function App() {
         if (++intentos < 60) marco = requestAnimationFrame(buscar)
         return
       }
-      document.title = `${h2.textContent} · MedidasCuerpo`
+      document.title = `${h2.textContent} · Mesura`
       if (enfocar) {
         h2.setAttribute('tabindex', '-1')
         h2.focus()
@@ -122,9 +122,9 @@ export function App() {
     <>
       <header className="top">
         <div className="wrap">
-          <button type="button" className="brand" onClick={() => navegar(alInicio)} aria-label="MedidasCuerpo, ir al inicio">
+          <button type="button" className="brand" onClick={() => navegar(alInicio)} aria-label="Mesura, ir al inicio">
             <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" />
-            <span className="brand-nombre">MedidasCuerpo</span>
+            <span className="brand-nombre">Mesura</span>
           </button>
           {personas && personas.length > 0 && (
             <SelectorPerfil

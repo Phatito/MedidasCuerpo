@@ -29,3 +29,9 @@ describe('generarIcs', () => {
     expect(ics.replace(/\r\n/g, '')).not.toContain('\n')
   })
 })
+
+test('el evento del calendario lleva el nombre Mesura', () => {
+  const ics = generarIcs(1, '09:00', '2026-11-23')
+  expect(ics).toContain('Mesura')
+  expect(ics).not.toContain('MedidasCuerpo')
+})

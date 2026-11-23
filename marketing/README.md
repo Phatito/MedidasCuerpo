@@ -1,11 +1,11 @@
-# Marca y promo de MedidasCuerpo
+# Marca y promo de Mesura
 
 ## Archivos
 
 | Archivo | Qué es |
 |---|---|
 | `public/logo.svg` | Marca (símbolo) cuadrada, fondo transparente. Para fondos oscuros. |
-| `public/logo-horizontal.svg` | Marca + palabra "MedidasCuerpo" (texto convertido a trazos), para encabezados. |
+| `public/logo-horizontal.svg` | Marca + palabra "Mesura" en Plus Jakarta Sans ExtraBold convertida a trazos, con un degradado de blanco a cian al final; para encabezados. |
 | `public/favicon.svg` | Marca simplificada (sin marcas de cinta) sobre baldosa #0e1220, para la pestaña del navegador. |
 | `public/icon-192.png`, `public/icon-512.png` | Íconos de la app (PWA). Fondo a sangre completa, marca dentro del 80 % central: valen como `maskable`. |
 | `public/apple-touch-icon.png` | Ícono 180×180 para iPhone/iPad, sin transparencia. |

@@ -33,7 +33,7 @@ export function Datos({ personas, personaActual }: Props) {
 
   async function descargarRespaldo() {
     const respaldo = await exportarRespaldo()
-    descargar(`medidascuerpo-${hoyIso()}.json`, JSON.stringify(respaldo, null, 2), 'application/json')
+    descargar(`mesura-${hoyIso()}.json`, JSON.stringify(respaldo, null, 2), 'application/json')
     await guardarAjustes({ ...(await leerAjustes()), ultimoRespaldo: hoyIso() })
     setAvisoRespaldo({ tipo: 'ok', texto: 'Respaldo descargado. Guárdalo fuera de este computador, por ejemplo en un pendrive o en tu nube.' })
   }

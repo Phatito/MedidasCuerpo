@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Renderiza los recursos de marca de MedidasCuerpo con Playwright (Chromium) + ffmpeg.
+ * Renderiza los recursos de marca de Mesura con Playwright (Chromium) + ffmpeg.
  *
  *   node marketing/render-promo.cjs            # todo: íconos, póster, og-image y los dos videos
  *   node marketing/render-promo.cjs icons      # solo íconos PNG (public/)

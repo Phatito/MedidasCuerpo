@@ -12,7 +12,8 @@ export interface Respaldo {
   ajustes: Ajustes
 }
 
-const MENSAJE_INVALIDO = 'El archivo no es un respaldo de MedidasCuerpo'
+// La app se llamaba MedidasCuerpo: ese identificador interno del archivo de respaldo se conserva para que los respaldos de antes y de ahora sean compatibles.
+const MENSAJE_INVALIDO = 'El archivo no es un respaldo de Mesura'
 
 export async function exportarRespaldo(): Promise<Respaldo> {
   return {

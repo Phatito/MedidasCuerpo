@@ -4,7 +4,7 @@ import { exportarRespaldo, leerRespaldo, restaurarRespaldo } from '../../src/sto
 import { borrarTodo, guardarAjustes, guardarMediciones, guardarPersona, leerAjustes, listarMediciones, listarPersonas } from '../../src/storage/db'
 import { m, persona } from '../domain/helpers'
 
-const MENSAJE = 'El archivo no es un respaldo de MedidasCuerpo'
+const MENSAJE = 'El archivo no es un respaldo de Mesura'
 
 beforeEach(async () => {
   await borrarTodo()
