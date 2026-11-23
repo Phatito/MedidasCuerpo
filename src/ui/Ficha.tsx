@@ -302,7 +302,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana }: Props)
               <p className="muted small">
                 Los estados son orientación general: IMC según la OMS; % de grasa por sexo y edad según Gallagher y otros (2000); grasa visceral, agua y
                 proteína según la escala habitual de las básculas domésticas. Músculo, hueso y metabolismo no tienen un rango que sirva para todos, así que
-                solo se muestra su cambio. A menores de 18 años no se les asigna estado.
+                solo se muestra su cambio.
               </p>
             </details>
           </section>

@@ -1,4 +1,3 @@
-import { esMenor } from './insights'
 import type { Persona } from './types'
 
 /**
@@ -94,7 +93,6 @@ function limites(tramos: Tramo[], i: number): [number, number] {
 }
 
 export function clasificar(medida: MedidaConEstado, valor: number, p: Persona, fecha: string): Clasificacion | null {
-  if (esMenor(p, fecha)) return null
   const tramos = tramosDe(medida, p, fecha)
   const tramo = tramos.findIndex((t) => t.hasta == null || valor < t.hasta)
   const [inf, sup] = limites(tramos, tramo)

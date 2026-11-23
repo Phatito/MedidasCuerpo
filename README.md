@@ -55,8 +55,8 @@ ahí se llega a todo.
   otros, 2000), grasa visceral, agua y proteína (escala habitual de las
   básculas domésticas) muestran Bajo, Estándar, Alto o Muy alto, con una barra
   de rango. Músculo, hueso y metabolismo no tienen un rango que sirva para
-  todos y solo muestran su cambio. A menores de 18 años no se les asigna
-  estado.
+  todos y solo muestran su cambio. Las reglas son las mismas para todas las
+  edades.
 - **Medidas de la báscula:** peso, % de grasa, músculo esquelético, grasa
   visceral, % de agua y, en "Más de la báscula", masa muscular total, masa
   ósea, proteína, metabolismo basal, edad corporal y frecuencia cardíaca, como

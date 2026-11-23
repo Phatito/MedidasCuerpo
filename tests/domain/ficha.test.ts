@@ -76,12 +76,11 @@ describe('tarjetas', () => {
     const t = tarjeta(resumenFicha(p, [m('2026-11-01', { musculoKg: 35 }), m('2026-11-08')]), 'musculoKg')
     expect(t).toMatchObject({ valor: 35, cambio: null })
   })
-  test('en un menor de edad nada se colorea', () => {
+  test('un menor de edad recibe colores y estados como cualquiera', () => {
     const nino = persona({ fechaNacimiento: '2020-06-01', estaturaCm: 115, objetivo: 'bajar_grasa' })
     const r = resumenFicha(nino, [m('2026-11-01', { pesoKg: 20, grasaVisceral: 12 }), m('2026-11-08', { pesoKg: 21, grasaVisceral: 12 })])
-    expect(r.tarjetas.every((t) => t.tono === 'neutro')).toBe(true)
-    expect(r.tarjetas.every((t) => t.nota === null)).toBe(true)
-    expect(r.tarjetas.every((t) => t.clasificacion === null)).toBe(true)
+    expect(r.tarjetas.find((t) => t.clave === 'grasaVisceral')?.clasificacion).not.toBeNull()
+    expect(r.tarjetas.find((t) => t.clave === 'pesoKg')?.tono).not.toBe('neutro')
   })
 })
 
@@ -146,8 +145,8 @@ describe('peso de tendencia y meta', () => {
     expect(resumenFicha(p, subida).meta).toBeNull()
     expect(resumenFicha(persona({ metaPesoKg: 95 }), subida).meta).toMatchObject({ faltaKg: expect.any(Number) })
   })
-  test('a un menor no se le muestra la meta', () => {
-    expect(resumenFicha(persona({ metaPesoKg: 30, fechaNacimiento: '2016-01-01', estaturaCm: 135 }), subida).meta).toBeNull()
+  test('un menor también ve su meta', () => {
+    expect(resumenFicha(persona({ metaPesoKg: 30, fechaNacimiento: '2016-01-01', estaturaCm: 135 }), subida).meta).not.toBeNull()
   })
   test('la proyección usa la fecha de hoy', () => {
     expect(resumenFicha(persona({ metaPesoKg: 95 }), subida, { hoy: '2027-03-01' }).meta?.estado).toBe('sin_datos')
@@ -183,9 +182,9 @@ describe('todas las medidas de la báscula', () => {
     const r = resumenFicha(daniela, [m('2026-11-01', { pesoKg: 97, masaOseaKg: 3.4 }), m('2026-11-08', { pesoKg: 96.5 }), completa])
     expect(tarjeta(r, 'masaOseaKg')).toMatchObject({ cambio: 0.1, desde: '2026-11-01' })
   })
-  test('a un menor no se le asigna estado en ninguna tarjeta', () => {
+  test('un menor recibe estado en las tarjetas', () => {
     const r = resumenFicha(persona({ fechaNacimiento: '2015-01-01', estaturaCm: 140 }), [completa])
-    expect(r.tarjetas.every((t) => t.clasificacion === null)).toBe(true)
+    expect(r.tarjetas.some((t) => t.clasificacion !== null)).toBe(true)
   })
 })
 

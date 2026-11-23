@@ -1,5 +1,5 @@
 import { clasificar, type Clasificacion, type MedidaConEstado } from './estados'
-import { esMenor, interpretar, type Mensaje, type Tono } from './insights'
+import { interpretar, type Mensaje, type Tono } from './insights'
 import { derivar } from './metrics'
 import { formatear } from './numbers'
 import { proyeccionMeta, tendenciaPeso, type ProyeccionMeta, type PuntoTendencia } from './trend'
@@ -61,7 +61,7 @@ export interface TarjetaFicha {
   nota: string | null
   /** Solo en la tarjeta del peso: la pesada de la última medición. */
   ultimaPesada?: number
-  /** Estado frente a rangos de referencia, para las medidas que los tienen (null en menores). */
+  /** Estado frente a rangos de referencia, para las medidas que los tienen. */
   clasificacion: Clasificacion | null
   /** Una línea de contexto, por ejemplo "65,1 % del peso". */
   referencia: string | null
@@ -137,7 +137,6 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
   const ms = [...mediciones].sort((a, b) => a.fecha.localeCompare(b.fecha))
   const ultima = ms[ms.length - 1] ?? null
   if (!ultima) return { ultima: null, fechaPerimetros: null, medidas: [], asimetrias: [], tarjetas: [], serie: [], meta: null, mensaje: null }
-  const menor = esMenor(p, ultima.fecha)
 
   // Una pesada sin cinta no borra la figura: se dibujan los perímetros de la última medición que tenga alguno.
   const iFigura = ms.findLastIndex((m) => PERIMETROS.some((c) => m[c] != null))
@@ -170,7 +169,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     estimada: false,
     cambio: cambioPeso,
     desde: cambioPeso == null ? null : ms[0].fecha,
-    tono: menor ? 'neutro' : tonoDe('pesoKg', cambioPeso, tendencia, p),
+    tono: tonoDe('pesoKg', cambioPeso, tendencia, p),
     nota: null,
     ultimaPesada: ultima.pesoKg,
     clasificacion: null,
@@ -187,7 +186,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     // La comparación es con la medición anterior que tenga el dato, y solo del mismo origen (medido o estimado).
     const previa = ms.slice(0, i).reverse().find((m) => dato(p, m, clave)?.estimada === actual.estimada)
     const cambio = previa ? diferencia(actual.valor, dato(p, previa, clave)!.valor) : null
-    const tono = menor ? 'neutro' : tonoDe(clave, cambio, actual.valor, p)
+    const tono = tonoDe(clave, cambio, actual.valor, p)
     const medidaConEstado = CON_ESTADO[clave]
     return [
       {
@@ -212,8 +211,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     asimetrias,
     tarjetas: [tarjetaPeso, ...otras],
     serie: serieCompleta.slice(-MEDICIONES_EN_TENDENCIA),
-    // A un menor no se le proyecta un peso meta, como en el resto de las reglas para adultos.
-    meta: p.metaPesoKg == null || esMenor(p, ultima.fecha) ? null : proyeccionMeta(serieCompleta, p.metaPesoKg, opciones.hoy),
+    meta: p.metaPesoKg == null ? null : proyeccionMeta(serieCompleta, p.metaPesoKg, opciones.hoy),
     mensaje: interpretar(p, ms)[0] ?? null,
   }
 }

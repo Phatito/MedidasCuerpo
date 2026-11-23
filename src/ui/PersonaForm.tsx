@@ -79,7 +79,7 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
         <div className="field">
           <label htmlFor="persona-nacimiento">Fecha de nacimiento (opcional)</label>
           <input id="persona-nacimiento" type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
-          <span className="hint">Indícala si es menor de 18 años: las interpretaciones son para adultos.</span>
+          <span className="hint">Opcional: se usa para los rangos de % de grasa por edad.</span>
         </div>
         <div className="field">
           <label htmlFor="persona-objetivo">Objetivo</label>

@@ -20,7 +20,6 @@ export type Codigo =
   | 'alerta_cintura'
   | 'alerta_visceral'
   | 'imc'
-  | 'menor'
 
 export interface Mensaje {
   tono: Tono
@@ -36,8 +35,6 @@ const CINTURA_RELEVANTE = 1
 const MUSCULO_SUBE = 0.3
 const MUSCULO_BAJA = 0.5
 const GRASA_RELEVANTE = 0.5
-const EDAD_ADULTA = 18
-const ESTATURA_MINIMA_SIN_EDAD = 140
 const RITMO_RAPIDO_PCT = 1
 const VISCERAL_ALTA = 10
 const DIAS_MINIMOS_PARA_RITMO = 4
@@ -63,17 +60,6 @@ function deltaGrasa(p: Persona, a: Medicion, b: Medicion): { cambio: number; nom
   const db = derivar(p, b)
   if (da.grasaPct == null || db.grasaPct == null || da.grasaEstimada !== db.grasaEstimada) return null
   return { cambio: redondear(db.grasaPct - da.grasaPct), nombre: da.grasaEstimada ? 'grasa corporal estimada' : 'grasa corporal' }
-}
-
-/** Las reglas y categorías de esta app son para adultos. Sin fecha de nacimiento, una estatura baja indica un niño. */
-export function esMenor(p: Persona, fechaReferencia: string): boolean {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(p.fechaNacimiento)) {
-    const [an, mn, dn] = p.fechaNacimiento.split('-').map(Number)
-    const [ar, mr, dr] = fechaReferencia.split('-').map(Number)
-    const edad = ar - an - (mr < mn || (mr === mn && dr < dn) ? 1 : 0)
-    return edad < EDAD_ADULTA
-  }
-  return p.estaturaCm < ESTATURA_MINIMA_SIN_EDAD
 }
 
 function promedio(valores: (number | undefined | null)[]): number | null {
@@ -260,20 +246,10 @@ export function interpretar(p: Persona, mediciones: Medicion[]): Mensaje[] {
     ]
   }
   const ult = ms[ms.length - 1]
-  const menor = esMenor(p, ult.fecha)
-  const out = menor ? [] : compararUltimas(p, ms[ms.length - 2], ult)
+  const out = compararUltimas(p, ms[ms.length - 2], ult)
   const t = tendencia(p, ms)
   if (t) out.push(t)
   if (ms.length >= 3) out.push(desdeInicio(p, ms[0], ult))
-  if (menor) {
-    out.push({
-      tono: 'neutro',
-      codigo: 'menor',
-      titulo: 'Las interpretaciones de esta app son para adultos',
-      texto: 'En niños y adolescentes subir de peso y de medidas es parte de crecer, y el IMC se evalúa con curvas por edad. Usa estos registros como historial y revísalos con su pediatra.',
-    })
-    return out
-  }
 
   const d = derivar(p, ult)
   if (d.cinturaEstatura != null && d.cinturaEstatura > 0.5) {

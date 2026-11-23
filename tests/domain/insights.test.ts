@@ -179,24 +179,13 @@ describe('hallazgos de la revisión final', () => {
     expect(texto(ms, 'baja_peso_grasa')).toContain('grasa corporal estimada')
   })
 
-  describe('menores de edad', () => {
+  describe('la edad no importa', () => {
     const nina = persona({ sexo: 'mujer', estaturaCm: 115, fechaNacimiento: '2020-06-01' })
     const ms = [m(A, { pesoKg: 20, cinturaCm: 60 }), m(B, { pesoKg: 20.6, cinturaCm: 61 })]
-    const cod = (quien: typeof nina) => interpretar(quien, ms).map((x) => x.codigo)
-
-    test('no reciben categoría de IMC ni reglas de adultos', () => {
-      expect(cod(nina)).toContain('menor')
-      for (const c of ['imc', 'gana_grasa', 'alerta_cintura', 'sube_sin_datos', 'ritmo_rapido']) expect(cod(nina)).not.toContain(c)
-    })
-    test('sin fecha de nacimiento y con estatura bajo 140 cm se tratan como menores', () => {
-      expect(cod(persona({ estaturaCm: 115, fechaNacimiento: '' }))).toContain('menor')
-    })
-    test('un adulto con fecha de nacimiento sigue recibiendo el IMC', () => {
-      expect(interpretar(persona({ fechaNacimiento: '1990-01-01' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('imc')
-    })
-    test('cumple 18 justo antes de la última medición: adulto', () => {
-      expect(interpretar(persona({ fechaNacimiento: '2008-11-08' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('imc')
-      expect(interpretar(persona({ fechaNacimiento: '2008-11-09' }), [m(A), m(B)]).map((x) => x.codigo)).toContain('menor')
+    test('un menor recibe las mismas interpretaciones que un adulto', () => {
+      const cod = interpretar(nina, ms).map((x) => x.codigo)
+      expect(cod).not.toContain('menor')
+      expect(cod).toContain('imc')
     })
   })
 })

@@ -71,8 +71,8 @@ test('proteína', () => {
   expect(estado('proteinaPct', 20.1)).toBe('Alto')
 })
 
-test('a un menor no se le asigna estado', () => {
-  expect(clasificar('imc', 30, persona({ fechaNacimiento: '2015-01-01' }), F)).toBeNull()
+test('la edad no quita el estado: un menor también lo recibe', () => {
+  expect(clasificar('imc', 30, persona({ fechaNacimiento: '2015-01-01' }), F)?.estado).toBe('muy')
 })
 
 test('estado y tramos coinciden', () => {
