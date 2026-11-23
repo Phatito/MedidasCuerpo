@@ -176,7 +176,7 @@ describe('todas las medidas de la báscula', () => {
     expect(tarjeta(r, 'proteinaPct')).toMatchObject({ referencia: '14,4 kg' })
     expect(tarjeta(r, 'masaOseaKg')).toMatchObject({ referencia: '3,6 % del peso' })
     expect(tarjeta(r, 'edadCorporal')?.clasificacion).toBeNull()
-    expect(tarjeta(r, 'musculoKg')?.clasificacion).toBeNull()
+    expect(tarjeta(r, 'musculoKg')).toMatchObject({ clasificacion: { nombre: 'Normal' }, referencia: '36,5 % del peso' })
   })
   test('el cambio es frente a la medición anterior que tenga esa medida', () => {
     const r = resumenFicha(daniela, [m('2026-11-01', { pesoKg: 97, masaOseaKg: 3.4 }), m('2026-11-08', { pesoKg: 96.5 }), completa])
@@ -192,4 +192,11 @@ test('cada tarjeta dice de qué fecha es su valor', () => {
   const r = resumenFicha(p, [m('2026-08-01', { pesoKg: 80, grasaVisceral: 12 }), m('2026-11-08', { pesoKg: 79 })])
   expect(tarjeta(r, 'grasaVisceral')?.fecha).toBe('2026-08-01')
   expect(tarjeta(r, 'imc')?.fecha).toBe('2026-11-08')
+})
+
+test('el músculo esquelético muestra su estado y su % del peso', () => {
+  const r = resumenFicha(persona({ fechaNacimiento: '1990-01-01' }), [m('2026-11-17', { pesoKg: 106.8, musculoKg: 38.7 })])
+  const t = r.tarjetas.find((x) => x.clave === 'musculoKg')!
+  expect(t.clasificacion?.nombre).toBe('Normal')
+  expect(t.referencia).toBe('36,2 % del peso')
 })

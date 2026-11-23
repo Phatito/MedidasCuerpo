@@ -97,3 +97,18 @@ test('la posición en la barra va de 0 a 1 y crece con el valor', () => {
   }
   expect(clasificar('grasaPct', 29, hombre36, F)!.posicion).toBeGreaterThan(0.75)
 })
+
+describe('músculo esquelético (% del peso, por sexo y edad)', () => {
+  test.each([
+    [33.2, 'Bajo'], [33.3, 'Normal'], [39.3, 'Normal'], [39.4, 'Alto'], [44.1, 'Muy alto'],
+  ])('hombre de 36 años: %d %% → %s', (v, nombre) => expect(estado('musculoPct', v)).toBe(nombre))
+  test('mujer de 36 años', () => {
+    const mujer = persona({ sexo: 'mujer', fechaNacimiento: '1990-01-01' })
+    expect(estado('musculoPct', 24.2, mujer)).toBe('Bajo')
+    expect(estado('musculoPct', 27, mujer)).toBe('Normal')
+    expect(estado('musculoPct', 31, mujer)).toBe('Alto')
+  })
+  test('poco músculo es lo que preocupa: bajo en ámbar, el resto en verde', () => {
+    expect(clasificar('musculoPct', 30, hombre36, F)!.tramos.map((t) => t.estado)).toEqual(['alto', 'ok', 'ok', 'ok'])
+  })
+})

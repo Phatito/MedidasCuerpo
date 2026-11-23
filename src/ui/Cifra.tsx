@@ -130,7 +130,7 @@ export function Mensajes({ mensajes, titulo = 'Qué indican tus cambios' }: { me
 }
 
 export const GUIA_ESTADOS =
-  'Los estados son orientación general: IMC según la OMS; % de grasa por sexo y edad según Gallagher y otros (2000); grasa visceral, agua y proteína según la escala habitual de las básculas domésticas. Músculo, hueso y metabolismo no tienen un rango que sirva para todos, así que solo se muestra su cambio.'
+  'Los estados son orientación general: IMC según la OMS; % de grasa por sexo y edad según Gallagher y otros (2000); grasa visceral, agua y proteína según la escala habitual de las básculas domésticas; músculo esquelético como % del peso, por sexo y edad, según la escala de las básculas de bioimpedancia. Hueso y metabolismo no tienen un rango que sirva para todos, así que solo se muestra su cambio.'
 
 /** True mientras la pantalla mida a lo más `px` de ancho. */
 export function useAngosto(px: number): boolean {

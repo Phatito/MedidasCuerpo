@@ -89,6 +89,7 @@ const CLAVES: Exclude<ClaveTarjeta, 'pesoKg'>[] = [
 ]
 const CON_ESTADO: Partial<Record<ClaveTarjeta, MedidaConEstado>> = {
   grasaPct: 'grasaPct', grasaVisceral: 'grasaVisceral', aguaPct: 'aguaPct', imc: 'imc', proteinaPct: 'proteinaPct',
+  musculoKg: 'musculoPct',
 }
 const LADOS = [
   { zona: 'brazo', izq: 'brazoIzqCm', der: 'brazoDerCm', sinLado: 'brazoCm' },
@@ -117,7 +118,7 @@ function dato(p: Persona, m: Medicion, clave: Exclude<ClaveTarjeta, 'pesoKg'>): 
 }
 
 function referencia(clave: ClaveTarjeta, valor: number, m: Medicion): string | null {
-  if (clave === 'musculoTotalKg' || clave === 'masaOseaKg') return `${formatear((valor / m.pesoKg) * 100)} % del peso`
+  if (clave === 'musculoTotalKg' || clave === 'masaOseaKg' || clave === 'musculoKg') return `${formatear((valor / m.pesoKg) * 100)} % del peso`
   if (clave === 'proteinaPct') return `${formatear((m.pesoKg * valor) / 100)} kg`
   if (clave === 'grasaKg') return 'masa grasa'
   if (clave === 'pesoSinGrasaKg') return 'masa magra'
@@ -197,7 +198,9 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
         desde: cambio == null ? null : previa!.fecha,
         tono,
         nota: clave === 'grasaVisceral' && tono === 'atencion' ? 'Elevada' : null,
-        clasificacion: medidaConEstado ? clasificar(medidaConEstado, actual.valor, p, fuente.fecha) : null,
+        clasificacion: medidaConEstado
+          ? clasificar(medidaConEstado, medidaConEstado === 'musculoPct' ? (actual.valor / fuente.pesoKg) * 100 : actual.valor, p, fuente.fecha)
+          : null,
         referencia: referencia(clave, actual.valor, fuente),
         fecha: fuente.fecha,
       },

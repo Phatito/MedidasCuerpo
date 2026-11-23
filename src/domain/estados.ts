@@ -7,10 +7,11 @@ import type { Persona } from './types'
  * - IMC: Organización Mundial de la Salud.
  * - % de grasa por sexo y edad: Gallagher et al., "Healthy percentage body fat ranges", Am J Clin Nutr 2000.
  * - Grasa visceral, agua y proteína: escala habitual de las básculas domésticas de bioimpedancia.
+ * - Músculo esquelético como % del peso, por sexo y edad: escala de las básculas de bioimpedancia (Omron).
  * Son orientación general, no diagnóstico.
  */
 export type Estado = 'bajo' | 'ok' | 'alto' | 'muy'
-export type MedidaConEstado = 'imc' | 'grasaPct' | 'grasaVisceral' | 'aguaPct' | 'proteinaPct'
+export type MedidaConEstado = 'imc' | 'grasaPct' | 'grasaVisceral' | 'aguaPct' | 'proteinaPct' | 'musculoPct'
 
 /** `hasta` es el límite superior exclusivo del tramo; null = sin tope. */
 export interface Tramo {
@@ -48,6 +49,12 @@ const GRASA: Record<Persona['sexo'], [number, number, number][]> = {
   mujer: [[21, 33, 39], [23, 34, 40], [24, 36, 42]],
 }
 
+// Límites del músculo esquelético en % del peso: [bajo hasta, normal hasta, alto hasta] por franja de edad (18–39, 40–59, 60+).
+const MUSCULO: Record<Persona['sexo'], [number, number, number][]> = {
+  hombre: [[33.3, 39.4, 44.1], [33.1, 39.2, 43.9], [32.9, 39, 43.7]],
+  mujer: [[24.3, 30.4, 35.4], [24.1, 30.2, 35.2], [23.9, 30, 35]],
+}
+
 function edad(p: Persona, fecha: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(p.fechaNacimiento)) return null
   const [an, mn, dn] = p.fechaNacimiento.split('-').map(Number)
@@ -71,6 +78,17 @@ function tramosDe(medida: MedidaConEstado, p: Persona, fecha: string): Tramo[] {
         { hasta: 15, estado: 'alto', nombre: 'Alto' },
         { hasta: null, estado: 'muy', nombre: 'Muy alto' },
       ]
+    case 'musculoPct': {
+      const e = edad(p, fecha)
+      const [a, b, c] = MUSCULO[p.sexo][e == null || e < 40 ? 0 : e < 60 ? 1 : 2]
+      // Poco músculo es lo que preocupa: el tramo bajo va en ámbar y los demás en verde.
+      return [
+        { hasta: a, estado: 'alto', nombre: 'Bajo' },
+        { hasta: b, estado: 'ok', nombre: 'Normal' },
+        { hasta: c, estado: 'ok', nombre: 'Alto' },
+        { hasta: null, estado: 'ok', nombre: 'Muy alto' },
+      ]
+    }
     case 'aguaPct':
       // El tope del estándar es inclusivo (65 % es estándar, 65,1 % es alto).
       return p.sexo === 'hombre' ? tres(50, 65.05) : tres(45, 60.05)
