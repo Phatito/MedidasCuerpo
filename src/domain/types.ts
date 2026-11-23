@@ -11,6 +11,8 @@ export interface Persona {
   creadaEn: string
   /** Peso objetivo opcional, en kg. */
   metaPesoKg?: number
+  /** Consumo diario de kcal que la persona anota, vigente desde cada fecha (AAAA-MM-DD), ordenado. */
+  consumos?: { desde: string; kcal: number }[]
 }
 
 export interface Medicion {

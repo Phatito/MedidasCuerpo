@@ -136,3 +136,16 @@ describe('campos nuevos y persona principal', () => {
     expect(() => leerRespaldo(JSON.stringify(malo))).toThrow(MENSAJE)
   })
 })
+
+describe('consumo de kcal en el respaldo', () => {
+  test('ida y vuelta conserva el consumo; mal formado se rechaza', async () => {
+    await guardarPersona(persona({ consumos: [{ desde: '2026-11-01', kcal: 2500 }] }))
+    const json = JSON.stringify(await exportarRespaldo())
+    expect(leerRespaldo(json).personas[0].consumos).toEqual([{ desde: '2026-11-01', kcal: 2500 }])
+    for (const malo of [[{ desde: '2026-13-01', kcal: 2500 }], [{ desde: '2026-11-01', kcal: 9000 }], 'x']) {
+      const d = JSON.parse(json)
+      d.personas[0].consumos = malo
+      expect(() => leerRespaldo(JSON.stringify(d))).toThrow(MENSAJE)
+    }
+  })
+})

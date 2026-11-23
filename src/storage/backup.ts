@@ -1,3 +1,4 @@
+import { KCAL_MAX, KCAL_MIN } from '../domain/consumo'
 import { parseFecha } from '../domain/numbers'
 import { CAMPOS_NUMERICOS, type Ajustes, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
@@ -29,6 +30,19 @@ export async function exportarRespaldo(): Promise<Respaldo> {
 const esObjeto = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x)
 const esTexto = (x: unknown) => typeof x === 'string' && x !== ''
 
+function consumoValido(c: unknown): boolean {
+  return (
+    esObjeto(c) &&
+    typeof c.desde === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(c.desde) &&
+    parseFecha(c.desde) === c.desde &&
+    typeof c.kcal === 'number' &&
+    Number.isFinite(c.kcal) &&
+    c.kcal >= KCAL_MIN &&
+    c.kcal <= KCAL_MAX
+  )
+}
+
 function personaValida(x: unknown): boolean {
   return (
     esObjeto(x) &&
@@ -37,7 +51,8 @@ function personaValida(x: unknown): boolean {
     (x.sexo === 'hombre' || x.sexo === 'mujer') &&
     typeof x.estaturaCm === 'number' &&
     validarValor('estaturaCm', x.estaturaCm) == null &&
-    (x.metaPesoKg == null || (typeof x.metaPesoKg === 'number' && validarValor('pesoKg', x.metaPesoKg) == null))
+    (x.metaPesoKg == null || (typeof x.metaPesoKg === 'number' && validarValor('pesoKg', x.metaPesoKg) == null)) &&
+    (x.consumos == null || (Array.isArray(x.consumos) && x.consumos.every(consumoValido)))
   )
 }
 
