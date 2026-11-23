@@ -350,7 +350,7 @@ async function agregarPersona(page: Page, nombre: string, sexo: 'hombre' | 'muje
   if ((await page.locator('.perfil-boton').count()) === 0) await page.getByRole('button', { name: 'Agregar persona' }).click()
   else {
     await abrirPerfiles(page)
-    await perfiles(page).getByRole('menuitem', { name: '+ Agregar persona' }).click()
+    await perfiles(page).getByRole('menuitem', { name: 'Agregar persona' }).click()
   }
   await page.getByLabel('Nombre').fill(nombre)
   await page.getByLabel('Sexo').selectOption(sexo)

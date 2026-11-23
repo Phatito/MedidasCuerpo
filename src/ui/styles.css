@@ -2,13 +2,13 @@
    Cada persona es una línea del molde; cada medida, una marca rotulada sobre esa línea. */
 :root {
   /* Tiza de sastre sobre paño de lana: fondo carbón neutro, hojas apenas levantadas y definidas por líneas
-     de tiza, todo trazo en tiza blanca; acciones en tiza azul; estados en tonos de tiza, nunca neón. */
+     de tiza, todo trazo en tiza blanca neutra (nunca crema); acciones en tiza azul; estados en tonos de tiza, nunca neón. */
   --bg: #16171a;
   --card: #1b1c20;
-  --edge: #3a3a3d;
+  --edge: #3a3b3f;
   --soft: #222327;
-  --fg: #ece9e2;
-  --dim: #aaa69d;
+  --fg: #eceef1;
+  --dim: #a8abb2;
   --accent: #3d6ab0;
   --accent-hondo: #345c9b;
   --accent-tiza: #9cbde8;
@@ -18,10 +18,10 @@
   --good-bg: #1f2a20;
   --warn: #e2c36b;
   --warn-bg: #2c2717;
-  --bad: #e58a7f;
+  --bad: #ec8692;
   /* La pieza del molde: paño, línea de corte en tiza y costura en tiza azul. */
   --pieza: #24262c;
-  --corte: #ece9e2;
+  --corte: #eceef1;
   --costura: #9cbde8;
   --font: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 10px;
@@ -30,7 +30,7 @@
   --st-bajo: #8fbbe6;
   --st-ok: #9cc79a;
   --st-alto: #e2c36b;
-  --st-muy: #e58a7f;
+  --st-muy: #ec8692;
   --seleccion: #34507d;
   --hover-celda: #222327;
   color-scheme: dark;
@@ -269,7 +269,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
   flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--edge); background: transparent;
   color: var(--dim); font-size: 1.3rem; line-height: 1; cursor: pointer;
 }
-.estrella[aria-pressed='true'] { color: var(--warn); border-color: var(--warn); }
+.estrella[aria-pressed='true'] { color: var(--fg); border-color: var(--fg); }
 .estrella:hover { border-color: var(--dim); }
 
 /* Revisión: todo lo que se toca mide al menos 44 px. */
@@ -626,3 +626,12 @@ details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px)
 .principal-marca .icono { width: 14px; height: 14px; }
 /* Los bordes de los campos se distinguen del fondo (3:1). */
 .field input, .field select, .field textarea, .chip-select { border-color: #77736b; }
+
+/* Botón de archivo del navegador, con el mismo lenguaje que los demás botones. */
+input[type='file']::file-selector-button {
+  font: inherit; font-weight: 700; font-size: 0.875rem; margin-right: 12px; padding: 8px 14px; border-radius: 8px;
+  border: 1.5px solid var(--edge); background: var(--soft); color: var(--fg); cursor: pointer;
+}
+input[type='file']::file-selector-button:hover { border-color: var(--accent-tiza); }
+.perfil-item.accion { gap: 8px; }
+.perfil-item .icono { width: 18px; height: 18px; }

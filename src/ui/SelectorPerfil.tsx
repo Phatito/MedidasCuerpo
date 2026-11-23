@@ -103,7 +103,9 @@ export function SelectorPerfil({ personas, actual, principalId, ultimaFecha, onE
             )
           })}
           <hr />
-          <button type="button" role="menuitem" className="perfil-item accion" onClick={() => elegir(onAgregar)}>+ Agregar persona</button>
+          <button type="button" role="menuitem" className="perfil-item accion" onClick={() => elegir(onAgregar)}>
+            <Icono nombre="mas" /> Agregar persona
+          </button>
           <button type="button" role="menuitem" className="perfil-item" onClick={() => elegir(onFamilia)}>Administrar familia…</button>
         </div>
       )}
