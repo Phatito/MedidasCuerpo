@@ -1,6 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { consumoVigente } from '../domain/consumo'
-import { esMenor } from '../domain/insights'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { informeSemanal, type InformeSemanal } from '../domain/semana'
 import type { Medicion, Persona } from '../domain/types'
@@ -21,7 +20,6 @@ function Cambio({ kg }: { kg: number }) {
 const NOTA = 'Estimaciones orientativas a partir de tus datos, no indicación médica.'
 
 function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; hoy: string }) {
-  const menor = esMenor(persona, hoy)
   const consumo = consumoVigente(persona, hoy)
   const g = inf.gasto
   return (
@@ -62,7 +60,7 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
         <p className="notice info small">Tu última medición es del {ddmm(inf.fecha)}: mídete para recibir un plan nuevo.</p>
       )}
 
-      {!menor && g && (
+      {g && (
         <p className="small num semana-gasto">
           {g.estado === 'ok' ? (
             <>
@@ -212,7 +210,7 @@ export function PantallaSemana({ persona }: { persona: Persona }) {
           </li>
           <li>
             <b>Kcal recomendadas:</b> tu gasto más el ritmo de tu objetivo (bajar grasa −0,5 % del peso por semana; ganar músculo +0,25 %; mantener 0).
-            Nunca menos de 1.200 kcal (mujeres) o 1.500 kcal (hombres). A menores de 18 años no se les dan kcal ni acciones.
+            Nunca menos de 1.200 kcal (mujeres) o 1.500 kcal (hombres).
           </li>
         </ul>
       </details>

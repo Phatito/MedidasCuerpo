@@ -102,11 +102,10 @@ describe('informe semanal: qué hacer', () => {
     expect(inf.acciones[0].texto).toMatch(/sigue con tu consumo actual \(~2\.400 kcal\)/)
   })
 
-  test('menores: sin acciones ni kcal', () => {
+  test('la edad no cambia el informe: un menor recibe acciones y estimación igual que un adulto', () => {
     const inf = informeSemanal(persona({ fechaNacimiento: '2015-01-01' }), rapido, FIN)!
-    expect(inf.acciones).toEqual([])
-    expect(inf.gasto).toBeNull()
-    expect(inf.revision).toEqual([])
+    expect(codigos(inf)[0]).toBe('muy-rapido')
+    expect(inf.gasto).not.toBeNull()
   })
 
   test('datos de hace 30 días: viejo, sin acciones ni kcal', () => {

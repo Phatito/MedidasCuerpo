@@ -1,6 +1,5 @@
 import { consumoVigente } from './consumo'
 import { estimarGasto, ritmoSemanalPct, RITMO_OBJETIVO_PCT, serieDePeso, type EstimacionGasto } from './energia'
-import { esMenor } from './insights'
 import { derivar } from './metrics'
 import { diasEntre } from './numbers'
 import { RETENCION_DIARIA } from './trend'
@@ -24,7 +23,7 @@ export interface InformeSemanal {
   composicionTotal: { desde: string; grasaKg: number; magraKg: number } | null
   barras: { fecha: string; grasaKg: number; magraKg: number }[]
   atipica: { diferenciaKg: number; sentido: 'sobre' | 'bajo' } | null
-  /** Null para menores o datos viejos. */
+  /** Null con datos viejos. */
   gasto: EstimacionGasto | null
   acciones: Accion[]
   revision: Revision[]
@@ -188,8 +187,7 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
   }
 
   const vieja = diasEntre(ultima.fecha, hoy) > DIAS_VIEJA
-  const menor = esMenor(p, hoy)
-  const gasto = menor || vieja ? null : estimarGasto(p, ms)
+  const gasto = vieja ? null : estimarGasto(p, ms)
   const ctx: Contexto = {
     p,
     ritmo: ritmoSemanalPct(p, ms),
@@ -202,10 +200,10 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
     pesoTendencia: tendencia,
     ms,
   }
-  const acciones = menor || vieja ? [] : decidirAcciones(ctx)
+  const acciones = vieja ? [] : decidirAcciones(ctx)
 
   let revision: Revision[] = []
-  if (conRevision && previa && !menor && !vieja) {
+  if (conRevision && previa && !vieja) {
     const anterior = informe(p, ms.slice(0, -1), previa.fecha, false)
     // Sin una medición antes de la anterior, la semana pasada no tuvo informe que revisar.
     revision = (anterior?.anterior != null ? anterior.acciones : []).map((a) => revisar(a, ctx)).filter((r): r is Revision => r != null)

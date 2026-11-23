@@ -139,3 +139,7 @@ días exactos).
 ## Lo que queda al constructor
 
 Textos exactos no listados, estilo del gráfico de barras, y nombres internos.
+
+## Cambio posterior (pedido por el usuario)
+
+- Se quitó la regla de menores: todas las personas reciben el mismo informe, con kcal y acciones.

@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import type { Clasificacion } from '../domain/estados'
 import { resumenFicha, type ClaveTarjeta, type TarjetaFicha } from '../domain/ficha'
-import { esMenor, interpretar, NOTA_ORIENTACION } from '../domain/insights'
+import { interpretar, NOTA_ORIENTACION } from '../domain/insights'
 import { derivar } from '../domain/metrics'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { serieMetrica, valorMetrica, type Metrica, type Periodo } from '../domain/series'
@@ -218,8 +218,8 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana }: Props)
               <p className="muted small">Con la primera verás aquí sus números; con la segunda, cómo van cambiando.</p>
             </div>
           )}
-          {/* El consumo de kcal sirve para estimar el gasto real; a menores no se les dan kcal. */}
-          {!esMenor(persona, hoy) && <Consumo persona={persona} />}
+          {/* El consumo de kcal sirve para estimar el gasto real. */}
+          <Consumo persona={persona} />
           <button type="button" className="btn primary grande" onClick={onMedir}>+ Registrar medición</button>
         </section>
 

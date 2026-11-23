@@ -80,8 +80,7 @@ ahí se llega a todo.
   queda el historial. Con 3 o más semanas de consumo y pesadas, la app estima
   tu **gasto real** (consumo − cambio de la tendencia × 7.700 kcal/kg) y te
   recomienda kcal según tu objetivo, nunca menos de 1.200 (mujeres) o 1.500
-  (hombres). Es orientación, no indicación médica; a menores no se les dan
-  kcal ni acciones.
+  (hombres). Es orientación, no indicación médica.
 - **Todas las mediciones:** tabla con edición y eliminación.
 - **Ajustes y datos** (⚙): persona principal, importar y exportar CSV,
   respaldo, y recordatorio semanal como evento de calendario.
