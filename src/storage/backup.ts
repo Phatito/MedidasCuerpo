@@ -1,7 +1,7 @@
 import { parseFecha } from '../domain/numbers'
 import { CAMPOS_NUMERICOS, type Ajustes, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
-import { db, leerAjustes } from './db'
+import { db, horaDeEdicion, leerAjustes } from './db'
 
 export interface Respaldo {
   app: 'MedidasCuerpo'
@@ -99,9 +99,7 @@ export async function restaurarRespaldo(r: Respaldo): Promise<void> {
     await db.mediciones.bulkPut(r.mediciones)
     await db.ajustes.put({ ...r.ajustes, clave: 'principal' })
     const borrados = new Set([...antes.map((c) => c.idLogico), ...locales])
-    await db.cambios.bulkPut([
-      ...[...borrados].map((idLogico) => ({ idLogico, editadoEn: ahora, pendiente: 1 as const, borrado: 1 as const })),
-      ...[...restaurados].map((idLogico) => ({ idLogico, editadoEn: ahora, pendiente: 1 as const, borrado: 0 as const })),
-    ])
+    for (const idLogico of borrados) await db.cambios.put({ idLogico, editadoEn: await horaDeEdicion(idLogico, ahora), pendiente: 1, borrado: 1 })
+    for (const idLogico of restaurados) await db.cambios.put({ idLogico, editadoEn: await horaDeEdicion(idLogico, ahora), pendiente: 1, borrado: 0 })
   })
 }

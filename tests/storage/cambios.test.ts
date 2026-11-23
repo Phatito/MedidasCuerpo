@@ -116,3 +116,41 @@ describe('aplicar lo que llega de la nube', () => {
     expect(await leerAjustes()).toEqual({ diaRecordatorio: 3, horaRecordatorio: '07:30', personaPrincipalId: 'p1', ultimoRespaldo: '2026-11-20' })
   })
 })
+
+describe('revisión final', () => {
+  test('una medición que llega antes que su persona se guarda aparte y se aplica cuando llega la persona', async () => {
+    await aplicarRemotas([{ tipo: 'medicion', idLogico: 'medicion:p1_2026-11-05', editadoEn: 50, datos: m('2026-11-05', { pesoKg: 71 }) }])
+    expect(await db.mediciones.count()).toBe(0)
+    await aplicarRemotas([{ tipo: 'persona', idLogico: 'persona:p1', editadoEn: 60, datos: persona() }])
+    expect((await listarMediciones('p1'))[0].pesoKg).toBe(71)
+  })
+
+  test('si la persona llega borrada, sus mediciones guardadas aparte se descartan', async () => {
+    await aplicarRemotas([{ tipo: 'medicion', idLogico: 'medicion:p1_2026-11-05', editadoEn: 50, datos: m('2026-11-05') }])
+    await aplicarRemotas([{ tipo: 'persona', idLogico: 'persona:p1', editadoEn: 60, borrado: true }])
+    await db.personas.put(persona())
+    await aplicarRemotas([])
+    expect(await db.mediciones.count()).toBe(0)
+  })
+
+  test('una edición local siempre queda más nueva que lo último recibido, aunque el reloj vaya atrasado', async () => {
+    const futuro = Date.now() + 10 * 60_000
+    await aplicarRemotas([{ tipo: 'persona', idLogico: 'persona:p1', editadoEn: futuro, datos: persona() }])
+    await guardarPersona(persona({ nombre: 'Editada' }))
+    expect((await db.cambios.get('persona:p1'))!.editadoEn).toBeGreaterThan(futuro)
+  })
+
+  test('dos guardados en el mismo milisegundo tienen horas distintas', async () => {
+    await guardarMedicion(m('2026-11-05'))
+    const a = (await db.cambios.get('medicion:p1_2026-11-05'))!.editadoEn
+    await guardarMedicion(m('2026-11-05', { pesoKg: 71 }))
+    expect((await db.cambios.get('medicion:p1_2026-11-05'))!.editadoEn).toBeGreaterThan(a)
+  })
+
+  test('lo pendiente sube primero ajustes y personas, después mediciones', async () => {
+    await guardarMedicion(m('2026-11-05'))
+    await guardarPersona(persona())
+    await guardarAjustes({ diaRecordatorio: 1, horaRecordatorio: '09:00' })
+    expect((await pendientesDeSubir()).map((p) => p.tipo)).toEqual(['ajustes', 'persona', 'medicion'])
+  })
+})

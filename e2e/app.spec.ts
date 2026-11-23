@@ -1255,3 +1255,32 @@ test('crear cuenta exige frase larga, confirmación y un nombre libre', async ({
   await page.getByRole('button', { name: 'Crear cuenta y sincronizar' }).click()
   await expect(page.getByText('Ese nombre de usuario ya está en uso')).toBeVisible({ timeout: 20_000 })
 })
+
+test('con cuenta, restaurar un respaldo avisa que también cambia la nube', async ({ page }) => {
+  test.setTimeout(60_000)
+  await agregarAna(page)
+  await crearCuentaE2E(page, unico('olga'))
+  const respaldo = { app: 'MedidasCuerpo', version: 1, exportadoEn: '2026-11-01T00:00:00.000Z', personas: [], mediciones: [], ajustes: { diaRecordatorio: 1, horaRecordatorio: '09:00' } }
+  await page.getByLabel('Archivo de respaldo').setInputFiles({ name: 'r.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(respaldo)) })
+  await expect(page.getByText(/también se reemplazarán los datos de la nube y de tus otros dispositivos/)).toBeVisible()
+})
+
+test('el aviso de datos de otra cuenta se cierra con Escape sin entrar', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const otra = unico('pia')
+  const aparte = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await aparte.goto('./')
+  await crearCuentaE2E(aparte, otra)
+  const pc = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await agregarAna(pc)
+  await crearCuentaE2E(pc, unico('quim'))
+  await pc.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await pc.getByRole('button', { name: 'Iniciar sesión' }).click()
+  await pc.getByLabel('Nombre de usuario').fill(otra)
+  await pc.getByLabel('Frase secreta', { exact: true }).fill(FRASE_E2E)
+  await pc.getByRole('button', { name: 'Entrar y sincronizar' }).click()
+  await expect(pc.getByRole('dialog')).toBeVisible({ timeout: 20_000 })
+  await pc.keyboard.press('Escape')
+  await expect(pc.getByRole('dialog')).toHaveCount(0)
+  await expect(pc.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
+})

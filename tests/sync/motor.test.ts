@@ -171,3 +171,41 @@ describe('sincronización entre dos dispositivos', { timeout: 60_000 }, () => {
     await borrarTodo()
   })
 })
+
+describe('revisión final del motor', { timeout: 60_000 }, () => {
+  test('una subida cortada a la mitad no deja mediciones perdidas en el otro dispositivo', async () => {
+    await dispositivo(`pc${n}`)
+    await guardarPersona(persona())
+    for (let d = 1; d <= 28; d++) await guardarMedicion(m(`2026-10-${String(d).padStart(2, '0')}`))
+    for (let d = 1; d <= 17; d++) await guardarMedicion(m(`2026-11-${String(d).padStart(2, '0')}`))
+    fallarSiguiente = null
+    // La segunda llamada de subida falla.
+    let llamadas = 0
+    const original = fetchFalso
+    configurarApi(URL_PRUEBA, async (e, i) => {
+      if (i?.method === 'POST' && String(e).endsWith('/piezas') && ++llamadas === 2) return new Response('{}', { status: 500 })
+      return original(e, i)
+    })
+    await crearCuenta('mati.prueba', FRASE)
+    await dispositivo(`cel${n}`)
+    await iniciarSesion('mati.prueba', FRASE, async () => 'cancelar')
+    await dispositivo(`pc${n}`)
+    await sincronizarAhora()
+    await dispositivo(`cel${n}`)
+    await sincronizarAhora()
+    expect(await listarMediciones('p1')).toHaveLength(45)
+  })
+
+  test('una pieza demasiado grande no frena el resto de la sincronización', async () => {
+    await dispositivo(`pc${n}`)
+    await guardarPersona(persona({ nombre: 'Nora' }))
+    await guardarMedicion(m('2026-11-05', { nota: 'x'.repeat(20_000) }))
+    await guardarMedicion(m('2026-11-06'))
+    await crearCuenta('nora.prueba', FRASE)
+    expect(ultimoEstado.tipo).toBe('error')
+    await dispositivo(`cel${n}`)
+    await iniciarSesion('nora.prueba', FRASE, async () => 'cancelar')
+    expect((await listarPersonas()).map((p) => p.nombre)).toEqual(['Nora'])
+    expect((await listarMediciones('p1')).map((x) => x.fecha)).toEqual(['2026-11-06'])
+  })
+})

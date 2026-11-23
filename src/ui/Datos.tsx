@@ -8,6 +8,7 @@ import { exportarRespaldo, leerRespaldo, restaurarRespaldo, type Respaldo } from
 import { guardarAjustes, leerAjustes, listarMediciones } from '../storage/db'
 import { hayServidor } from '../sync/api'
 import { Cuenta } from './Cuenta'
+import { sesionActual } from '../sync/sesion'
 import { descargar } from './descargar'
 import { ImportarArchivo, plural } from './ImportarArchivo'
 
@@ -19,6 +20,8 @@ interface Props {
 
 export function Datos({ personas, personaActual }: Props) {
   const ajustes = useLiveQuery(leerAjustes, [])
+  // Con sesión iniciada, restaurar también cambia la nube: se avisa.
+  const conCuenta = useLiveQuery(() => sesionActual().then((x) => x != null), [], false)
   const [personaId, setPersonaId] = useState(personaActual?.id ?? personas[0]?.id ?? '')
   // Tras restaurar un respaldo la persona elegida puede ya no existir: se usa la primera disponible.
   const persona = personas.find((p) => p.id === personaId) ?? personas[0] ?? null
@@ -186,6 +189,7 @@ export function Datos({ personas, personaActual }: Props) {
             <p className="notice warn">
               El archivo contiene {plural(pendiente.personas.length, 'persona', 'personas')} y {plural(pendiente.mediciones.length, 'medición', 'mediciones')}.
               Reemplazará todos los datos actuales.
+              {conCuenta && ' Como tienes una cuenta, también se reemplazarán los datos de la nube y de tus otros dispositivos.'}
             </p>
             <div className="row">
               <button className="btn danger" onClick={restaurar}>Sí, restaurar</button>

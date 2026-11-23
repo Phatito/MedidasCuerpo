@@ -28,8 +28,9 @@ cifrados; solo tú puedes leerlos.
 - **Con cuenta (opcional, en Ajustes y datos → Cuenta y sincronización):**
   entras con un nombre de usuario y una frase secreta y tus datos se
   sincronizan entre el PC y el celular. Se cifran en tu dispositivo con tu
-  frase antes de salir; el servidor (Cloudflare) solo guarda texto ilegible y
-  ni siquiera sabe en qué fechas te mediste. **Si olvidas la frase, la copia de
+  frase antes de salir; el servidor (Cloudflare) solo guarda texto ilegible: no
+  ve nombres, pesos, medidas, notas ni fechas de medición. Sí ve tu nombre de
+  usuario, cuántas piezas guardas y cuándo se editó cada una. **Si olvidas la frase, la copia de
   la nube no se puede recuperar** (tus datos siguen en cada dispositivo). Las
   capturas de Xiaomi nunca se suben: solo los números que la app lee.
 

@@ -34,6 +34,7 @@ class BaseDatos extends Dexie {
   ajustes!: Table<FilaAjustes, string>
   cambios!: Table<Cambio, string>
   sesion!: Table<FilaSesion, string>
+  huerfanas!: Table<{ idLogico: string; personaId: string; pieza: ContenidoPieza }, string>
 
   constructor(nombre = 'medidascuerpo') {
     super(nombre)
@@ -47,6 +48,8 @@ class BaseDatos extends Dexie {
       cambios: 'idLogico, pendiente',
       sesion: 'clave',
     })
+    // Versión 3: mediciones que llegaron de la nube antes que su persona; se aplican cuando llega.
+    this.version(3).stores({ huerfanas: 'idLogico, personaId' })
   }
 }
 
@@ -72,8 +75,17 @@ function avisar() {
   for (const fn of oyentes) fn()
 }
 
-function registrar(idLogico: string, borrado = false, editadoEn = Date.now()): Promise<string> {
-  return db.cambios.put({ idLogico, editadoEn, pendiente: 1, borrado: borrado ? 1 : 0 })
+/**
+ * Hora de una edición local: nunca menor que la última conocida de esa pieza (+1 ms).
+ * Así una edición hecha con el reloj atrasado, o dos en el mismo milisegundo, siempre gana a lo anterior.
+ */
+export async function horaDeEdicion(idLogico: string, ahora = Date.now()): Promise<number> {
+  const previa = await db.cambios.get(idLogico)
+  return previa ? Math.max(ahora, previa.editadoEn + 1) : ahora
+}
+
+async function registrar(idLogico: string, borrado = false, ahora = Date.now()): Promise<string> {
+  return db.cambios.put({ idLogico, editadoEn: await horaDeEdicion(idLogico, ahora), pendiente: 1, borrado: borrado ? 1 : 0 })
 }
 
 export function listarPersonas(): Promise<Persona[]> {
@@ -116,7 +128,7 @@ export async function guardarMediciones(ms: Medicion[]): Promise<void> {
   await db.transaction('rw', db.mediciones, db.cambios, async () => {
     await db.mediciones.bulkPut(ms)
     const ahora = Date.now()
-    await db.cambios.bulkPut(ms.map((m) => ({ idLogico: idMedicion(m.id), editadoEn: ahora, pendiente: 1 as const, borrado: 0 as const })))
+    for (const m of ms) await registrar(idMedicion(m.id), false, ahora)
   })
   avisar()
 }
@@ -151,8 +163,8 @@ export async function guardarAjustes(a: Ajustes): Promise<void> {
 
 /** Borra todos los datos de este dispositivo, sin dejar borrados pendientes para la nube. */
 export async function borrarTodo(): Promise<void> {
-  await db.transaction('rw', db.personas, db.mediciones, db.ajustes, db.cambios, async () => {
-    await Promise.all([db.personas.clear(), db.mediciones.clear(), db.ajustes.clear(), db.cambios.clear()])
+  await db.transaction('rw', [db.personas, db.mediciones, db.ajustes, db.cambios, db.huerfanas], async () => {
+    await Promise.all([db.personas.clear(), db.mediciones.clear(), db.ajustes.clear(), db.cambios.clear(), db.huerfanas.clear()])
   })
 }
 
@@ -165,7 +177,9 @@ const idReal = (idLogico: string) => idLogico.slice(idLogico.indexOf(':') + 1)
 
 /** Las piezas pendientes con su contenido actual (o como borradas). */
 export async function pendientesDeSubir(): Promise<ContenidoPieza[]> {
-  const cambios = await db.cambios.where('pendiente').equals(1).toArray()
+  // Ajustes y personas primero: una medición no sirve en otro dispositivo sin su persona.
+  const orden = { ajustes: 0, persona: 1, medicion: 2 }
+  const cambios = (await db.cambios.where('pendiente').equals(1).toArray()).sort((a, b) => orden[tipoDe(a.idLogico)] - orden[tipoDe(b.idLogico)])
   const piezas: ContenidoPieza[] = []
   for (const c of cambios) {
     const tipo = tipoDe(c.idLogico)
@@ -209,7 +223,7 @@ export async function aplicarRemotas(piezas: ContenidoPieza[]): Promise<number> 
   let aplicadas = 0
   // Primero personas y ajustes, después mediciones: una medición necesita a su persona.
   const orden = [...piezas].sort((a, b) => Number(a.tipo === 'medicion') - Number(b.tipo === 'medicion'))
-  await db.transaction('rw', db.personas, db.mediciones, db.ajustes, db.cambios, async () => {
+  await db.transaction('rw', [db.personas, db.mediciones, db.ajustes, db.cambios, db.huerfanas], async () => {
     for (const p of orden) {
       if (!debeAplicarse(await db.cambios.get(p.idLogico), p.editadoEn)) continue
       const borrado = 'borrado' in p
@@ -220,14 +234,18 @@ export async function aplicarRemotas(piezas: ContenidoPieza[]): Promise<number> 
             await db.cambios.put({ idLogico: idMedicion(m), editadoEn: p.editadoEn, pendiente: 0, borrado: 1 })
           }
           await db.mediciones.where('personaId').equals(id).delete()
+          await db.huerfanas.where('personaId').equals(id).delete()
           await db.personas.delete(id)
         } else await db.personas.put((p as Extract<ContenidoPieza, { datos: Persona }>).datos)
       } else if (p.tipo === 'medicion') {
         if (borrado) await db.mediciones.delete(idReal(p.idLogico))
         else {
           const datos = (p as Extract<ContenidoPieza, { datos: Medicion }>).datos
-          // Una medición cuya persona ya no existe (se borró en otro dispositivo) no se muestra.
-          if (!(await db.personas.get(datos.personaId))) continue
+          // Su persona todavía no llegó (o se borró): se guarda aparte y se aplica si la persona llega.
+          if (!(await db.personas.get(datos.personaId))) {
+            await db.huerfanas.put({ idLogico: p.idLogico, personaId: datos.personaId, pieza: p })
+            continue
+          }
           await db.mediciones.put(datos)
         }
       } else if (!borrado) {
@@ -237,6 +255,16 @@ export async function aplicarRemotas(piezas: ContenidoPieza[]): Promise<number> 
         await db.ajustes.put({ ...datos, ...(local?.ultimoRespaldo ? { ultimoRespaldo: local.ultimoRespaldo } : {}), clave: CLAVE_AJUSTES })
       }
       await db.cambios.put({ idLogico: p.idLogico, editadoEn: p.editadoEn, pendiente: 0, borrado: borrado ? 1 : 0 })
+      aplicadas++
+    }
+    // Mediciones guardadas aparte cuya persona ya está: se aplican ahora.
+    for (const h of await db.huerfanas.toArray()) {
+      if (!(await db.personas.get(h.personaId))) continue
+      await db.huerfanas.delete(h.idLogico)
+      const pieza = h.pieza as Extract<ContenidoPieza, { datos: Medicion }>
+      if (!debeAplicarse(await db.cambios.get(h.idLogico), pieza.editadoEn)) continue
+      await db.mediciones.put(pieza.datos)
+      await db.cambios.put({ idLogico: h.idLogico, editadoEn: pieza.editadoEn, pendiente: 0, borrado: 0 })
       aplicadas++
     }
   })
@@ -260,4 +288,5 @@ export async function marcarTodoPendiente(): Promise<void> {
 
 export async function reiniciarCambios(): Promise<void> {
   await db.cambios.clear()
+  await db.huerfanas.clear()
 }

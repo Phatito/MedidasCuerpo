@@ -196,7 +196,15 @@ export function Cuenta() {
 
       {preguntaAjenos && (
         <div className="dialogo-fondo">
-          <div className="card stack dialogo" role="dialog" aria-modal="true" aria-labelledby="ajenos-titulo">
+          <div
+            className="card stack dialogo"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ajenos-titulo"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') preguntaAjenos.responder('cancelar')
+            }}
+          >
             <h3 id="ajenos-titulo">Este dispositivo tiene datos que no son de {preguntaAjenos.usuario}</h3>
             <p className="small">Puedes sumarlos a esta cuenta o reemplazarlos por lo que esta cuenta tiene en la nube (los de este dispositivo se borran).</p>
             <div className="row">

@@ -271,7 +271,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
       <div className="card">
         <div className="field">
           <label htmlFor="medir-nota">Nota (opcional)</label>
-          <input id="medir-nota" value={nota} onChange={(e) => { editado(); setNota(e.target.value) }} />
+          <input id="medir-nota" maxLength={1000} value={nota} onChange={(e) => { editado(); setNota(e.target.value) }} />
         </div>
       </div>
       <div className="row">

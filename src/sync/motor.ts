@@ -12,6 +12,8 @@ export type EstadoSync =
   | { tipo: 'sesion-terminada' }
 
 const SUBIDA_POR_LLAMADA = 40
+// El servidor no acepta piezas de más de 16 KB.
+const MAX_PIEZA = 16 * 1024
 const ESPERA_TRAS_CAMBIO = 3_000
 const CADA = 5 * 60_000
 
@@ -45,16 +47,22 @@ async function ciclo(): Promise<void> {
   fijar({ tipo: 'sincronizando' })
   try {
     // Subir, de a 40 piezas.
-    const pendientes = await pendientesDeSubir()
-    for (let i = 0; i < pendientes.length; i += SUBIDA_POR_LLAMADA) {
-      const lote = pendientes.slice(i, i + SUBIDA_POR_LLAMADA)
-      const porId = new Map<string, ContenidoPieza>()
-      const piezas = []
-      for (const p of lote) {
-        const id = await idOpaco(s.ids, p.idLogico)
-        porId.set(id, p)
-        piezas.push({ id, cifrado: await cifrar(s.cifrado, p), editadoEn: p.editadoEn })
+    // Se cifra todo primero: una pieza demasiado grande queda pendiente, pero no frena al resto.
+    const porId = new Map<string, ContenidoPieza>()
+    const listas: { id: string; cifrado: string; editadoEn: number }[] = []
+    let grandes = 0
+    for (const p of await pendientesDeSubir()) {
+      const id = await idOpaco(s.ids, p.idLogico)
+      const cifrado = await cifrar(s.cifrado, p)
+      if (cifrado.length > MAX_PIEZA) {
+        grandes++
+        continue
       }
+      porId.set(id, p)
+      listas.push({ id, cifrado, editadoEn: p.editadoEn })
+    }
+    for (let i = 0; i < listas.length; i += SUBIDA_POR_LLAMADA) {
+      const piezas = listas.slice(i, i + SUBIDA_POR_LLAMADA)
       const r = await llamar<{ aceptadas: string[]; rechazadas: string[] }>('POST', '/piezas', { cuerpo: piezas, token: s.token })
       const marca = (ids: string[]) => ids.map((id) => porId.get(id)!).filter(Boolean).map((p) => ({ idLogico: p.idLogico, editadoEn: p.editadoEn }))
       await marcarSubidas(marca(r.aceptadas), marca(r.rechazadas))
@@ -77,7 +85,8 @@ async function ciclo(): Promise<void> {
     }
     if (recibidas.length) await aplicarRemotas(recibidas)
     await guardarCursor(cursor)
-    fijar({ tipo: 'al-dia', desde: Date.now() })
+    if (grandes) fijar({ tipo: 'error', motivo: 'Una medición es demasiado grande para sincronizar (revisa si tiene una nota muy larga).' })
+    else fijar({ tipo: 'al-dia', desde: Date.now() })
   } catch (e) {
     if (e instanceof ErrorApi && e.estado === 401) {
       await olvidarSesion()
