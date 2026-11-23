@@ -1,87 +1,87 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-23T07:06:25+00:00",
+  "generatedAt": "2026-11-23T07:10:25+00:00",
   "title": "Design System: Mesura",
   "extensions": {
     "colorMeta": {
       "envelope-navy": {
         "role": "primary",
         "displayName": "Envelope Navy",
-        "canonical": "#1b2a78",
+        "canonical": "#1d2a48",
         "tonalRamp": [
-          "#030725",
-          "#15214c",
-          "#2d3d76",
-          "#465ca3",
-          "#627dd1",
-          "#88a1ed",
-          "#b4c8ff",
-          "#e8eeff"
+          "#080b11",
+          "#1f2532",
+          "#394256",
+          "#54617d",
+          "#7282a5",
+          "#97a5c3",
+          "#bec9e1",
+          "#e7efff"
         ]
       },
       "cobalt": {
         "role": "primary",
-        "displayName": "Cobalt",
-        "canonical": "#3d5cf0",
+        "displayName": "Chalk-Blue Fill",
+        "canonical": "#3d6ab0",
         "tonalRamp": [
-          "#020034",
-          "#0d1666",
-          "#203398",
-          "#3551ce",
-          "#4f73ff",
-          "#7fa0ff",
-          "#b3c8ff",
-          "#e8eeff"
+          "#040b18",
+          "#14253f",
+          "#28426a",
+          "#3d6199",
+          "#5582ca",
+          "#80a6e2",
+          "#adcbfa",
+          "#dbf0ff"
         ]
       },
       "cobalt-deep": {
         "role": "primary",
-        "displayName": "Pressed Cobalt",
-        "canonical": "#2f4bd6",
+        "displayName": "Pressed Fill",
+        "canonical": "#345c9b",
         "tonalRamp": [
-          "#020035",
-          "#0d1863",
-          "#203595",
-          "#3553c9",
-          "#4d73ff",
-          "#7ea0ff",
-          "#b2c8ff",
-          "#e8eeff"
+          "#050b17",
+          "#16253d",
+          "#2a4267",
+          "#416195",
+          "#5983c4",
+          "#83a6dd",
+          "#afcbf6",
+          "#dcf0ff"
         ]
       },
       "chalk-blue": {
         "role": "primary",
         "displayName": "Chalk Blue",
-        "canonical": "#93a8ff",
+        "canonical": "#9cbde8",
         "tonalRamp": [
-          "#050724",
-          "#19204a",
-          "#323d74",
-          "#4c5ba0",
-          "#697bce",
-          "#8ea0ea",
-          "#b7c6ff",
-          "#e9eeff"
+          "#060b13",
+          "#1b2634",
+          "#32435a",
+          "#4b6382",
+          "#6684ac",
+          "#8ea7c9",
+          "#b7cbe6",
+          "#e2f0ff"
         ]
       },
       "selection-navy": {
         "role": "primary",
         "displayName": "Selection Navy",
-        "canonical": "#2c3f8f",
+        "canonical": "#34507d",
         "tonalRamp": [
-          "#030725",
-          "#16214c",
-          "#2d3d76",
-          "#475ca3",
-          "#637cd2",
-          "#88a1ee",
-          "#b4c8ff",
-          "#e8eeff"
+          "#060b14",
+          "#1a2537",
+          "#31425e",
+          "#4a6288",
+          "#6583b3",
+          "#8da6cf",
+          "#b6caea",
+          "#e1f0ff"
         ]
       },
       "on-cobalt": {
         "role": "neutral",
-        "displayName": "White On Cobalt",
+        "displayName": "White On Fill",
         "canonical": "#ffffff",
         "tonalRamp": [
           "#0b0b0b",
@@ -96,287 +96,287 @@
       },
       "wool": {
         "role": "neutral",
-        "displayName": "Wool",
-        "canonical": "#0f131b",
+        "displayName": "Charcoal Wool",
+        "canonical": "#16171a",
         "tonalRamp": [
-          "#090b0f",
-          "#22252a",
-          "#3e4249",
-          "#5d616a",
-          "#7d828d",
-          "#a0a5af",
-          "#c5c9d2",
-          "#ebeff6"
+          "#0a0b0e",
+          "#242528",
+          "#414245",
+          "#606165",
+          "#818286",
+          "#a3a5a9",
+          "#c7c9cd",
+          "#edeef3"
         ]
       },
       "sheet": {
         "role": "neutral",
         "displayName": "Sheet",
-        "canonical": "#171c27",
+        "canonical": "#1b1c20",
         "tonalRamp": [
-          "#090b10",
-          "#22252c",
-          "#3e424b",
-          "#5c616d",
-          "#7c8290",
-          "#9fa5b2",
-          "#c4c9d4",
-          "#eaeff8"
+          "#0a0b0f",
+          "#242529",
+          "#414246",
+          "#606166",
+          "#818287",
+          "#a3a5aa",
+          "#c7c9ce",
+          "#edeef4"
         ]
       },
       "soft-fold": {
         "role": "neutral",
         "displayName": "Soft Fold",
-        "canonical": "#1f2532",
+        "canonical": "#222327",
         "tonalRamp": [
-          "#090b10",
-          "#21252d",
-          "#3d424d",
-          "#5b616f",
-          "#7b8292",
-          "#9ea5b4",
-          "#c3c9d6",
-          "#e9eff9"
+          "#0a0b0e",
+          "#242529",
+          "#414246",
+          "#606166",
+          "#818287",
+          "#a3a5aa",
+          "#c7c9ce",
+          "#edeef4"
         ]
       },
       "cut-rule": {
         "role": "neutral",
         "displayName": "Cut Rule",
-        "canonical": "#2b3242",
+        "canonical": "#3a3a3d",
         "tonalRamp": [
-          "#080b11",
-          "#21252e",
-          "#3c424e",
-          "#5a6171",
-          "#7a8295",
-          "#9da5b6",
-          "#c2c9d8",
-          "#e9effb"
+          "#0b0b0d",
+          "#252527",
+          "#424245",
+          "#616164",
+          "#828285",
+          "#a4a5a8",
+          "#c9c9cc",
+          "#eeeef2"
         ]
       },
-      "cell-hover": {
+      "sheet-edge": {
         "role": "neutral",
-        "displayName": "Cell Hover",
-        "canonical": "#1c2232",
+        "displayName": "Sheet Edge",
+        "canonical": "#45443f",
         "tonalRamp": [
-          "#080b12",
-          "#21252f",
-          "#3d424f",
-          "#5a6171",
-          "#7a8296",
-          "#9ea5b7",
-          "#c3c9d9",
-          "#e9eefc"
-        ]
-      },
-      "pattern-piece": {
-        "role": "neutral",
-        "displayName": "Pattern Piece",
-        "canonical": "#1d2540",
-        "tonalRamp": [
-          "#070b16",
-          "#1f2435",
-          "#3a4157",
-          "#57607b",
-          "#7681a2",
-          "#9aa4c2",
-          "#bfc9e2",
-          "#e8eeff"
+          "#0c0b07",
+          "#262521",
+          "#43423d",
+          "#62615c",
+          "#83827d",
+          "#a6a59f",
+          "#cac9c3",
+          "#f0efe8"
         ]
       },
       "seam-dash": {
         "role": "neutral",
         "displayName": "Seam Dash",
-        "canonical": "#4a5672",
+        "canonical": "#5a5853",
         "tonalRamp": [
-          "#070b15",
-          "#1e2534",
-          "#394256",
-          "#56617a",
-          "#7582a0",
-          "#99a5c0",
-          "#bfc9e1",
-          "#e7efff"
+          "#0d0b07",
+          "#272521",
+          "#44423d",
+          "#63615c",
+          "#84827d",
+          "#a7a59f",
+          "#cbc9c3",
+          "#f1eee8"
+        ]
+      },
+      "field-edge": {
+        "role": "neutral",
+        "displayName": "Field Edge",
+        "canonical": "#77736b",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423d",
+          "#64615a",
+          "#86827a",
+          "#a8a59e",
+          "#cbc9c3",
+          "#f0eeea"
+        ]
+      },
+      "pattern-piece": {
+        "role": "neutral",
+        "displayName": "Pattern Piece",
+        "canonical": "#24262c",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242528",
+          "#404246",
+          "#5f6167",
+          "#808289",
+          "#a3a5ab",
+          "#c7c9ce",
+          "#edeef2"
         ]
       },
       "chalk": {
         "role": "neutral",
         "displayName": "Chalk",
-        "canonical": "#eef1f6",
+        "canonical": "#ece9e2",
         "tonalRamp": [
-          "#0a0b0d",
-          "#242527",
-          "#404245",
-          "#5f6165",
-          "#808287",
-          "#a3a5a9",
-          "#c7c9cd",
-          "#edeef1"
-        ]
-      },
-      "chalk-line": {
-        "role": "neutral",
-        "displayName": "Chalk Line",
-        "canonical": "#e9edf5",
-        "tonalRamp": [
-          "#0a0b0e",
-          "#232529",
-          "#404247",
-          "#5e6167",
-          "#7f8289",
-          "#a2a5ab",
-          "#c6c9cf",
-          "#eceef3"
+          "#0d0b07",
+          "#272520",
+          "#44423c",
+          "#64615b",
+          "#85827c",
+          "#a8a59e",
+          "#ccc9c2",
+          "#f1eee7"
         ]
       },
       "graphite": {
         "role": "neutral",
         "displayName": "Graphite",
-        "canonical": "#a3acbd",
+        "canonical": "#aaa69d",
         "tonalRamp": [
-          "#080b11",
-          "#21252d",
-          "#3d424d",
-          "#5a616f",
-          "#7a8393",
-          "#9ea5b4",
-          "#c3c9d6",
-          "#e9eff9"
+          "#0c0b0a",
+          "#262522",
+          "#44423d",
+          "#64615a",
+          "#868279",
+          "#a8a59e",
+          "#cbc9c3",
+          "#f0eeea"
         ]
       },
       "state-good": {
         "role": "tertiary",
-        "displayName": "Good Green",
-        "canonical": "#52d69c",
+        "displayName": "Muted Green",
+        "canonical": "#9cc79a",
         "tonalRamp": [
-          "#000f07",
-          "#002e1b",
-          "#004f33",
-          "#00744d",
-          "#009a68",
-          "#51bd8c",
-          "#89dfb3",
-          "#c2ffde"
+          "#070d06",
+          "#1b291a",
+          "#324931",
+          "#4b6b4a",
+          "#668f65",
+          "#8eb08d",
+          "#b8d2b6",
+          "#e2f5e1"
         ]
       },
       "state-good-bg": {
         "role": "tertiary",
-        "displayName": "Good Green Wash",
-        "canonical": "#13372a",
+        "displayName": "Muted Green Wash",
+        "canonical": "#1f2a20",
         "tonalRamp": [
-          "#030e09",
-          "#162a22",
-          "#2f483e",
-          "#4a695c",
-          "#678c7c",
-          "#8dae9f",
-          "#b5d1c4",
-          "#def5ea"
+          "#0a0c0a",
+          "#222622",
+          "#3d443d",
+          "#5a645b",
+          "#79867a",
+          "#9ea89e",
+          "#c3ccc4",
+          "#eaf0eb"
         ]
       },
       "state-warn": {
         "role": "tertiary",
-        "displayName": "Caution Amber",
-        "canonical": "#f2b45a",
+        "displayName": "Chalk Yellow",
+        "canonical": "#e2c36b",
         "tonalRamp": [
-          "#130900",
-          "#352000",
-          "#5b3a00",
-          "#845700",
-          "#af7504",
-          "#ce9a50",
-          "#eec184",
-          "#ffebd2"
+          "#100a01",
+          "#2e2403",
+          "#51400a",
+          "#755e13",
+          "#9c7f22",
+          "#bba360",
+          "#dac896",
+          "#fbeecb"
         ]
       },
       "state-warn-bg": {
         "role": "tertiary",
-        "displayName": "Caution Amber Wash",
-        "canonical": "#3b2a12",
+        "displayName": "Chalk Yellow Wash",
+        "canonical": "#2c2717",
         "tonalRamp": [
-          "#110a03",
-          "#2d2316",
-          "#4d402e",
-          "#6f5e48",
-          "#937f65",
-          "#b4a28b",
-          "#d6c7b2",
-          "#faecdb"
+          "#0c0b08",
+          "#27251e",
+          "#454237",
+          "#666153",
+          "#888270",
+          "#aaa596",
+          "#cdc9bd",
+          "#f1eee6"
         ]
       },
       "state-bad": {
         "role": "tertiary",
-        "displayName": "Alarm Red",
-        "canonical": "#ff7a88",
+        "displayName": "Chalk Red",
+        "canonical": "#e58a7f",
         "tonalRamp": [
-          "#1f0004",
-          "#4a0514",
-          "#741d2c",
-          "#a23646",
-          "#d05162",
-          "#ef7e88",
-          "#ffb1b6",
-          "#ffe8e9"
+          "#150705",
+          "#3a1b17",
+          "#63322c",
+          "#8f4b43",
+          "#bc665c",
+          "#d88f86",
+          "#f3b9b1",
+          "#ffe3dd"
         ]
       },
       "range-low": {
         "role": "tertiary",
-        "displayName": "Range Low Blue",
-        "canonical": "#6cc3f5",
+        "displayName": "Range Low Chalk Blue",
+        "canonical": "#8fbbe6",
         "tonalRamp": [
-          "#000d17",
-          "#00293d",
-          "#004867",
-          "#186990",
-          "#328cbb",
-          "#67aed8",
-          "#96d2f7",
-          "#def2ff"
+          "#050c13",
+          "#172635",
+          "#2d445b",
+          "#446484",
+          "#5d86ae",
+          "#87a9cb",
+          "#b2cde7",
+          "#def1ff"
         ]
       },
       "range-ok": {
         "role": "tertiary",
         "displayName": "Range Normal Green",
-        "canonical": "#52d69c",
+        "canonical": "#9cc79a",
         "tonalRamp": [
-          "#000f07",
-          "#002e1b",
-          "#004f33",
-          "#00744d",
-          "#009a68",
-          "#51bd8c",
-          "#89dfb3",
-          "#c2ffde"
+          "#070d06",
+          "#1b291a",
+          "#324931",
+          "#4b6b4a",
+          "#668f65",
+          "#8eb08d",
+          "#b8d2b6",
+          "#e2f5e1"
         ]
       },
       "range-high": {
         "role": "tertiary",
-        "displayName": "Range High Amber",
-        "canonical": "#f2b45a",
+        "displayName": "Range High Yellow",
+        "canonical": "#e2c36b",
         "tonalRamp": [
-          "#130900",
-          "#352000",
-          "#5b3a00",
-          "#845700",
-          "#af7504",
-          "#ce9a50",
-          "#eec184",
-          "#ffebd2"
+          "#100a01",
+          "#2e2403",
+          "#51400a",
+          "#755e13",
+          "#9c7f22",
+          "#bba360",
+          "#dac896",
+          "#fbeecb"
         ]
       },
       "range-very-high": {
         "role": "tertiary",
         "displayName": "Range Very High Red",
-        "canonical": "#ff7a88",
+        "canonical": "#e58a7f",
         "tonalRamp": [
-          "#1f0004",
-          "#4a0514",
-          "#741d2c",
-          "#a23646",
-          "#d05162",
-          "#ef7e88",
-          "#ffb1b6",
-          "#ffe8e9"
+          "#150705",
+          "#3a1b17",
+          "#63322c",
+          "#8f4b43",
+          "#bc665c",
+          "#d88f86",
+          "#f3b9b1",
+          "#ffe3dd"
         ]
       }
     },
@@ -387,7 +387,7 @@
       },
       "figure": {
         "displayName": "Figure",
-        "purpose": "Every measured value, narrow and tabular: cifras tiles 2rem, metric screen 2.2rem, ficha four-cell row 1.55rem (1.9rem from 900px)."
+        "purpose": "Every measured value, narrow and tabular: cifras tiles 2rem, metric screen 2.2rem, ficha figure band 1.55rem (1.9rem from 900px), body figure 17.5px."
       },
       "headline": {
         "displayName": "Headline",
@@ -403,18 +403,18 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Condensed graphite labels over figures, chart axes, legends, body-figure labels (14.5px)."
+        "purpose": "Condensed graphite labels over figures, chart axes, legends; 0.72rem single-line in the figure band; body-figure labels 14.5px."
       }
     },
     "shadows": [
       {
         "name": "floating-menu",
-        "value": "0 18px 40px rgba(0, 0, 0, 0.55)",
+        "value": "0 18px 40px rgba(0, 0, 0, 0.6)",
         "purpose": "Profile menu only; the one floating surface."
       },
       {
         "name": "focus-ring-input",
-        "value": "0 0 0 3px #2c3f8f",
+        "value": "0 0 0 3px #34507d",
         "purpose": "Focused input ring."
       },
       {
@@ -461,15 +461,15 @@
       "refersTo": "button-primary",
       "description": "The one action per screen; the large full-width variant registers a measurement.",
       "html": "<button class=\"ds-btn-primary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>Registrar medición</button>",
-      "css": ".ds-btn-primary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:9px 18px;border-radius:10px;border:1.5px solid #3d5cf0;background:#3d5cf0;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-btn-primary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.ds-btn-primary:hover{background:#2f4bd6;border-color:#2f4bd6}.ds-btn-primary:focus-visible{outline:2.5px solid #93a8ff;outline-offset:2px}"
+      "css": ".ds-btn-primary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:9px 18px;border-radius:10px;border:1.5px solid #3d6ab0;background:#3d6ab0;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-btn-primary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.ds-btn-primary:hover{background:#345c9b;border-color:#345c9b}.ds-btn-primary:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Back and secondary actions; sheet fill with a cut-rule border.",
+      "description": "Back and secondary actions; sheet fill drawn by its edge.",
       "html": "<button class=\"ds-btn-secondary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>Volver</button>",
-      "css": ".ds-btn-secondary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 18px;border-radius:10px;border:1.5px solid #2b3242;background:#171c27;color:#eef1f6;font-size:.9rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out}.ds-btn-secondary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-secondary:hover{border-color:#a3acbd}.ds-btn-secondary:focus-visible{outline:2.5px solid #93a8ff;outline-offset:2px}"
+      "css": ".ds-btn-secondary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 18px;border-radius:10px;border:1.5px solid #45443f;background:#1b1c20;color:#ece9e2;font-size:.9rem;font-weight:700;cursor:pointer}.ds-btn-secondary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-secondary:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Toggle Chips",
@@ -477,31 +477,31 @@
       "refersTo": "chip-toggle",
       "description": "Metric and period selectors above a chart; pressed fills cobalt.",
       "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">Peso</button><button class=\"ds-chip\" aria-pressed=\"true\">Grasa</button><button class=\"ds-chip\" aria-pressed=\"false\">Músculo</button></div>",
-      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #2b3242;background:#171c27;color:#eef1f6;font-size:.875rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out,background-color .15s ease-out}.ds-chip:hover:not([aria-pressed='true']){border-color:#a3acbd}.ds-chip[aria-pressed='true']{background:#3d5cf0;border-color:#3d5cf0;color:#fff}.ds-chip:focus-visible{outline:2.5px solid #93a8ff;outline-offset:2px}"
+      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #3a3a3d;background:#1b1c20;color:#ece9e2;font-size:.875rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out,background-color .15s ease-out}.ds-chip[aria-pressed='true']{background:#3d6ab0;border-color:#3d6ab0;color:#fff}.ds-chip:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Input Field",
       "kind": "input",
       "refersTo": "input-field",
-      "description": "Labeled measurement input; cobalt border and selection-navy ring on focus.",
+      "description": "Labeled measurement input; 3:1 field edge, cobalt border and selection-navy ring on focus.",
       "html": "<label class=\"ds-field\"><span>Cintura (cm)</span><input inputmode=\"decimal\" value=\"95,0\"></label>",
-      "css": ".ds-field{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:5px}.ds-field span{font-size:.8rem;font-weight:600;color:#a3acbd}.ds-field input{font:inherit;color:#eef1f6;background:#171c27;border:1.5px solid #2b3242;border-radius:10px;min-height:44px;padding:9px 12px}.ds-field input:hover{border-color:#a3acbd}.ds-field input:focus{border-color:#3d5cf0;outline:none;box-shadow:0 0 0 3px #2c3f8f}"
+      "css": ".ds-field{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:5px}.ds-field span{font-size:.8rem;font-weight:600;color:#aaa69d}.ds-field input{font:inherit;color:#ece9e2;background:#1b1c20;border:1.5px solid #77736b;border-radius:10px;min-height:44px;padding:9px 12px}.ds-field input:focus{border-color:#3d6ab0;outline:none;box-shadow:0 0 0 3px #34507d}"
     },
     {
       "name": "Envelope Band",
       "kind": "nav",
       "refersTo": "envelope-band",
-      "description": "Navy header: logo tile, profile selector, settings.",
+      "description": "Navy wool header: logo tile, profile selector, settings.",
       "html": "<header class=\"ds-band\"><span class=\"ds-band-logo\"></span><b>Mesura</b><button class=\"ds-band-perfil\"><i>P</i>Pablo</button><button class=\"ds-band-icon\" aria-label=\"Ajustes\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></button></header>",
-      "css": ".ds-band{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;align-items:center;gap:12px;padding:12px 20px;background:#1b2a78;color:#fff}.ds-band b{margin-right:auto;font-size:1.3rem;font-weight:760;font-stretch:80%}.ds-band-logo{width:34px;height:34px;border-radius:9px;background:#fff}.ds-band-perfil{font:inherit;font-weight:700;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}.ds-band-perfil i{font-style:normal;width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:#fff;color:#1b2a78;font-weight:800;font-size:.8rem}.ds-band-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;cursor:pointer}.ds-band-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}.ds-band-icon:hover,.ds-band-perfil:hover{background:rgba(255,255,255,.14)}.ds-band :focus-visible{outline:2.5px solid #fff;outline-offset:2px}"
+      "css": ".ds-band{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;align-items:center;gap:12px;padding:12px 20px;background:#1d2a48;color:#fff}.ds-band b{margin-right:auto;font-size:1.3rem;font-weight:760;font-stretch:80%}.ds-band-logo{width:34px;height:34px;border-radius:9px;background:#fff}.ds-band-perfil{font:inherit;font-weight:700;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}.ds-band-perfil i{font-style:normal;width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:#fff;color:#1d2a48;font-weight:800;font-size:.8rem}.ds-band-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;cursor:pointer}.ds-band-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}.ds-band-icon:hover,.ds-band-perfil:hover{background:rgba(255,255,255,.14)}.ds-band :focus-visible{outline:2.5px solid #fff;outline-offset:2px}"
     },
     {
-      "name": "Figure Row",
+      "name": "Weight Sheet With Figure Band",
       "kind": "card",
-      "refersTo": "figure-row-cell",
-      "description": "The ficha's four key figures as a ruled row of cells inside the weight sheet.",
-      "html": "<div class=\"ds-row\"><button class=\"ds-cell\"><span class=\"k\">Grasa</span><span class=\"v\">26,2 <small>%</small></span><span class=\"st\">Muy alto</span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,3</span></button><button class=\"ds-cell\"><span class=\"k\">Músculo</span><span class=\"v\">36,3 <small>kg</small></span></button><button class=\"ds-cell\"><span class=\"k\">Cintura</span><span class=\"v\">95,0 <small>cm</small></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 1,0</span></button><button class=\"ds-cell\"><span class=\"k\">Grasa visceral</span><span class=\"v\">14 <small>nivel</small></span><span class=\"st warn\">Alto</span></button></div>",
-      "css": ".ds-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.5px;background:#2b3242;border:1.5px solid #2b3242;border-radius:10px;overflow:hidden;max-width:520px}.ds-cell{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:82px;padding:10px 8px;border:0;background:#171c27;color:#eef1f6;text-align:left;cursor:pointer;transition:background-color .15s ease-out}.ds-cell:hover{background:#1c2232}.ds-cell:focus-visible{outline:3px solid #93a8ff;outline-offset:-3px}.ds-cell .k{font-size:.72rem;font-weight:650;font-stretch:82%;color:#a3acbd;line-height:1.15}.ds-cell .v{font-size:1.55rem;font-weight:720;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}.ds-cell small{font-size:.7rem;font-weight:600;color:#a3acbd}.ds-cell .st{font-size:.72rem;font-weight:800;color:#ff7a88}.ds-cell .st.warn{color:#f2b45a}.ds-cell .d{font-size:.72rem;font-weight:700;color:#a3acbd;font-variant-numeric:tabular-nums}.ds-cell .d.good{color:#52d69c}.ds-cell .d svg{width:.8em;height:.8em;fill:currentColor}"
+      "refersTo": "figure-band-cell",
+      "description": "The ficha sheet drawn by a chalk cutting line; the four key figures as a ruled band of the same sheet.",
+      "html": "<section class=\"ds-sheet\"><span class=\"k\">Peso de tendencia</span><span class=\"hero\">92,5 <small>kg</small></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,5 kg desde el 16/11</span><div class=\"ds-band-row\"><button class=\"ds-cell\"><span class=\"k\">Grasa</span><span class=\"v\">26,2 <small>%</small></span><span class=\"st bad\">Muy alto</span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,3</span></button><button class=\"ds-cell\"><span class=\"k\">Músculo</span><span class=\"v\">36,3 <small>kg</small></span></button><button class=\"ds-cell\"><span class=\"k\">Cintura</span><span class=\"v\">95,0 <small>cm</small></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 1,0</span></button><button class=\"ds-cell\"><span class=\"k\">Visceral</span><span class=\"v\">14 <small>nivel</small></span><span class=\"st warn\">Alto</span></button></div></section>",
+      "css": ".ds-sheet{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:4px;max-width:520px;padding:18px;border-radius:10px;border:1.5px solid #ece9e2;background:#1b1c20;color:#ece9e2}.ds-sheet .k{font-size:.78rem;font-weight:650;font-stretch:82%;color:#aaa69d}.ds-sheet .hero{font-size:4.2rem;font-weight:720;font-stretch:72%;line-height:.95;letter-spacing:-.01em;font-variant-numeric:tabular-nums}.ds-sheet small{font-size:.7rem;font-weight:600;color:#aaa69d}.ds-sheet .d{font-size:.8rem;font-weight:700;color:#aaa69d;font-variant-numeric:tabular-nums}.ds-sheet .d.good{color:#9cc79a}.ds-sheet .d svg{width:.8em;height:.8em;fill:currentColor}.ds-band-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;border-top:1.5px solid #3a3a3d;border-bottom:1.5px solid #3a3a3d}.ds-cell{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:82px;padding:10px 8px;border:0;border-left:1.5px solid #3a3a3d;background:none;color:#ece9e2;text-align:left;cursor:pointer;transition:background-color .15s ease-out}.ds-cell:first-child{border-left:0;padding-left:2px}.ds-cell:hover{background:#222327}.ds-cell:focus-visible{outline:2.5px solid #9cbde8;outline-offset:-3px}.ds-cell .k{font-size:.72rem;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ds-cell .v{font-size:1.55rem;font-weight:720;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}.ds-cell .st{font-size:.72rem;font-weight:800}.ds-cell .st.bad{color:#e58a7f}.ds-cell .st.warn{color:#e2c36b}.ds-cell .d{font-size:.72rem}"
     },
     {
       "name": "Week Line",
@@ -509,23 +509,24 @@
       "refersTo": "sheet",
       "description": "Tu semana as a seam: dashed border that becomes a solid chalk-blue cut on hover.",
       "html": "<button class=\"ds-week\"><svg viewBox=\"0 0 24 24\"><path d=\"M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3\"/></svg><span><b>Tu semana.</b> Anota cuánto comes al día para estimar tu gasto real.</span><svg viewBox=\"0 0 24 24\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
-      "css": ".ds-week{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-height:48px;padding:10px 12px;width:100%;text-align:left;border-radius:10px;background:#171c27;border:1.5px dashed #4a5672;color:#eef1f6;font-size:.9rem;cursor:pointer;transition:border-color .15s ease-out}.ds-week b{font-weight:750;color:#93a8ff}.ds-week svg{width:20px;height:20px;flex:none;fill:none;stroke:#a3acbd;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-week:hover{border-style:solid;border-color:#93a8ff}.ds-week:focus-visible{outline:3px solid #93a8ff;outline-offset:2px}"
+      "css": ".ds-week{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-height:48px;padding:10px 12px;width:100%;text-align:left;border-radius:10px;background:#1b1c20;border:1.5px dashed #5a5853;color:#ece9e2;font-size:.9rem;cursor:pointer;transition:border-color .15s ease-out}.ds-week b{font-weight:750;color:#9cbde8}.ds-week svg{width:20px;height:20px;flex:none;fill:none;stroke:#aaa69d;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-week:hover{border-style:solid;border-color:#9cbde8}.ds-week:focus-visible{outline:2.5px solid #9cbde8;outline-offset:2px}"
     },
     {
       "name": "Range Bar",
       "kind": "custom",
       "refersTo": "figure-cell",
-      "description": "Four range-ink segments with a chalk dot for the current value, always paired with the state word.",
-      "html": "<div class=\"ds-range\" role=\"img\" aria-label=\"Muy alto\"><i style=\"background:#6cc3f5\"></i><i style=\"background:#52d69c\"></i><i style=\"background:#f2b45a\"></i><i style=\"background:#ff7a88\"></i><b style=\"left:86%\"></b></div>",
-      "css": ".ds-range{position:relative;display:flex;gap:3px;height:5px;width:280px;margin:12px;}.ds-range i{flex:1;border-radius:2px}.ds-range b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#eef1f6;border:2.5px solid #171c27}"
+      "description": "Four chalk-tone segments with a chalk dot for the current value, always paired with the state word.",
+      "html": "<div class=\"ds-range\" role=\"img\" aria-label=\"Muy alto\"><i style=\"background:#8fbbe6\"></i><i style=\"background:#9cc79a\"></i><i style=\"background:#e2c36b\"></i><i style=\"background:#e58a7f\"></i><b style=\"left:86%\"></b></div>",
+      "css": ".ds-range{position:relative;display:flex;gap:3px;height:5px;width:280px;margin:12px}.ds-range i{flex:1;border-radius:2px}.ds-range b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#ece9e2;border:2.5px solid #1b1c20}"
     }
   ],
   "narrative": {
     "northStar": "The Pattern Sheet",
-    "overview": "**Creative North Star: \"The Pattern Sheet\"**\n\nMesura reads like a dressmaker's pattern sheet, chalked on dark wool. The ground is a blue-black wool (wool), sheets lie on it one tone lighter (sheet), and everything is drawn in tailor's chalk: near-white chalk for text and cutting lines, a chalk blue for the marks that mean \"now\". A deep navy band runs across the top like the envelope a pattern ships in. Each person is a pattern piece and each measurement a labeled mark on it. The body figure is literally a pattern piece: a navy wool fill, a chalk cutting line, a dashed chalk-blue seam allowance inside it, a double-headed grainline down the center, and each girth a chalk-blue band with a triangular notch where its dimension line meets the piece.\n\nThe system is dark, dense and drafted rather than decorated. The pattern world was first built light (cool paper, white sheets, ink); the owner asked for dark colors, so the same grammar now ships as chalk on wool, and that preference is the reason the palette is dark. Depth comes from cloth on cloth and from rules, never from glow. Figures are set narrow and firm on Archivo's width axis, the way a pattern prints its sizes; reading text stays at normal width. Meaning lives in line style: solid is now, dashed is before or alongside, a filled triangle notch is a change. Color is reserved: cobalt fills only the action, chalk blue draws the current reading, and green, amber and red mean states.\n\nThe rejected category default is the neon health dashboard: glowing cards, saturated cyan and purple accents, gradients. Dark here is cloth, not a screen.",
+    "overview": "**Creative North Star: \"The Pattern Sheet\"**\n\nMesura reads like a dressmaker's pattern sheet, drawn in tailor's chalk on charcoal wool. The ground is a neutral charcoal wool (wool), never blue slate. Sheets lie on it barely lifted (sheet) and are defined by their chalk cutting lines, not by a lighter fill. Everything is drawn in warm chalk white; a pale chalk blue marks what is \"now\"; a deep navy wool band runs across the top like the envelope a pattern ships in. Each person is a pattern piece and each measurement a labeled mark on it. The body figure is literally a pattern piece: a wool fill, a chalk cutting line, a dashed chalk-blue seam allowance inside it, a double-headed grainline down the center, and each girth a chalk-blue band with a triangular notch where its dimension line meets the piece.\n\nThe system is dark, dense and drafted rather than decorated. The pattern world was first built light; the owner asked for dark colors (\"prefiero colores oscuros\"), so the same grammar ships as chalk on wool, and that preference is the reason the palette is dark. Depth comes from lines on cloth, never from glow or from stacked fills. Figures are set narrow and firm on Archivo's width axis, the way a pattern prints its sizes; reading text stays at normal width. Meaning lives in line style: solid is now, dashed is before or alongside, a filled triangle notch is a change. Color is reserved and muted: a chalk-blue fill for the action, chalk blue for the current reading, and states in soft chalk tones (muted green, chalk yellow, chalk red).\n\nThe rejected category default is the neon health dashboard: glowing cards, saturated cyan and purple accents, gradients. Dark here is cloth, not a screen.",
     "keyCharacteristics": [
-      "Blue-black wool ground with one-tone-lighter sheets and 1.5px rules.",
-      "One navy envelope band at the top; cobalt fill only for the primary action and active toggles; chalk blue for every line, link and focus.",
+      "Neutral charcoal wool ground; sheets barely lifted and drawn by 1.5px chalk cutting lines.",
+      "One navy envelope band at the top; a muted cobalt fill only for the primary action and pressed toggles; chalk blue for every line, link and focus.",
+      "States in chalk tones, never bright: muted green, chalk yellow, chalk red, chalk blue.",
       "Condensed tabular numerals (wdth 72) for every figure; condensed labels (wdth 82); normal width for prose.",
       "Solid / dashed / notch line grammar shared by the body figure, charts and the week line.",
       "10px corners on everything that holds content or takes a tap; no pills."
@@ -533,17 +534,22 @@
     "rules": [
       {
         "name": "The Envelope Rule",
-        "body": "One large colored area per screen: the navy header band. Below it, cobalt appears only as the fill of the one primary action and of pressed toggles; every other blue is chalk-blue line or text.",
+        "body": "One large colored area per screen: the navy header band. Below it, the cobalt fill appears only on the one primary action and on pressed toggles; every other blue is chalk-blue line or text.",
         "section": "colors"
       },
       {
         "name": "The Chalk Rule",
-        "body": "On wool, blue as ink is chalk blue, never cobalt. Cobalt is a fill under white text; chalk blue is the line, the link, the mark and the focus ring.",
+        "body": "On wool, blue as ink is chalk blue, never the cobalt fill. The fill sits under white text; chalk blue is the line, the link, the mark and the focus ring.",
+        "section": "colors"
+      },
+      {
+        "name": "The Chalk Tone Rule",
+        "body": "Every state color is a soft chalk tone with AA contrast on the wool. No saturated or bright state inks; if a state color glows, it is wrong.",
         "section": "colors"
       },
       {
         "name": "The State Ink Rule",
-        "body": "Green, amber and red mean a state and nothing else. A change value is graphite unless it is judged against the person's goal; then it takes green or amber.",
+        "body": "Green, yellow and red mean a state and nothing else. A change value is graphite unless it is judged against the person's goal; then it takes green or yellow.",
         "section": "colors"
       },
       {
@@ -557,25 +563,33 @@
         "section": "typography"
       },
       {
-        "name": "The Paper On Paper Rule",
+        "name": "The Cutting Line Rule",
+        "body": "A sheet is made by its line, not its fill. Lift a surface with a chalk or sheet-edge border, never with a lighter fill, a glow or a shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Cloth On Cloth Rule",
         "body": "Surfaces never cast shadows at rest. Only an overlay that truly floats (the profile menu) gets the one soft black shadow; no glows, no colored halos except the input focus ring.",
         "section": "elevation"
       }
     ],
     "dos": [
       "Do set every measured number in Archivo at wdth 72, weight 720, tabular figures.",
-      "Do mark every change with the notch triangle (down for less, up for more) plus a screen-reader word, colored green or amber only when judged against the goal.",
+      "Do mark every change with the notch triangle (down for less, up for more) plus a screen-reader word, colored green or yellow only when judged against the goal.",
       "Do draw \"now\" as a solid line and \"before\" or \"each reading\" as a dashed one, on the figure and in charts alike.",
-      "Do draw lines, links and focus in chalk blue; keep cobalt for fills under white text.",
+      "Do define a sheet by its cutting line: chalk for the weight sheet and the cifras grid, sheet-edge for the rest.",
+      "Do draw lines, links and focus in chalk blue; keep the cobalt fill for surfaces under white text.",
       "Do keep 10px corners and 1.5px borders on every container, control and input.",
-      "Do group related figures as cells of one ruled sheet rather than loose cards.",
-      "Do keep every tap target at least 44px and pair every color state with a word."
+      "Do group related figures as a ruled band or a ruled grid rather than loose cards.",
+      "Do keep every tap target at least 44px, control borders at 3:1, and pair every color state with a word."
     ],
     "donts": [
       "Don't turn the dark into a neon health dashboard: no glows, gradients or saturated cyan and purple accents.",
+      "Don't tint the wool or the sheets blue; the ground is neutral charcoal.",
+      "Don't lift a sheet with a lighter fill; lift it with a line.",
       "Don't use pill shapes (999px radius) for buttons, toggles, chips or tags.",
       "Don't fill a second large area with color below the envelope band.",
-      "Don't use green, amber, red or the range inks decoratively.",
+      "Don't use green, yellow, red or the range tones decoratively.",
       "Don't add shadows or glows to resting surfaces; the floating menu's shadow is the only one.",
       "Don't set labels in tracked uppercase."
     ]

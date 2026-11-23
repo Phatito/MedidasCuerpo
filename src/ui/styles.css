@@ -36,7 +36,7 @@
   color-scheme: dark;
 }
 ::selection { background: var(--seleccion); color: var(--fg); }
-html { scrollbar-color: #3a4256 var(--bg); accent-color: var(--accent); }
+html { scrollbar-color: #45443f var(--bg); accent-color: var(--accent); }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5; }
@@ -620,8 +620,8 @@ details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px)
 
 /* Estrella de la persona principal, dibujada. */
 .estrella { display: inline-grid; place-items: center; }
-.icono.llena { fill: var(--warn); stroke: var(--warn); }
-.estrella[aria-pressed='true'] .icono { fill: var(--warn); }
+.icono.llena { fill: var(--fg); stroke: var(--fg); }
+.estrella[aria-pressed='true'] .icono { fill: var(--fg); }
 .principal-marca { display: inline-flex; align-items: center; gap: 4px; }
 .principal-marca .icono { width: 14px; height: 14px; }
 /* Los bordes de los campos se distinguen del fondo (3:1). */
