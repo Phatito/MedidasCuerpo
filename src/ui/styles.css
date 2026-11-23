@@ -500,7 +500,7 @@ details.guide summary { color: var(--accent); }
 .muesca { width: 0.7em; height: 0.7em; fill: currentColor; vertical-align: 0.02em; }
 
 /* La ficha como una sola hoja: en el teléfono, la figura queda en la primera pantalla. */
-.ficha-c { grid-template-areas: 'hero' 'fig' 'semana' 'enl' 'cta'; }
+.ficha-c { grid-template-areas: 'hero' 'cuad' 'fig' 'semana' 'enl' 'cta'; }
 .ficha-c > .hero { grid-area: hero; }
 .ficha-c > .figura { grid-area: fig; padding: 8px 12px 12px; gap: 4px; }
 .ficha-c > .linea-semana { grid-area: semana; }
@@ -510,7 +510,7 @@ details.guide summary { color: var(--accent); }
 .ficha-c .body-fig { max-width: 340px; }
 .pieza-pie { text-align: center; }
 @media (min-width: 900px) {
-  .ficha-c { grid-template-areas: 'hero fig' 'semana fig' 'enl fig' 'cta fig'; grid-template-rows: repeat(3, min-content) 1fr; align-items: start; }
+  .ficha-c { grid-template-areas: 'hero fig' 'cuad fig' 'semana fig' 'enl fig' 'cta fig'; grid-template-rows: repeat(4, min-content) 1fr; align-items: start; }
   .ficha-c > .figura { align-self: stretch; justify-content: center; }
   .ficha-c .body-fig { max-width: 520px; }
 }
@@ -635,3 +635,6 @@ input[type='file']::file-selector-button {
 input[type='file']::file-selector-button:hover { border-color: var(--accent-tiza); }
 .perfil-item.accion { gap: 8px; }
 .perfil-item .icono { width: 18px; height: 18px; }
+
+/* Las cifras principales de la ficha usan las mismas tarjetas que "Todas las cifras", en una hoja reglada de 2 × 2. */
+.ficha-c > .cifras-ficha { grid-area: cuad; grid-template-columns: repeat(2, minmax(0, 1fr)); }

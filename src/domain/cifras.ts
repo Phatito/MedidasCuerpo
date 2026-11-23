@@ -10,6 +10,10 @@ export interface Cuadrito {
   valor: number
   /** Frente a la medición anterior que tenga el dato; null si no hay o no cambió. */
   cambio: number | null
+  /** Fecha de la medición con la que se compara el cambio. */
+  desde: string | null
+  /** Fecha de la medición de donde sale el valor. */
+  fecha: string
   tono: Tono
   clasificacion: Clasificacion | null
   estimada: boolean
@@ -33,12 +37,12 @@ export function cuadritos(p: Persona, ms: Medicion[], hoy: string): Cuadrito[] {
       if (!ultima) continue
       const previa = serie[serie.length - 2]
       const cambio = previa && previa.valor !== ultima.valor ? Math.round((ultima.valor - previa.valor) * 10) / 10 : null
-      out.push({ medida, valor: ultima.valor, cambio, tono: cambio == null ? 'neutro' : cambio < 0 ? 'bien' : 'atencion', clasificacion: null, estimada: false, unidad: 'cm' })
+      out.push({ medida, valor: ultima.valor, cambio, desde: cambio == null ? null : previa.fecha, fecha: ultima.fecha, tono: cambio == null ? 'neutro' : cambio < 0 ? 'bien' : 'atencion', clasificacion: null, estimada: false, unidad: 'cm' })
       continue
     }
     const t = r.tarjetas.find((x) => x.clave === medida)
     if (!t) continue
-    out.push({ medida, valor: t.valor, cambio: t.cambio, tono: t.tono, clasificacion: t.clasificacion, estimada: t.estimada, unidad: '' })
+    out.push({ medida, valor: t.valor, cambio: t.cambio, desde: t.desde, fecha: t.fecha, tono: t.tono, clasificacion: t.clasificacion, estimada: t.estimada, unidad: '' })
   }
   return out
 }

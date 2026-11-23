@@ -14,7 +14,7 @@ describe('cuadritos de la ficha', () => {
     ]
     const c = cuadritos(p, ms, HOY)
     expect(c.map((x) => x.medida)).toEqual(['grasaPct', 'musculoKg', 'cinturaCm', 'grasaVisceral'])
-    expect(c[2]).toMatchObject({ valor: 95, cambio: -1, tono: 'bien', unidad: 'cm' })
+    expect(c[2]).toMatchObject({ valor: 95, cambio: -1, tono: 'bien', unidad: 'cm', desde: '2026-11-16', fecha: '2026-11-23' })
     expect(c[0].clasificacion).not.toBeNull()
   })
   test('si falta alguna, se completa con IMC y las siguientes', () => {

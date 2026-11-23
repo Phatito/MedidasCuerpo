@@ -432,9 +432,9 @@ test('la ficha muestra el cambio frente a la medición anterior y la interpretac
   await expect(figura(page).locator('[data-medida="cinturaCm"]')).toContainText('1,5')
   await expect(figura(page)).toHaveAttribute('aria-label', /cintura 86,5 cm \(bajó 1,5\)/)
   await expect(page.locator('.hero')).toContainText('72,4')
-  await expect(page.locator('.cuadrito[data-medida="cinturaCm"]')).toContainText('bajó 1,5')
+  await expect(page.locator('.cifras-ficha [data-clave="cinturaCm"]')).toContainText('bajó 1,5')
   // La interpretación y el gráfico están en la pantalla de la medida.
-  await page.locator('.cuadrito[data-medida="cinturaCm"]').click()
+  await page.locator('.cifras-ficha [data-clave="cinturaCm"]').click()
   await expect(page.getByRole('heading', { name: 'Mismo peso, menos cintura' })).toBeVisible()
   await expect(page.locator('svg.chart circle.dot')).toHaveCount(2)
   await expect(page.locator('svg.chart .area')).toHaveCount(1)
@@ -902,7 +902,7 @@ test('los enlaces y desplegables de la ficha miden al menos 44 px', async ({ pag
   await agregarAna(page)
   await medir(page, haceDias(0), '72', '88')
   await ir(page, 'Ficha')
-  for (const objetivo of [page.getByRole('button', { name: 'Todas las mediciones' }), page.getByRole('button', { name: 'Todas las cifras' }), page.locator('.cuadrito').first(), page.locator('.linea-semana')]) {
+  for (const objetivo of [page.getByRole('button', { name: 'Todas las mediciones' }), page.getByRole('button', { name: 'Todas las cifras' }), page.locator('.cifras-ficha .tile').first(), page.locator('.linea-semana')]) {
     expect((await objetivo.boundingBox())!.height).toBeGreaterThanOrEqual(44)
   }
   await ir(page, 'Cifras')
@@ -1387,7 +1387,7 @@ test('Tu semana no desborda a 400 px', async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 800 })
   await agregarAna(page)
   await importarConGrasa(page)
-  await expect(page.locator('.cuadrito').first()).toBeVisible()
+  await expect(page.locator('.cifras-ficha .tile').first()).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   // La ficha cabe en unas dos pantallas de teléfono.
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(1800)

@@ -7,7 +7,7 @@ import type { Metrica } from '../domain/series'
 import { tendenciaPeso } from '../domain/trend'
 import type { Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
-import { OBJETIVO } from './Cifra'
+import { OBJETIVO, Tarjeta } from './Cifra'
 import { Cuerpo } from './Cuerpo'
 import { Icono, Muesca } from './Icono'
 
@@ -20,8 +20,6 @@ interface Props {
   onVerCifras: () => void
 }
 
-// Nombre completo para el lector de pantalla; en la celda va el corto.
-const LARGO: Partial<Record<Metrica, string>> = { grasaVisceral: 'Grasa visceral', musculoKg: 'Músculo esquelético' }
 const NOMBRE: Partial<Record<Metrica, string>> = {
   grasaPct: 'Grasa',
   musculoKg: 'Músculo',
@@ -33,27 +31,28 @@ const NOMBRE: Partial<Record<Metrica, string>> = {
   pesoSinGrasaKg: 'Peso sin grasa',
 }
 const UNIDAD: Partial<Record<Metrica, string>> = { grasaPct: '%', musculoKg: 'kg', cinturaCm: 'cm', grasaVisceral: 'nivel', imc: '', aguaPct: '%', grasaKg: 'kg', pesoSinGrasaKg: 'kg' }
-const ENTERO: Metrica[] = ['grasaVisceral']
 
-function CuadritoBoton({ c, onAbrir }: { c: Cuadrito; onAbrir: () => void }) {
-  const dec = ENTERO.includes(c.medida) && Number.isInteger(c.valor) ? 0 : 1
-  const nombre = NOMBRE[c.medida] ?? c.medida
-  const unidad = UNIDAD[c.medida] ?? ''
+/** Tarjeta de un perímetro (la cintura) con el mismo formato que las de la báscula. */
+function TarjetaPerimetro({ c, ultimaFecha, onAbrir }: { c: Cuadrito; ultimaFecha: string; onAbrir: () => void }) {
   return (
-    <button type="button" className="cuadrito" data-medida={c.medida} onClick={onAbrir} aria-label={`${LARGO[c.medida] ?? nombre}${c.estimada ? ' (estimada)' : ''}: ${formatear(c.valor, dec)} ${unidad}${c.clasificacion ? `, ${c.clasificacion.nombre}` : ''}. Ver gráfico`}>
-      <span className="cuadrito-k">{nombre}{c.estimada && ' (est.)'}</span>
-      <span className="cuadrito-v num">
-        {formatear(c.valor, dec)} <small>{unidad}</small>
-      </span>
-      <span className="cuadrito-pie">
-        {c.clasificacion && <span className={`estado st-${c.clasificacion.estado}`}>{c.clasificacion.nombre}</span>}
-        {c.cambio != null && (
-          <span className={`cuadrito-cambio num ${c.tono}`}>
-            <Muesca cambio={c.cambio} /> {formatear(Math.abs(c.cambio), dec)}
-          </span>
-        )}
-      </span>
-    </button>
+    <article className="tile tocable" data-clave={c.medida}>
+      <h3 className="k">
+        <button type="button" className="tile-abrir" onClick={onAbrir}>
+          {NOMBRE[c.medida] ?? c.medida}
+        </button>
+      </h3>
+      <div className="tile-fila">
+        <span className="v num">
+          {formatear(c.valor)} <small>{UNIDAD[c.medida]}</small>
+        </span>
+      </div>
+      {c.cambio != null && c.desde && (
+        <p className={`d ${c.tono}`}>
+          <Muesca cambio={c.cambio} /> {formatear(Math.abs(c.cambio))} {UNIDAD[c.medida]} desde el {fechaLegible(c.desde)}
+        </p>
+      )}
+      {c.fecha !== ultimaFecha && <p className="d fecha-vieja">del {fechaLegible(c.fecha)}</p>}
+    </article>
   )
 }
 
@@ -117,14 +116,20 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
             <p className="muted small">Con la primera verás aquí sus números; con la segunda, cómo van cambiando.</p>
           </div>
         )}
-        {cs.length > 0 && (
-          <div role="group" aria-label="Cifras principales" className="cuadritos">
-            {cs.map((c) => (
-              <CuadritoBoton key={c.medida} c={c} onAbrir={() => onVerMedida(c.medida)} />
-            ))}
-          </div>
-        )}
       </section>
+
+      {cs.length > 0 && (
+        <section aria-label="Cifras principales" className="tiles cifras-ficha">
+          {cs.map((c) => {
+            const t = r.tarjetas.find((x) => x.clave === c.medida)
+            return t ? (
+              <Tarjeta key={c.medida} t={t} ultimaFecha={r.ultima!.fecha} onAbrir={() => onVerMedida(c.medida)} />
+            ) : (
+              <TarjetaPerimetro key={c.medida} c={c} ultimaFecha={r.ultima!.fecha} onAbrir={() => onVerMedida(c.medida)} />
+            )
+          })}
+        </section>
+      )}
 
       <section className="card stack figura" aria-label="Perímetros">
         <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
