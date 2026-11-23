@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Trazos</title>
+  <!-- Una M de cuatro trazos superpuestos: donde se cruzan, el color se suma. -->
+  <g stroke-linecap="round" stroke-width="10.5" fill="none">
+    <path d="M15 48V17" stroke="#ffffff" opacity=".92"/>
+    <path d="M15 17l17 19" stroke="#9cbde8" opacity=".85"/>
+    <path d="M49 17L32 36" stroke="#ffffff" opacity=".7"/>
+    <path d="M49 17v31" stroke="#9cbde8" opacity=".85"/>
+  </g>
+</svg>

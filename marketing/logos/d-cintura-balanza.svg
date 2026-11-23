@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Mesura</title>
+  <!-- Una persona de vidrio sobre una balanza, con la cinta de medir apretando su cintura:
+       la cinta pasa por detrás (en sombra) y por delante (iluminada, con marcas y su extremo metálico). -->
+  <defs>
+    <linearGradient id="cu" x1="0" y1="4" x2="0" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9dbf5" stop-opacity=".7"/><stop offset="1" stop-color="#9cbde8" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="fr" x1="22" y1="0" x2="42" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4f7fc"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#b9cff0"/></linearGradient>
+    <linearGradient id="bk" x1="0" y1="23" x2="0" y2="33" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#34497a"/><stop offset="1" stop-color="#5f7fb8"/></linearGradient>
+    <linearGradient id="ba" x1="0" y1="45" x2="0" y2="58" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#eef3fb"/><stop offset="1" stop-color="#a9c4ec"/></linearGradient>
+  </defs>
+  <g transform="translate(32 32) scale(1.06) translate(-32 -30.6)">
+  <!-- Balanza en perspectiva: tapa, canto y visor -->
+  <path d="M15 45.6h34q2.4 0 3.1 2.2l1.5 4.6q.6 2-1.6 2H12q-2.2 0-1.6-2l1.5-4.6q.7-2.2 3.1-2.2Z" fill="url(#ba)"/>
+  <path d="M10.4 54.4h43.2v1.3q0 1.5-1.5 1.5H11.9q-1.5 0-1.5-1.5Z" fill="#5f7fb8"/>
+  <rect x="27.4" y="48" width="9.2" height="3.6" rx="1.1" fill="#1d2a48"/>
+  <path d="M29.6 49.8h4.8" stroke="#9cbde8" stroke-width="1.3" stroke-linecap="round"/>
+  <!-- Mitad trasera de la cinta -->
+  <path d="M22.4 27.2 L22.43 26.96 L22.52 26.72 L22.67 26.48 L22.87 26.24 L23.13 26.01 L23.45 25.79 L23.81 25.58 L24.23 25.38 L24.7 25.19 L25.21 25.01 L25.77 24.84 L26.36 24.69 L26.98 24.56 L27.64 24.44 L28.33 24.34 L29.03 24.25 L29.76 24.19 L30.5 24.14 L31.25 24.11 L32 24.1 L32.75 24.11 L33.5 24.14 L34.24 24.19 L34.97 24.25 L35.67 24.34 L36.36 24.44 L37.02 24.56 L37.64 24.69 L38.23 24.84 L38.79 25.01 L39.3 25.19 L39.77 25.38 L40.19 25.58 L40.55 25.79 L40.87 26.01 L41.13 26.24 L41.33 26.48 L41.48 26.72 L41.57 26.96 L41.6 27.2 L41.6 31.6 L41.57 31.36 L41.48 31.12 L41.33 30.88 L41.13 30.64 L40.87 30.41 L40.55 30.19 L40.19 29.98 L39.77 29.78 L39.3 29.59 L38.79 29.41 L38.23 29.24 L37.64 29.09 L37.02 28.96 L36.36 28.84 L35.67 28.74 L34.97 28.65 L34.24 28.59 L33.5 28.54 L32.75 28.51 L32 28.5 L31.25 28.51 L30.5 28.54 L29.76 28.59 L29.03 28.65 L28.33 28.74 L27.64 28.84 L26.98 28.96 L26.36 29.09 L25.77 29.24 L25.21 29.41 L24.7 29.59 L24.23 29.78 L23.81 29.98 L23.45 30.19 L23.13 30.41 L22.87 30.64 L22.67 30.88 L22.52 31.12 L22.43 31.36 L22.4 31.6 Z" fill="url(#bk)"/>
+  <!-- Persona de vidrio -->
+  <circle cx="32" cy="8.6" r="4.6" fill="url(#cu)" stroke="#ffffff" stroke-opacity=".6" stroke-width=".9"/>
+  <path d="M27.6 14.6q4.4 1.6 8.8 0l6.6 1.9q2.6.8 2.4 3.6c-.4 3.6-2.2 5.4-3.4 7.4-.4.8-.4 2.4 0 3.4q2.6 5 2.6 10.6v2.4q0 1.4-1.4 1.4h-6.4q-.8 0-1-.8L32 41.2l-1.6 3.3q-.2.8-1 .8H24q-1.4 0-1.4-1.4v-2.4q0-5.6 2.6-10.6c.4-1 .4-2.6 0-3.4-1.2-2-3-3.8-3.4-7.4q-.2-2.8 2.4-3.6Z" fill="url(#cu)" stroke="#ffffff" stroke-opacity=".6" stroke-width=".9" stroke-linejoin="round"/>
+  <!-- Mitad delantera de la cinta, con marcas y su extremo -->
+  <path d="M41.6 27.2 L41.57 27.44 L41.48 27.68 L41.33 27.92 L41.13 28.16 L40.87 28.39 L40.55 28.61 L40.19 28.82 L39.77 29.02 L39.3 29.21 L38.79 29.39 L38.23 29.56 L37.64 29.71 L37.02 29.84 L36.36 29.96 L35.67 30.06 L34.97 30.15 L34.24 30.21 L33.5 30.26 L32.75 30.29 L32 30.3 L31.25 30.29 L30.5 30.26 L29.76 30.21 L29.03 30.15 L28.33 30.06 L27.64 29.96 L26.98 29.84 L26.36 29.71 L25.77 29.56 L25.21 29.39 L24.7 29.21 L24.23 29.02 L23.81 28.82 L23.45 28.61 L23.13 28.39 L22.87 28.16 L22.67 27.92 L22.52 27.68 L22.43 27.44 L22.4 27.2 L22.4 31.6 L22.43 31.84 L22.52 32.08 L22.67 32.32 L22.87 32.56 L23.13 32.79 L23.45 33.01 L23.81 33.22 L24.23 33.42 L24.7 33.61 L25.21 33.79 L25.77 33.96 L26.36 34.11 L26.98 34.24 L27.64 34.36 L28.33 34.46 L29.03 34.55 L29.76 34.61 L30.5 34.66 L31.25 34.69 L32 34.7 L32.75 34.69 L33.5 34.66 L34.24 34.61 L34.97 34.55 L35.67 34.46 L36.36 34.36 L37.02 34.24 L37.64 34.11 L38.23 33.96 L38.79 33.79 L39.3 33.61 L39.77 33.42 L40.19 33.22 L40.55 33.01 L40.87 32.79 L41.13 32.56 L41.33 32.32 L41.48 32.08 L41.57 31.84 L41.6 31.6 Z" fill="url(#fr)"/>
+  <path d="M40.95 32.42v-1.3 M40.16 32.93v-2.3 M34.63 34.28v-1.3 M32.89 34.39v-1.3 M31.11 34.39v-2.3 M29.37 34.28v-1.3 M27.72 34.08v-1.3 M26.21 33.77v-2.3 M24.91 33.39v-1.3 M23.84 32.93v-1.3 M23.05 32.42v-2.3" stroke="#1d2a48" stroke-width=".7" stroke-linecap="round" opacity=".7"/>
+  <g transform="translate(37.64 31.91) rotate(-14)"><rect x="-2.9" y="-3.8" width="5.8" height="7.6" rx="1.3" fill="#e6ecf6" stroke="#ffffff" stroke-width=".8"/><path d="M0 -4.6V4.6" stroke="#3d6ab0" stroke-width="1.5" stroke-linecap="round"/></g>
+  </g>
+</svg>

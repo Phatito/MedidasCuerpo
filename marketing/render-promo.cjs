@@ -37,7 +37,7 @@ async function icons(browser) {
   // Fondo a sangre completa (apto para "maskable"); la marca ocupa el 64 % central,
   // dentro de la zona segura (círculo del 80 %).
   const tile = (n) => `<body style="margin:0"><div style="width:${n}px;height:${n}px;display:grid;place-items:center;
-    background:radial-gradient(circle at 30% 22%, #232a52 0%, #141a31 55%, #0e1220 100%)">
+    background:linear-gradient(160deg,#24345a,#141c33)">
     <img src="${uri}" style="width:${Math.round(n * 0.64)}px;height:${Math.round(n * 0.64)}px"></div></body>`;
   for (const [n, file] of [[512, 'icon-512.png'], [192, 'icon-192.png'], [180, 'apple-touch-icon.png']]) {
     const page = await browser.newPage({ viewport: { width: n, height: n } });

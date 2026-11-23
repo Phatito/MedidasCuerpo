@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Contornos</title>
+  <!-- La silueta del cuerpo como curvas de nivel: tres contornos que se ajustan, como tu progreso. -->
+  <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M18 9q14 5 28 0-7.5 23 0 46-14-5-28 0 7.5-23 0-46Z" stroke="#ffffff" stroke-width="3.6"/>
+    <path d="M24.4 17.2q7.6 2.8 15.2 0-4.2 14.8 0 29.6-7.6-2.8-15.2 0 4.2-14.8 0-29.6Z" stroke="#9cbde8" stroke-width="3.2"/>
+    <path d="M29.4 24.4q2.6 1 5.2 0-1.6 7.6 0 15.2-2.6-1-5.2 0 1.6-7.6 0-15.2Z" stroke="#ffffff" stroke-width="2.8"/>
+  </g>
+</svg>

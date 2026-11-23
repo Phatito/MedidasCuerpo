@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Muesca</title>
+  <!-- La marca mínima del molde: un círculo de corte con su costura, una muesca y la perforación del centro. -->
+  <circle cx="32" cy="32" r="24" fill="#26365c" stroke="#eceef1" stroke-width="2.6"/>
+  <circle cx="32" cy="32" r="19" fill="none" stroke="#9cbde8" stroke-width="1.8" stroke-dasharray="3.2 2.6"/>
+  <path d="M32 8.6l-6.5 10.4h13z" fill="#eceef1"/>
+  <path d="M22 44l6-16 4 9 4-9 6 16" fill="none" stroke="#eceef1" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

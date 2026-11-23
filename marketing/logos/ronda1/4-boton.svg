@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Botón</title>
+  <!-- Un botón de cinco agujeros cosido con hilo azul tiza: la puntada dibuja una M. -->
+  <circle cx="32" cy="32" r="25" fill="#26365c" stroke="#eceef1" stroke-width="2.6"/>
+  <circle cx="32" cy="32" r="19.5" fill="none" stroke="#eceef1" stroke-width="1.2" opacity=".45"/>
+  <path d="M21 42V22l11 13 11-13v20" fill="none" stroke="#9cbde8" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#16171a" stroke="#eceef1" stroke-width="1.6"><circle cx="21" cy="42" r="3.3"/><circle cx="21" cy="22" r="3.3"/><circle cx="32" cy="35" r="3.3"/><circle cx="43" cy="22" r="3.3"/><circle cx="43" cy="42" r="3.3"/></g>
+</svg>

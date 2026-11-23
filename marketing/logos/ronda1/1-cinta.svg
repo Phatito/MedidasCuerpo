@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Cinta</title>
+  <!-- Una cinta de medir doblada en forma de M, con sus marcas de centímetro y la punta metálica. -->
+  <path d="M13 53V15L32 36 51 15V53" fill="none" stroke="#eceef1" stroke-width="9" stroke-linejoin="miter" stroke-miterlimit="3"/>
+  <path d="M13 53V15L32 36 51 15V53" fill="none" stroke="#1d2a48" stroke-width="9" stroke-dasharray="0.9 3.1" stroke-linejoin="miter" stroke-miterlimit="3" opacity=".9"/>
+  <path d="M13 53V15L32 36 51 15V53" fill="none" stroke="#eceef1" stroke-width="4.4" stroke-linejoin="miter" stroke-miterlimit="3" transform="translate(0.9 0)"/>
+  <rect x="7.5" y="52" width="11" height="5" rx="1.2" fill="#9cbde8"/>
+</svg>

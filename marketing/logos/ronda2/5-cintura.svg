@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>Cintura</title>
+  <!-- Dos formas enfrentadas dibujan una cintura en el espacio vacío, cruzada por la línea de la medida. -->
+  <path d="M11 9h8.5q17 23 0 46H11q12-23 0-46Z" fill="#ffffff"/>
+  <path d="M53 9h-8.5q-17 23 0 46H53q-12-23 0-46Z" fill="#9cbde8"/>
+  <path d="M25.5 32h13" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 4.3"/>
+</svg>
