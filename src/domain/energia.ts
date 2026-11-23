@@ -47,13 +47,20 @@ interface Ventana {
   cambioKg: number
 }
 
-function ventana(p: Persona, serie: PuntoTendencia[], largo: number): Ventana {
+/**
+ * Ventana que termina en la última pesada y empieza en la pesada más reciente con al menos `minDias`
+ * de anterioridad (sin pasar de `tope` días), para no depender de pesarse en un día exacto.
+ */
+function ventana(p: Persona, serie: PuntoTendencia[], minDias: number, tope: number): Ventana {
   const ultima = serie[serie.length - 1]
-  const dentro = serie.filter((s) => s.fecha >= sumarDias(ultima.fecha, -largo))
-  const primera = dentro[0]
+  const dentro = serie.filter((s) => s.fecha >= sumarDias(ultima.fecha, -tope))
+  const limite = sumarDias(ultima.fecha, -minDias)
+  const candidatas = dentro.filter((s) => s.fecha <= limite)
+  const primera = candidatas.length ? candidatas[candidatas.length - 1] : dentro[0]
+  const usadas = dentro.filter((s) => s.fecha >= primera.fecha)
   const consumo = diasConConsumo(p, primera.fecha, ultima.fecha)
   return {
-    pesadas: new Set(dentro.map((s) => s.fecha)).size,
+    pesadas: new Set(usadas.map((s) => s.fecha)).size,
     dias: diasEntre(primera.fecha, ultima.fecha),
     diasConsumo: consumo.dias,
     promedio: consumo.promedio,
@@ -68,9 +75,9 @@ function ventana(p: Persona, serie: PuntoTendencia[], largo: number): Ventana {
 export function estimarGasto(p: Persona, ms: Medicion[]): EstimacionGasto {
   const serie = serieDePeso(ms)
   if (!serie.length) return { estado: 'faltan', faltanPesadas: 3, faltanDias: 21, faltanDiasConsumo: 21 }
-  const larga = ventana(p, serie, 42)
-  const alta = larga.pesadas >= 6 && larga.dias >= 42 && larga.diasConsumo >= 35
-  const v = alta ? larga : ventana(p, serie, 28)
+  const larga = ventana(p, serie, 42, 56)
+  const alta = larga.pesadas >= 6 && larga.dias >= 42 && larga.diasConsumo >= Math.round(larga.dias * (35 / 42))
+  const v = alta ? larga : ventana(p, serie, 21, 35)
   if (!alta && (v.pesadas < 3 || v.dias < 21 || v.diasConsumo < 21 || v.promedio == null)) {
     return {
       estado: 'faltan',

@@ -17,7 +17,7 @@ export interface ProyeccionMeta {
 }
 
 /** Cada día que pasa, la tendencia se acerca un 10 % a la pesada nueva. */
-const RETENCION_DIARIA = 0.9
+export const RETENCION_DIARIA = 0.9
 const VENTANA_RITMO_DIAS = 28
 const DIAS_MINIMOS_PARA_RITMO = 7
 const MAXIMO_DIAS_PROYECCION = 730

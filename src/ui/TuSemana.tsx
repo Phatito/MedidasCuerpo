@@ -66,8 +66,8 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
               Faltan semanas para estimar tu gasto:{' '}
               {[
                 g.faltanPesadas > 0 && `${g.faltanPesadas} ${g.faltanPesadas === 1 ? 'pesada' : 'pesadas'} más`,
-                g.faltanDias > 0 && `${g.faltanDias} días más de datos`,
-                g.faltanDiasConsumo > 0 && `${g.faltanDiasConsumo} días con consumo anotado`,
+                g.faltanDias > 0 && `${g.faltanDias} ${g.faltanDias === 1 ? 'día' : 'días'} más de datos`,
+                g.faltanDiasConsumo > 0 && `${g.faltanDiasConsumo} ${g.faltanDiasConsumo === 1 ? 'día' : 'días'} con consumo anotado`,
               ]
                 .filter(Boolean)
                 .join(', ')}

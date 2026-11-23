@@ -55,6 +55,8 @@ describe('informe semanal: qué hacer', () => {
   test('bajar más de 1 %/sem pide comer más', () => {
     expect(ritmoSemanalPct(persona(), rapido)!).toBeLessThan(-1)
     expect(codigos(informeSemanal(persona(), rapido, FIN))[0]).toBe('muy-rapido')
+    // Bajar rápido pero parejo no es una pesada atípica.
+    expect(informeSemanal(persona(), rapido, FIN)!.atipica).toBeNull()
   })
 
   test('masa magra −0,6 kg pide proteger el músculo con el rango de proteína', () => {
@@ -70,7 +72,7 @@ describe('informe semanal: qué hacer', () => {
   })
 
   test('nunca más de 2 acciones', () => {
-    const ms = semanales([100, 98.7, 97.4, 96.1, 94.8, 93.5, 92.2, 90.5], (i) => ({ grasaPct: i === 7 ? 30 : 28 }))
+    const ms = semanales([100, 98.7, 97.4, 96.1, 94.8, 93.5, 92.2, 90.9], (i) => ({ grasaPct: i === 7 ? 30 : 28 }))
     const inf = informeSemanal(persona(), ms, FIN)!
     expect(inf.acciones).toHaveLength(2)
     expect(codigos(inf)).toEqual(['muy-rapido', 'proteger-musculo'])
@@ -131,5 +133,30 @@ describe('informe semanal: revisión de la semana pasada', () => {
     const p = conConsumo(persona(), sumar(FIN, -3), 2500)
     const inf = informeSemanal(p, ms, FIN)!
     expect(inf.revision.find((r) => r.codigo === 'anota-consumo')).toMatchObject({ cumplida: true })
+  })
+})
+
+describe('revisión final: casos de la revisión', () => {
+  test('bajar parejo pesándose cada 14 días no es una pesada atípica', () => {
+    const ms = Array.from({ length: 10 }, (_, i) => m(sumar(FIN, (i - 9) * 14), { pesoKg: 85 - i }))
+    expect(informeSemanal(persona(), ms, FIN)!.atipica).toBeNull()
+  })
+
+  test('una baja de agua (pesada atípica) no pide proteger el músculo', () => {
+    const inf = informeSemanal(persona(), semanales([85, 85, 85, 83.5], () => ({ grasaPct: 25 })), FIN)!
+    expect(inf.atipica).toMatchObject({ sentido: 'bajo' })
+    expect(codigos(inf)).not.toContain('proteger-musculo')
+  })
+
+  test('sin datos de grasa ni músculo ahora, la revisión no da por cumplido proteger el músculo', () => {
+    const ms = [...semanales([80, 79.6], (i) => ({ grasaPct: [25, 25.4][i] })).map((x) => ({ ...x, fecha: sumar(x.fecha, -7), id: x.id + 'a' })), m(FIN, { pesoKg: 79.5 })]
+    const inf = informeSemanal(persona(), ms, FIN)!
+    expect(inf.revision.find((r) => r.codigo === 'proteger-musculo')).toBeUndefined()
+  })
+
+  test('los textos de lo que falta usan singular', () => {
+    const p = conConsumo(persona(), sumar(FIN, -14), 2500)
+    const inf = informeSemanal(p, semanales([80, 79.9, 79.8]), FIN)!
+    expect(inf.acciones[0].texto).toMatch(/en 1 semana/)
   })
 })

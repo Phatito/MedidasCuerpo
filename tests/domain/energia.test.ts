@@ -86,3 +86,16 @@ describe('ritmo semanal', () => {
     expect(ritmoSemanalPct(persona(), [m, { ...m, id: 'b', pesoKg: 81 }])).toBeNull()
   })
 })
+
+describe('ventana del gasto con pesadas espaciadas', () => {
+  const p = conKcal(persona(), 2500)
+  test('pesándose cada 10 días hay estimación', () => {
+    expect(estimarGasto(p, pesadas(100, -0.5, 8, 10))).toMatchObject({ estado: 'ok' })
+  })
+  test('pesándose cada 15 días hay estimación', () => {
+    expect(estimarGasto(p, pesadas(100, -0.5, 8, 15))).toMatchObject({ estado: 'ok' })
+  })
+  test('pesándose cada 5 días la confianza es alta', () => {
+    expect(estimarGasto(p, pesadas(100, -0.5, 9, 5))).toMatchObject({ estado: 'ok', confianza: 'alta' })
+  })
+})

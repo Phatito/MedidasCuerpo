@@ -3,6 +3,7 @@ import { estimarGasto, ritmoSemanalPct, RITMO_OBJETIVO_PCT, serieDePeso, type Es
 import { esMenor } from './insights'
 import { derivar } from './metrics'
 import { diasEntre } from './numbers'
+import { RETENCION_DIARIA } from './trend'
 import type { Medicion, Persona } from './types'
 
 export type CodigoAccion = 'muy-rapido' | 'proteger-musculo' | 'estancado' | 'reduce' | 'anota-consumo' | 'sigue-anotando' | 'vas-bien'
@@ -79,6 +80,9 @@ interface Contexto {
   ritmo: number | null
   composicion: InformeSemanal['composicion']
   caidaMusculo: boolean
+  /** Hay grasa o músculo en las dos mediciones para comparar. */
+  comparable: boolean
+  atipica: boolean
   consumo: number | null
   gasto: EstimacionGasto | null
   pesoTendencia: number
@@ -92,15 +96,16 @@ function decidirAcciones(c: Contexto): Accion[] {
   const semanasFaltan = () => {
     const f = gasto?.estado === 'faltan' ? Math.max(gasto.faltanDias, gasto.faltanDiasConsumo, gasto.faltanPesadas * 7) : 21
     const n = Math.max(1, Math.ceil(f / 7))
-    return `${n} ${n === 1 ? 'semana' : 'semanas'}`
+    return n === 1 ? '1 semana' : `unas ${n} semanas`
   }
-  const sigueAnotando: Accion = { codigo: 'sigue-anotando', texto: `Sigue anotando tu consumo: en unas ${semanasFaltan()} podré estimar tu gasto real.` }
+  const sigueAnotando: Accion = { codigo: 'sigue-anotando', texto: `Sigue anotando tu consumo: en ${semanasFaltan()} podré estimar tu gasto real.` }
   const r: Accion[] = []
 
   if (ritmo != null && ritmo < -1) {
     r.push({ codigo: 'muy-rapido', texto: ok ? `Vas muy rápido: sube a ~${kcal(ok.recomendadaKcal)} al día.` : 'Vas muy rápido: come un poco más para no perder músculo.' })
   }
-  if ((composicion && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo) {
+  // Una pesada atípica suele ser agua: no se lee como pérdida de músculo.
+  if (!c.atipica && ((composicion && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo)) {
     const [a, b] = rangoProteina(p, c.pesoTendencia)
     r.push({ codigo: 'proteger-musculo', texto: `Protege tu músculo: 1,6–2,2 g de proteína por kg (${a}–${b} g al día) y 2–3 sesiones de fuerza por semana.` })
   }
@@ -129,6 +134,7 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
       if (ritmo == null) return null
       return ritmo >= -1 ? { codigo: previa.codigo, cumplida: true, texto: 'Ya no bajas tan rápido.' } : { codigo: previa.codigo, cumplida: false, texto: 'Sigues bajando más de 1 % por semana.' }
     case 'proteger-musculo': {
+      if (!c.comparable) return null
       const cae = (composicion != null && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo
       return cae ? { codigo: previa.codigo, cumplida: false, texto: 'Tu masa magra volvió a bajar.' } : { codigo: previa.codigo, cumplida: true, texto: 'Tu masa magra se mantuvo.' }
     }
@@ -136,6 +142,7 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
       if (ritmo == null) return null
       return ritmo <= -0.25 ? { codigo: previa.codigo, cumplida: true, texto: 'Saliste del estancamiento.' } : { codigo: previa.codigo, cumplida: false, texto: 'Sigues estancado.' }
     case 'reduce': {
+      if (composicion == null) return null
       const sube = composicion != null && composicion.grasaKg > 0 && composicion.grasaKg > composicion.magraKg
       return sube ? { codigo: previa.codigo, cumplida: false, texto: 'La grasa sigue subiendo más que el músculo.' } : { codigo: previa.codigo, cumplida: true, texto: 'La grasa ya no sube más que el músculo.' }
     }
@@ -164,10 +171,18 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
   const primera = conGrasa[0]
   const total = primera && primera !== ultima ? diferencia(p, primera, ultima) : null
 
-  const antes = serie.length > 1 ? serie[serie.length - 2].tendencia : null
+  // La pesada se compara con la tendencia anterior, proyectada al día de hoy con su ritmo reciente:
+  // así quien se pesa cada dos semanas mientras baja parejo no ve un aviso falso.
   let atipica: InformeSemanal['atipica'] = null
-  if (antes != null) {
-    const dif = ultima.pesoKg - antes
+  if (serie.length > 1) {
+    const a = serie[serie.length - 2]
+    const b = serie.length > 2 ? serie[serie.length - 3] : null
+    const pendiente = b && diasEntre(b.fecha, a.fecha) > 0 ? (a.tendencia - b.tendencia) / diasEntre(b.fecha, a.fecha) : 0
+    // A ritmo parejo la pesada va por delante de la tendencia (que se queda atrás): se compara con la pesada
+    // que daría ese ritmo, es decir, el avance de la tendencia dividido por lo que la tendencia alcanza a moverse.
+    const dias = Math.max(1, diasEntre(a.fecha, ultima.fecha))
+    const esperada = a.tendencia + (pendiente * dias) / (1 - RETENCION_DIARIA ** dias)
+    const dif = ultima.pesoKg - esperada
     if (Math.abs(dif) > Math.max(1, 0.012 * ultima.pesoKg)) atipica = { diferenciaKg: dif, sentido: dif > 0 ? 'sobre' : 'bajo' }
   }
 
@@ -179,6 +194,8 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
     ritmo: ritmoSemanalPct(p, ms),
     composicion,
     caidaMusculo: previa?.musculoKg != null && ultima.musculoKg != null && previa.musculoKg - ultima.musculoKg >= CAIDA_MAGRA_KG,
+    comparable: composicion != null || (previa?.musculoKg != null && ultima.musculoKg != null),
+    atipica: atipica != null,
     consumo: consumoVigente(p, hoy),
     gasto,
     pesoTendencia: tendencia,

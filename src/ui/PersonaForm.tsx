@@ -38,7 +38,10 @@ export function PersonaForm({ persona, onGuardar, onCancelar }: Props) {
     }
     setErrores(err)
     if (err.nombre || err.sexo || err.estatura || err.meta || est == null || sexo === '') return
+    // Se parte de la persona guardada para no perder campos que este formulario no edita (como el consumo de kcal).
+    const { metaPesoKg: _metaAnterior, ...resto } = persona ?? ({} as Partial<Persona>)
     await onGuardar({
+      ...resto,
       id: persona?.id ?? crypto.randomUUID(),
       nombre: nombre.trim(),
       sexo,
