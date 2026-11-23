@@ -11,7 +11,7 @@ const FIN = '2026-11-23'
 function pesadas(desdeKg: number, kgSemana: number, semanas: number, cada = 7): Medicion[] {
   const r: Medicion[] = []
   for (let d = -semanas * 7, i = 0; d <= 0; d += cada, i++) {
-    r.push({ id: `m${i}`, personaId: 'p1', fecha: sumar(FIN, d), pesoKg: desdeKg + (kgSemana * (d + semanas * 7)) / 7 })
+    r.push({ id: `m${i}`, personaId: 'p1', fecha: sumar(FIN, d), pesoKg: desdeKg + (kgSemana * (d + semanas * 7)) / 7, origen: 'manual' })
   }
   return r
 }
@@ -77,7 +77,7 @@ describe('ritmo semanal', () => {
     expect(ritmoSemanalPct(persona(), pesadas(100, -0.5, 12))!).toBeCloseTo(-0.53, 1)
   })
   test('con hasta se corta en esa fecha', () => {
-    const ms = [...pesadas(100, 0, 6), { id: 'x', personaId: 'p1', fecha: sumar(FIN, 7), pesoKg: 90 }]
+    const ms = [...pesadas(100, 0, 6), { id: 'x', personaId: 'p1', fecha: sumar(FIN, 7), pesoKg: 90, origen: 'manual' as const }]
     expect(ritmoSemanalPct(persona(), ms, FIN)!).toBeCloseTo(0, 5)
   })
   test('una sola pesada o dos el mismo día no dan ritmo', () => {
