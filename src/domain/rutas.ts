@@ -1,3 +1,4 @@
+import { esMedida, type Metrica } from './series'
 import type { Persona } from './types'
 
 /** Cada pantalla tiene su dirección en el hash, para que Atrás del navegador funcione. */
@@ -6,6 +7,8 @@ export type Ruta =
   | { pantalla: 'registrar'; personaId: string; fecha?: string }
   | { pantalla: 'mediciones'; personaId: string }
   | { pantalla: 'semana'; personaId: string }
+  | { pantalla: 'medida'; personaId: string; medida: Metrica }
+  | { pantalla: 'cifras'; personaId: string }
   | { pantalla: 'familia' }
   | { pantalla: 'ajustes' }
   | { pantalla: 'inicio' }
@@ -17,7 +20,7 @@ export function leerRuta(hash: string): Ruta {
   const partes = camino.split('/').filter(Boolean)
   if (partes.length === 1 && partes[0] === 'familia') return { pantalla: 'familia' }
   if (partes.length === 1 && partes[0] === 'ajustes') return { pantalla: 'ajustes' }
-  if (partes[0] !== 'p' || !partes[1] || partes.length > 3) return INICIO
+  if (partes[0] !== 'p' || !partes[1] || partes.length > 4) return INICIO
   let personaId: string
   try {
     personaId = decodeURIComponent(partes[1])
@@ -25,6 +28,9 @@ export function leerRuta(hash: string): Ruta {
     return INICIO
   }
   if (partes.length === 2) return { pantalla: 'ficha', personaId }
+  if (partes[2] === 'm') return partes[3] && esMedida(partes[3]) ? { pantalla: 'medida', personaId, medida: partes[3] } : { pantalla: 'ficha', personaId }
+  if (partes.length > 3) return INICIO
+  if (partes[2] === 'cifras') return { pantalla: 'cifras', personaId }
   if (partes[2] === 'mediciones') return { pantalla: 'mediciones', personaId }
   if (partes[2] === 'semana') return { pantalla: 'semana', personaId }
   if (partes[2] === 'registrar') {
@@ -48,6 +54,10 @@ export function escribirRuta(r: Ruta): string {
       return `#/p/${encodeURIComponent(r.personaId)}/mediciones`
     case 'semana':
       return `#/p/${encodeURIComponent(r.personaId)}/semana`
+    case 'medida':
+      return `#/p/${encodeURIComponent(r.personaId)}/m/${r.medida}`
+    case 'cifras':
+      return `#/p/${encodeURIComponent(r.personaId)}/cifras`
     case 'registrar':
       return `#/p/${encodeURIComponent(r.personaId)}/registrar${r.fecha ? `?fecha=${r.fecha}` : ''}`
   }

@@ -1,9 +1,16 @@
 import { derivar } from './metrics'
 import { diasEntre } from './numbers'
-import type { CampoNumerico, Medicion, Persona } from './types'
+import { CAMPOS_NUMERICOS, type CampoNumerico, type Medicion, type Persona } from './types'
 
 export type Metrica = CampoNumerico | 'imc' | 'grasaKg' | 'pesoSinGrasaKg'
 export type Periodo = '3m' | '1a' | 'todo'
+
+const EXTRA_METRICAS = ['imc', 'grasaKg', 'pesoSinGrasaKg'] as const
+
+/** Si un texto (por ejemplo de la dirección) es el nombre de una medida conocida. */
+export function esMedida(x: string): x is Metrica {
+  return (CAMPOS_NUMERICOS as string[]).includes(x) || (EXTRA_METRICAS as readonly string[]).includes(x)
+}
 
 const DIAS: Record<Exclude<Periodo, 'todo'>, number> = { '3m': 92, '1a': 366 }
 

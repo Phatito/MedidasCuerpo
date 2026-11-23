@@ -3,6 +3,14 @@ import { escribirRuta, leerRuta, personaInicio } from '../../src/domain/rutas'
 import { persona } from './helpers'
 
 describe('leerRuta', () => {
+  test('pantalla de una medida y todas las cifras, ida y vuelta', () => {
+    expect(leerRuta('#/p/abc/m/grasaPct')).toEqual({ pantalla: 'medida', personaId: 'abc', medida: 'grasaPct' })
+    expect(escribirRuta({ pantalla: 'medida', personaId: 'abc', medida: 'cinturaCm' })).toBe('#/p/abc/m/cinturaCm')
+    expect(leerRuta('#/p/abc/m/imc')).toEqual({ pantalla: 'medida', personaId: 'abc', medida: 'imc' })
+    expect(leerRuta('#/p/abc/m/otra')).toEqual({ pantalla: 'ficha', personaId: 'abc' })
+    expect(leerRuta('#/p/abc/cifras')).toEqual({ pantalla: 'cifras', personaId: 'abc' })
+    expect(escribirRuta({ pantalla: 'cifras', personaId: 'abc' })).toBe('#/p/abc/cifras')
+  })
   test('informe Tu semana, ida y vuelta', () => {
     expect(leerRuta('#/p/abc/semana')).toEqual({ pantalla: 'semana', personaId: 'abc' })
     expect(escribirRuta({ pantalla: 'semana', personaId: 'a b' })).toBe('#/p/a%20b/semana')
