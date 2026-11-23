@@ -67,7 +67,7 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Pro
 
   return (
     <div className="stack registrar">
-      <h2>Registrar medición · {persona.nombre}</h2>
+      <h1>Registrar medición · {persona.nombre}</h1>
       <div className="modos" role="tablist" aria-label="Cómo cargar" ref={pestanas} onKeyDown={teclas}>
         {MODOS.map((m) => (
           <button

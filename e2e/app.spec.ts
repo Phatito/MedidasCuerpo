@@ -586,7 +586,7 @@ test('la ficha muestra ambos brazos y la diferencia entre lados', async ({ page 
   await expect(page.getByText('Brazo derecho 1,5 cm mayor que el izquierdo')).toBeVisible()
   await expect(page.getByText(/Muslo (izquierdo|derecho) \d/)).toHaveCount(0)
   // El lado izquierdo de la persona se dibuja a la derecha de la imagen.
-  const x = (campo: string) => figura(page).locator(`[data-medida="${campo}"] circle`).evaluate((c) => c.getBoundingClientRect().x)
+  const x = (campo: string) => figura(page).locator(`[data-medida="${campo}"] .pin`).evaluate((c) => c.getBoundingClientRect().x)
   expect(await x('brazoIzqCm')).toBeGreaterThan(await x('brazoDerCm'))
   expect(await x('musloIzqCm')).toBeGreaterThan(await x('musloDerCm'))
 })
@@ -713,11 +713,11 @@ test('Volver desde Familia siempre lleva a una pantalla distinta', async ({ page
   await agregarAna(page)
   // Tras agregar a la primera persona se queda en Familia: Volver lleva a su ficha.
   await page.getByRole('button', { name: 'Volver', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Ana', exact: true })).toBeVisible()
   // Entrar directo por la dirección y volver.
   await page.goto('./#/familia')
   await page.getByRole('button', { name: 'Volver', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Ana', exact: true })).toBeVisible()
 })
 
 // ---------- Ficha completa ----------
@@ -738,7 +738,7 @@ test('la ficha muestra todas las medidas de la báscula con su estado', async ({
   await expect(tile('proteinaPct')).toContainText('Estándar')
   // Cada tarjeta abre su gráfico.
   await tile('masaOseaKg').getByRole('button').click()
-  await expect(page.getByRole('heading', { level: 2, name: /Masa ósea/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: /Masa ósea/ })).toBeVisible()
   await expect(page.locator('svg.chart')).toBeVisible()
 })
 
@@ -891,7 +891,7 @@ test('al cambiar de pantalla el foco va al título de la nueva', async ({ page }
   await page.keyboard.press('Enter')
   await perfiles(page).getByRole('menuitem', { name: /Beto/ }).focus()
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('heading', { name: 'Beto', level: 2 })).toBeFocused()
+  await expect(page.getByRole('heading', { name: 'Beto', level: 1 })).toBeFocused()
   await page.getByRole('button', { name: 'Registrar medición' }).click()
   await expect(page.getByRole('heading', { name: 'Registrar medición · Beto' })).toBeFocused()
   await expect(page).toHaveTitle(/Registrar medición/)
@@ -1369,11 +1369,11 @@ test('la tarjeta Tu semana muestra grasa y masa magra y abre el informe completo
   await expect(page).toHaveURL(/#\/p\/.+\/semana$/)
   await expect(page.locator('.semana-pantalla')).toContainText('Grasa')
   await expect(page.locator('.semana-pantalla')).toContainText('Masa magra')
-  await expect(page.getByRole('heading', { level: 2, name: /Tu semana/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: /Tu semana/ })).toBeVisible()
   await expect(page.getByRole('img', { name: /Grasa y masa magra por medición/ })).toBeVisible()
   await expect(page.getByText('Cómo se calcula')).toBeVisible()
   await page.getByRole('button', { name: 'Volver', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'Ana', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Ana', exact: true })).toBeVisible()
 })
 
 test('con una sola medición la tarjeta pide la segunda', async ({ page }) => {

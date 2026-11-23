@@ -53,9 +53,9 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
 
   return (
     <div className="stack medida-pantalla">
-      <h2>
+      <h1>
         {nombre} · {persona.nombre}
-      </h2>
+      </h1>
 
       {tarjeta && <Tarjeta t={tarjeta} ultimaFecha={r.ultima!.fecha} />}
       {!tarjeta && puntos.length > 0 && (
@@ -159,7 +159,7 @@ export function TodasLasCifras({ persona, onVerMedida }: { persona: Persona; onV
   const mensajes = r.ultima ? interpretar(persona, mediciones) : []
   return (
     <div className="stack">
-      <h2>Todas las cifras · {persona.nombre}</h2>
+      <h1>Todas las cifras · {persona.nombre}</h1>
       {r.ultima ? (
         <>
           <section aria-label="Medidas">

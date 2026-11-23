@@ -83,7 +83,7 @@ export function Datos({ personas, personaActual }: Props) {
 
   return (
     <>
-      <h2>Ajustes y datos</h2>
+      <h1>Ajustes y datos</h1>
 
       {hayServidor() && <Cuenta />}
 

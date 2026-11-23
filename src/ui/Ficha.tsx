@@ -82,7 +82,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
     <div className="ficha-c">
       <section className="card hero" aria-labelledby="ficha-nombre">
         <div className="pieza-rotulo">
-          <h2 id="ficha-nombre">{persona.nombre}</h2>
+          <h1 id="ficha-nombre">{persona.nombre}</h1>
           <p className="muted small">
             Objetivo: {OBJETIVO[persona.objetivo]}
             {r.ultima && ` · ${fechaLegible(r.ultima.fecha).slice(0, 5)}`}
@@ -115,6 +115,13 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
             <p className="muted small">Con la primera verás aquí sus números; con la segunda, cómo van cambiando.</p>
           </div>
         )}
+        {cs.length > 0 && (
+          <div role="group" aria-label="Cifras principales" className="cuadritos">
+            {cs.map((c) => (
+              <CuadritoBoton key={c.medida} c={c} onAbrir={() => onVerMedida(c.medida)} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="card stack figura" aria-label="Perímetros">
@@ -138,13 +145,6 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         </button>
       )}
 
-      {cs.length > 0 && (
-        <section aria-label="Cifras principales" className="cuadritos">
-          {cs.map((c) => (
-            <CuadritoBoton key={c.medida} c={c} onAbrir={() => onVerMedida(c.medida)} />
-          ))}
-        </section>
-      )}
 
 
       {r.ultima && (

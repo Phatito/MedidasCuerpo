@@ -62,7 +62,7 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
   return (
     <>
       <div className="head">
-        <h2>Familia</h2>
+        <h1>Familia</h1>
         {editando == null && personas.length > 0 && (
           <button className="btn primary" onClick={() => setEditando('nueva')}>Agregar persona</button>
         )}

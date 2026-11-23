@@ -4,6 +4,8 @@ const TRAZOS = {
   abrir: 'M9 5l7 7-7 7',
   volver: 'M15 5l-7 7 7 7',
   mas: 'M12 5v14M5 12h14',
+  si: 'M5 12.5l4.5 4.5L19 7',
+  no: 'M6 6l12 12M18 6L6 18',
   // Lápiz para editar.
   editar: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4',
   // Muesca del molde con una línea: "esta semana".

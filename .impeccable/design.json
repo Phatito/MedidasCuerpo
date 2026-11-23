@@ -1,0 +1,502 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T06:54:28+00:00",
+  "title": "Design System: Mesura",
+  "extensions": {
+    "colorMeta": {
+      "cobalt": {
+        "role": "primary",
+        "displayName": "Envelope Cobalt",
+        "canonical": "#1f45c9",
+        "tonalRamp": [
+          "#151d37",
+          "#1f2f68",
+          "#233f9e",
+          "#224bd9",
+          "#5a77dc",
+          "#91a2df",
+          "#c2cae8",
+          "#eef0f7"
+        ]
+      },
+      "cobalt-deep": {
+        "role": "primary",
+        "displayName": "Pressed Cobalt",
+        "canonical": "#17369e",
+        "tonalRamp": [
+          "#151d38",
+          "#1e2f69",
+          "#223f9f",
+          "#214bdb",
+          "#5977dd",
+          "#90a2e0",
+          "#c1cae9",
+          "#edf0f7"
+        ]
+      },
+      "cobalt-halo": {
+        "role": "primary",
+        "displayName": "Cobalt Halo",
+        "canonical": "#c9d6fb",
+        "tonalRamp": [
+          "#121d3b",
+          "#182f6e",
+          "#183ea9",
+          "#124ae9",
+          "#4f76e7",
+          "#8aa2e6",
+          "#becaec",
+          "#edf0f8"
+        ]
+      },
+      "tracing-paper": {
+        "role": "neutral",
+        "displayName": "Tracing Paper",
+        "canonical": "#e2e9fb",
+        "tonalRamp": [
+          "#141e38",
+          "#1e3369",
+          "#2145a0",
+          "#1f54dc",
+          "#587dde",
+          "#8fa6e1",
+          "#c1cce9",
+          "#edf0f7"
+        ]
+      },
+      "seam-dash": {
+        "role": "neutral",
+        "displayName": "Seam Dash",
+        "canonical": "#9fb0d6",
+        "tonalRamp": [
+          "#1d2330",
+          "#2f3c57",
+          "#3f5482",
+          "#4c6bb0",
+          "#778dbe",
+          "#a2b0ce",
+          "#cad1e0",
+          "#f0f1f5"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Drafting Ink",
+        "canonical": "#14171c",
+        "tonalRamp": [
+          "#22252a",
+          "#3b414c",
+          "#535d6e",
+          "#697892",
+          "#8c97aa",
+          "#afb6c1",
+          "#d1d4da",
+          "#f1f2f3"
+        ]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#535d6c",
+        "tonalRamp": [
+          "#232629",
+          "#3d424a",
+          "#565e6b",
+          "#6d7a8e",
+          "#8f99a6",
+          "#b1b7bf",
+          "#d2d4d9",
+          "#f1f2f3"
+        ]
+      },
+      "pattern-paper": {
+        "role": "neutral",
+        "displayName": "Pattern Paper",
+        "canonical": "#eef1f5",
+        "tonalRamp": [
+          "#20252c",
+          "#364250",
+          "#4b5d76",
+          "#5d799e",
+          "#8498b2",
+          "#aab6c6",
+          "#ced4dc",
+          "#f1f2f4"
+        ]
+      },
+      "sheet-white": {
+        "role": "neutral",
+        "displayName": "Sheet White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#434343",
+          "#616161",
+          "#7e7e7e",
+          "#9b9b9b",
+          "#b8b8b8",
+          "#d5d5d5",
+          "#f2f2f2"
+        ]
+      },
+      "cut-rule": {
+        "role": "neutral",
+        "displayName": "Cut Rule",
+        "canonical": "#d2d8e1",
+        "tonalRamp": [
+          "#22252b",
+          "#39414d",
+          "#505d71",
+          "#657997",
+          "#8997ac",
+          "#adb6c3",
+          "#d0d4da",
+          "#f1f2f4"
+        ]
+      },
+      "soft-fold": {
+        "role": "neutral",
+        "displayName": "Soft Fold",
+        "canonical": "#e7ebf1",
+        "tonalRamp": [
+          "#20252c",
+          "#364151",
+          "#4b5c77",
+          "#5d779e",
+          "#8496b2",
+          "#aab5c6",
+          "#ced4dc",
+          "#f1f2f4"
+        ]
+      },
+      "state-good": {
+        "role": "tertiary",
+        "displayName": "Good Green",
+        "canonical": "#0d7a4e",
+        "tonalRamp": [
+          "#13392a",
+          "#1b6c4b",
+          "#1da46e",
+          "#19e291",
+          "#53e2a9",
+          "#8de3c0",
+          "#c0ead9",
+          "#edf7f3"
+        ]
+      },
+      "state-good-bg": {
+        "role": "tertiary",
+        "displayName": "Good Green Wash",
+        "canonical": "#ddf2e8",
+        "tonalRamp": [
+          "#1c3127",
+          "#2d5a44",
+          "#3b8662",
+          "#46b580",
+          "#73c29d",
+          "#a0d0b9",
+          "#c9e1d6",
+          "#eff5f2"
+        ]
+      },
+      "state-warn": {
+        "role": "tertiary",
+        "displayName": "Caution Amber",
+        "canonical": "#9a5200",
+        "tonalRamp": [
+          "#3e280f",
+          "#754711",
+          "#b4660d",
+          "#fa8601",
+          "#f3a142",
+          "#eebb82",
+          "#f0d7bb",
+          "#f9f3ec"
+        ]
+      },
+      "state-warn-bg": {
+        "role": "tertiary",
+        "displayName": "Caution Amber Wash",
+        "canonical": "#fcead2",
+        "tonalRamp": [
+          "#3b2912",
+          "#6f4a18",
+          "#aa6b17",
+          "#eb8d11",
+          "#e8a64d",
+          "#e7bf89",
+          "#ecd8be",
+          "#f8f3ed"
+        ]
+      },
+      "state-bad": {
+        "role": "tertiary",
+        "displayName": "Alarm Red",
+        "canonical": "#c21f3a",
+        "tonalRamp": [
+          "#37151b",
+          "#681f2b",
+          "#9d2438",
+          "#d82341",
+          "#db5b70",
+          "#df919e",
+          "#e8c2c8",
+          "#f7eeef"
+        ]
+      },
+      "range-low": {
+        "role": "tertiary",
+        "displayName": "Range Low Blue",
+        "canonical": "#1a73a8",
+        "tonalRamp": [
+          "#152b37",
+          "#1f4d68",
+          "#23709e",
+          "#2295d9",
+          "#5aabdc",
+          "#91c2df",
+          "#c2dae8",
+          "#eef3f7"
+        ]
+      },
+      "range-ok": {
+        "role": "tertiary",
+        "displayName": "Range Normal Green",
+        "canonical": "#11804f",
+        "tonalRamp": [
+          "#143828",
+          "#1d6a48",
+          "#21a168",
+          "#1edd89",
+          "#57dea3",
+          "#8fe1bd",
+          "#c1e9d7",
+          "#edf7f3"
+        ]
+      },
+      "range-high": {
+        "role": "tertiary",
+        "displayName": "Range High Amber",
+        "canonical": "#a85a00",
+        "tonalRamp": [
+          "#3e280f",
+          "#754711",
+          "#b4670d",
+          "#fa8701",
+          "#f3a142",
+          "#eebc82",
+          "#f0d7bb",
+          "#f9f3ec"
+        ]
+      },
+      "range-very-high": {
+        "role": "tertiary",
+        "displayName": "Range Very High Red",
+        "canonical": "#c21f3a",
+        "tonalRamp": [
+          "#37151b",
+          "#681f2b",
+          "#9d2438",
+          "#d82341",
+          "#db5b70",
+          "#df919e",
+          "#e8c2c8",
+          "#f7eeef"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The trend weight on the ficha; one per screen."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Every measured value: figure cells (2.1rem), tiles (2rem), metric screen (2.2rem); narrow and tabular."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Screen titles; person name on the ficha at 1.45rem."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section and card titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose, insights and the week action at normal width."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Condensed graphite labels over figures, chart axes, legends, body-figure labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-menu",
+        "value": "0 18px 40px rgba(16, 28, 66, 0.22)",
+        "purpose": "Profile menu only; the one floating surface."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px #c9d6fb",
+        "purpose": "Focused input ring."
+      },
+      {
+        "name": "dialog-scrim",
+        "value": "rgba(16, 28, 66, 0.4)",
+        "purpose": "Background behind modal dialogs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": "0.15s ease-out",
+        "purpose": "Border and background changes on cells, toggles, week line, links."
+      },
+      {
+        "name": "trace-cut-line",
+        "value": "0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
+        "purpose": "Body figure cutting line draws in when the ficha opens; off under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "600px"
+      },
+      {
+        "name": "single-column-cifras",
+        "value": "760px"
+      },
+      {
+        "name": "ficha-a-stack",
+        "value": "860px"
+      },
+      {
+        "name": "ficha-two-column",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action per screen; large full-width variant registers a measurement.",
+      "html": "<button class=\"ds-btn-primary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>Registrar medición</button>",
+      "css": ".ds-btn-primary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:9px 18px;border-radius:10px;border:1.5px solid #1f45c9;background:#1f45c9;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-btn-primary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.ds-btn-primary:hover{background:#17369e;border-color:#17369e}.ds-btn-primary:focus-visible{outline:2.5px solid #1f45c9;outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Back and secondary actions; white with a cut-rule border.",
+      "html": "<button class=\"ds-btn-secondary\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 5l-7 7 7 7\"/></svg>Volver</button>",
+      "css": ".ds-btn-secondary{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 18px;border-radius:10px;border:1.5px solid #d2d8e1;background:#fff;color:#14171c;font-size:.9rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out}.ds-btn-secondary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-btn-secondary:hover{border-color:#535d6c}.ds-btn-secondary:focus-visible{outline:2.5px solid #1f45c9;outline-offset:2px}"
+    },
+    {
+      "name": "Toggle Chips",
+      "kind": "chip",
+      "refersTo": "chip-toggle",
+      "description": "Metric and period selectors above a chart; pressed fills cobalt.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">Peso</button><button class=\"ds-chip\" aria-pressed=\"true\">Grasa</button><button class=\"ds-chip\" aria-pressed=\"false\">Músculo</button></div>",
+      "css": ".ds-chips{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid #d2d8e1;background:#fff;color:#14171c;font-size:.875rem;font-weight:700;cursor:pointer;transition:border-color .15s ease-out,background-color .15s ease-out}.ds-chip:hover:not([aria-pressed='true']){border-color:#535d6c}.ds-chip[aria-pressed='true']{background:#1f45c9;border-color:#1f45c9;color:#fff}.ds-chip:focus-visible{outline:2.5px solid #1f45c9;outline-offset:2px}"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Labeled measurement input; cobalt border and halo on focus.",
+      "html": "<label class=\"ds-field\"><span>Cintura (cm)</span><input inputmode=\"decimal\" value=\"95,0\"></label>",
+      "css": ".ds-field{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:5px}.ds-field span{font-size:.8rem;font-weight:600;color:#535d6c}.ds-field input{font:inherit;color:#14171c;background:#fff;border:1.5px solid #d2d8e1;border-radius:10px;min-height:44px;padding:9px 12px}.ds-field input:hover{border-color:#535d6c}.ds-field input:focus{border-color:#1f45c9;outline:none;box-shadow:0 0 0 3px #c9d6fb}"
+    },
+    {
+      "name": "Envelope Band",
+      "kind": "nav",
+      "refersTo": "envelope-band",
+      "description": "Cobalt header: logo tile, profile selector, settings.",
+      "html": "<header class=\"ds-band\"><span class=\"ds-band-logo\"></span><b>Mesura</b><button class=\"ds-band-perfil\"><i>P</i>Pablo</button><button class=\"ds-band-icon\" aria-label=\"Ajustes\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></button></header>",
+      "css": ".ds-band{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;align-items:center;gap:12px;padding:12px 20px;background:#1f45c9;color:#fff}.ds-band b{margin-right:auto;font-size:1.3rem;font-weight:760;font-stretch:80%}.ds-band-logo{width:34px;height:34px;border-radius:9px;background:#fff}.ds-band-perfil{font:inherit;font-weight:700;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}.ds-band-perfil i{font-style:normal;width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:#fff;color:#1f45c9;font-weight:800;font-size:.8rem}.ds-band-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;cursor:pointer}.ds-band-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}.ds-band-icon:hover,.ds-band-perfil:hover{background:rgba(255,255,255,.14)}.ds-band :focus-visible{outline:2.5px solid #fff;outline-offset:2px}"
+    },
+    {
+      "name": "Figure Cells",
+      "kind": "card",
+      "refersTo": "figure-cell",
+      "description": "Key figures as cells of one ink-ruled sheet, each with label, narrow figure, state word and change notch.",
+      "html": "<div class=\"ds-cells\"><button class=\"ds-cell\"><span class=\"k\">Grasa</span><span class=\"v\">26,2 <small>%</small></span><span class=\"p\"><span class=\"st\">Muy alto</span><span class=\"d\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 0,3</span></span></button><button class=\"ds-cell\"><span class=\"k\">Cintura</span><span class=\"v\">95,0 <small>cm</small></span><span class=\"p\"><span></span><span class=\"d good\"><svg viewBox=\"0 0 10 10\"><path d=\"M1 2h8L5 9z\"/></svg> 1,0</span></span></button></div>",
+      "css": ".ds-cells{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5px;background:#d2d8e1;border:1.5px solid #14171c;border-radius:10px;overflow:hidden}.ds-cell{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:flex;flex-direction:column;gap:4px;min-height:96px;padding:12px 14px;border:0;background:#fff;color:#14171c;text-align:left;cursor:pointer;transition:background-color .15s ease-out}.ds-cell:hover{background:#f5f7ff}.ds-cell:focus-visible{outline:2.5px solid #1f45c9;outline-offset:-3px}.ds-cell .k{font-size:.78rem;font-weight:650;font-stretch:82%;color:#535d6c}.ds-cell .v{font-size:2.1rem;font-weight:720;font-stretch:72%;line-height:1;font-variant-numeric:tabular-nums}.ds-cell small{font-size:.8rem;font-weight:600;color:#535d6c}.ds-cell .p{display:flex;justify-content:space-between;align-items:center}.ds-cell .st{font-size:.78rem;font-weight:800;color:#c21f3a}.ds-cell .d{font-size:.8rem;font-weight:700;color:#535d6c;font-variant-numeric:tabular-nums}.ds-cell .d.good{color:#0d7a4e}.ds-cell .d svg{width:.8em;height:.8em;fill:currentColor}"
+    },
+    {
+      "name": "Week Line",
+      "kind": "custom",
+      "refersTo": "sheet",
+      "description": "Tu semana as a seam: dashed border that turns into a solid cobalt cut on hover.",
+      "html": "<button class=\"ds-week\"><svg viewBox=\"0 0 24 24\"><path d=\"M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3\"/></svg><span><b>Tu semana.</b> Camina 30 minutos tres días.</span><svg viewBox=\"0 0 24 24\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-week{font-family:var(--font,'Archivo Variable',system-ui,sans-serif);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;min-height:48px;padding:10px 12px;width:100%;text-align:left;border-radius:10px;background:#fff;border:1.5px dashed #9fb0d6;color:#14171c;font-size:.9rem;cursor:pointer;transition:border-color .15s ease-out}.ds-week b{font-weight:750;color:#1f45c9}.ds-week svg{width:20px;height:20px;fill:none;stroke:#535d6c;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ds-week:hover{border-style:solid;border-color:#1f45c9}.ds-week:focus-visible{outline:2.5px solid #1f45c9;outline-offset:2px}"
+    },
+    {
+      "name": "Range Bar",
+      "kind": "custom",
+      "refersTo": "figure-cell",
+      "description": "Four range-ink segments with an ink dot for the current value, always paired with the state word.",
+      "html": "<div class=\"ds-range\" role=\"img\" aria-label=\"Muy alto\"><i style=\"background:#1a73a8\"></i><i style=\"background:#11804f\"></i><i style=\"background:#a85a00\"></i><i style=\"background:#c21f3a\"></i><b style=\"left:86%\"></b></div>",
+      "css": ".ds-range{position:relative;display:flex;gap:3px;height:5px;width:280px}.ds-range i{flex:1;border-radius:2px}.ds-range b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#14171c;border:2.5px solid #fff}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Pattern Sheet",
+    "overview": "Mesura reads like a dressmaker's printed pattern: cool pattern paper underneath, white sheets laid on it, everything drawn in near-black ink, with a cobalt band across the top like the printed envelope a pattern ships in. Each person is a pattern piece and each measurement is a labeled mark on it. The body figure is literally a pattern piece: a tracing-paper fill, an ink cutting line, a dashed cobalt seam allowance inside it, a double-headed grainline down the center, and each girth drawn as a cobalt band with a triangular notch where its dimension line meets the piece.\n\nThe system is light, dense and drafted rather than decorated. Depth comes from paper on paper and from rules, never from glow. Figures are set narrow and firm on Archivo's width axis, the way a pattern prints its sizes; reading text stays at normal width. Meaning lives in line style: solid is now, dashed is before or alongside, a filled triangle notch is a change. Color is reserved: cobalt for action and the current reading, green, amber and red only for states.\n\nIt explicitly replaced a dark purple health-dashboard look; dark cards with neon accents are the rejected category default.",
+    "keyCharacteristics": [
+      "Cool pattern-paper ground with white sheets and 1.5px rules.",
+      "One cobalt envelope band at the top; cobalt elsewhere only for action, the trend and the current mark.",
+      "Condensed tabular numerals (wdth 72) for every figure; condensed labels (wdth 82); normal width for prose.",
+      "Solid / dashed / notch line grammar shared by the body figure, charts and the week line.",
+      "10px corners on everything that holds content or takes a tap; no pills."
+    ],
+    "rules": [
+      {
+        "name": "The Envelope Rule",
+        "body": "Cobalt fills exactly one large area per screen: the header band. Below it, cobalt appears only as ink (lines, text, outlines) or on the one primary action and active toggles.",
+        "section": "colors"
+      },
+      {
+        "name": "The State Ink Rule",
+        "body": "Green, amber and red mean a state and nothing else. A change value is graphite unless it is judged against the person's goal; then it takes green or amber.",
+        "section": "colors"
+      },
+      {
+        "name": "The Narrow Numeral Rule",
+        "body": "Every measured number is set at wdth 72, weight 720, tabular. Prose numbers stay at body width.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence-Case Label Rule",
+        "body": "Labels are condensed and graphite, never uppercase-tracked. Width carries the label voice, not capitals.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper On Paper Rule",
+        "body": "Surfaces never cast shadows at rest. Only an overlay that truly floats (menu) gets the one soft cobalt-tinted shadow; no glows, no colored halos except the input focus ring.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do set every measured number in Archivo at wdth 72, weight 720, tabular figures.",
+      "Do mark every change with the notch triangle (down for less, up for more) plus a screen-reader word, colored green or amber only when judged against the goal.",
+      "Do draw \"now\" as a solid line and \"before\" or \"each reading\" as a dashed one, on the figure and in charts alike.",
+      "Do keep 10px corners and 1.5px borders on every container, control and input.",
+      "Do group related figures as cells of one ruled sheet rather than loose cards.",
+      "Do keep every tap target at least 44px and pair every color state with a word."
+    ],
+    "donts": [
+      "Don't return to dark health-dashboard cards with neon accents, the look this world replaced.",
+      "Don't use pill shapes (999px radius) for buttons, toggles or tags.",
+      "Don't fill a second large area with cobalt below the envelope band.",
+      "Don't use green, amber, red or the range inks decoratively.",
+      "Don't add shadows or glows to resting surfaces; the floating menu's shadow is the only one.",
+      "Don't set labels in tracked uppercase."
+    ]
+  }
+}

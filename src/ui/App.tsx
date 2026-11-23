@@ -95,7 +95,7 @@ export function App() {
     let intentos = 0
     let marco = 0
     const buscar = () => {
-      const h2 = principal_.current?.querySelector('h2')
+      const h2 = principal_.current?.querySelector('h1')
       if (!h2) {
         if (++intentos < 60) marco = requestAnimationFrame(buscar)
         return
@@ -230,7 +230,7 @@ export function App() {
             )}
             {vista.pantalla === 'mediciones' && personaDeRuta && (
               <>
-                <h2>Todas las mediciones · {personaDeRuta.nombre}</h2>
+                <h1>Todas las mediciones · {personaDeRuta.nombre}</h1>
                 <Historial
                   persona={personaDeRuta}
                   onEditar={(fecha) => navegar({ pantalla: 'registrar', personaId: personaDeRuta.id, fecha })}

@@ -103,7 +103,7 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
           <ul className="semana-revision">
             {inf.revision.map((r) => (
               <li key={r.codigo} className={r.cumplida ? 'si' : 'no'}>
-                <span aria-hidden="true">{r.cumplida ? '✓' : '✗'}</span> <span className="sr-only">{r.cumplida ? 'Cumplido:' : 'Pendiente:'}</span> {r.texto}
+                <Icono nombre={r.cumplida ? 'si' : 'no'} /> <span className="sr-only">{r.cumplida ? 'Cumplido:' : 'Pendiente:'}</span> {r.texto}
               </li>
             ))}
           </ul>
@@ -178,7 +178,7 @@ export function PantallaSemana({ persona }: { persona: Persona }) {
   const inf = informeSemanal(persona, mediciones, hoy)
   return (
     <div className="stack semana-pantalla">
-      <h2>Tu semana · {persona.nombre}</h2>
+      <h1>Tu semana · {persona.nombre}</h1>
       {!inf || inf.anterior == null ? (
         <p className="muted">Con tu segunda medición verás aquí tu semana.</p>
       ) : (

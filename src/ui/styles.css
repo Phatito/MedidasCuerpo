@@ -1,48 +1,47 @@
 /* Mesura como hoja de moldes de costura: papel frío, tinta casi negra, banda cobalto del sobre del molde.
    Cada persona es una línea del molde; cada medida, una marca rotulada sobre esa línea. */
 :root {
-  --bg: #eef1f5;
-  --card: #ffffff;
-  --edge: #d2d8e1;
-  --soft: #e7ebf1;
-  --fg: #14171c;
-  --dim: #535d6c;
-  --accent: #1f45c9;
-  --accent-hondo: #17369e;
+  /* Tiza de sastre sobre paño oscuro: fondo de lana azul tinta, hojas un tono más claras,
+     líneas y cifras en tiza blanca, cobalto para las acciones. */
+  --bg: #0f131b;
+  --card: #171c27;
+  --edge: #2b3242;
+  --soft: #1f2532;
+  --fg: #eef1f6;
+  --dim: #a3acbd;
+  --accent: #3d5cf0;
+  --accent-hondo: #2f4bd6;
+  --accent-tiza: #93a8ff;
   --on-accent: #ffffff;
-  --cyan: #0b6a82;
-  --good: #0d7a4e;
-  --good-bg: #ddf2e8;
-  --warn: #9a5200;
-  --warn-bg: #fcead2;
-  --bad: #c21f3a;
-  /* La pieza del molde: relleno de papel calco, línea de corte en tinta y costura en cobalto. */
-  --pieza: #e2e9fb;
-  --corte: #14171c;
-  --costura: #1f45c9;
-  --sil-top: #e2e9fb;
-  --sil-bottom: #e2e9fb;
-  --sil-line: #14171c;
+  --cyan: #7fd3ea;
+  --good: #52d69c;
+  --good-bg: #13372a;
+  --warn: #f2b45a;
+  --warn-bg: #3b2a12;
+  --bad: #ff7a88;
+  /* La pieza del molde: paño, línea de corte en tiza y costura en tiza azul. */
+  --pieza: #1d2540;
+  --corte: #e9edf5;
+  --costura: #93a8ff;
   --font: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --r: 10px;
-  --sombra: rgba(16, 28, 66, 0.22);
-  /* Estados de salud: azul, verde, ámbar y rojo, con contraste AA sobre blanco. */
-  --st-bajo: #1a73a8;
-  --st-ok: #11804f;
-  --st-alto: #a85a00;
-  --st-muy: #c21f3a;
-  --hero-from: #ffffff;
-  --hero-to: #ffffff;
-  color-scheme: light;
+  --sombra: rgba(0, 0, 0, 0.55);
+  /* Estados de salud sobre fondo oscuro, con contraste AA. */
+  --st-bajo: #6cc3f5;
+  --st-ok: #52d69c;
+  --st-alto: #f2b45a;
+  --st-muy: #ff7a88;
+  --seleccion: #2c3f8f;
+  --hover-celda: #1c2232;
+  color-scheme: dark;
 }
-::selection { background: #c9d6fb; color: var(--fg); }
-html { scrollbar-color: #b8c1cf var(--bg); accent-color: var(--accent); }
+::selection { background: var(--seleccion); color: var(--fg); }
+html { scrollbar-color: #3a4256 var(--bg); accent-color: var(--accent); }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5; }
 h1, h2, h3, h4, p { margin: 0; }
-h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
-h2 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; }
+h1, h2 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; }
 h3 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
 h4 { font-size: 1.02rem; font-weight: 700; }
 .num { font-variant-numeric: tabular-nums; }
@@ -189,7 +188,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
 .ficha-a { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 20px; align-items: start; padding-block: 22px; }
 .ficha-a .aviso { grid-column: 1 / -1; }
 .col-izq, .col-der { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.hero { display: flex; flex-direction: column; gap: 8px; background: linear-gradient(160deg, var(--hero-from), var(--hero-to) 65%); }
+.hero { display: flex; flex-direction: column; gap: 8px; background: var(--card); }
 .hero-k { color: var(--dim); font-size: 0.85rem; font-weight: 600; margin-top: 8px; }
 .hero-v { font-size: 3.4rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; }
 .hero-v small { font-size: 1.1rem; color: var(--dim); letter-spacing: 0; }
@@ -236,7 +235,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
 .tile .d.bien { color: var(--good); }
 .tile .d.atencion { color: var(--warn); }
 .body-fig { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
-.body-fig .sil { fill: url(#cuerpo-relleno); stroke: var(--sil-line); stroke-width: 1.5; }
+.body-fig .sil { fill: none; stroke: none; }
 .body-fig .band { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-linecap: round; }
 .body-fig .lead { fill: none; stroke: var(--dim); stroke-width: 1; opacity: 0.7; }
 .body-fig .pin { fill: var(--cyan); }
@@ -278,7 +277,7 @@ details.guide b { color: var(--fg); font-weight: 600; }
 details.guide > summary { min-height: 44px; padding-block: 11px; cursor: pointer; }
 .aviso-app { margin-top: 16px; }
 .tile .fecha-vieja { font-weight: 600; }
-h2[tabindex='-1']:focus { outline: none; }
+h1[tabindex='-1']:focus { outline: none; }
 
 /* Captura de Xiaomi Home */
 .archivo-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; padding-inline: 22px; cursor: pointer; }
@@ -352,7 +351,6 @@ progress { width: 100%; accent-color: var(--accent); }
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 48px;
   padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.06);
 }
-.linea-semana-k { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan); }
 .linea-semana-t { font-size: 0.9rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .cuadritos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .cuadrito {
@@ -382,6 +380,7 @@ progress { width: 100%; accent-color: var(--accent); }
 /* ---------- Mundo: hoja de moldes ---------- */
 body { font-stretch: 100%; -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-stretch: 88%; }
+h1 { font-size: 1.65rem; font-weight: 750; letter-spacing: -0.015em; }
 h2 { font-size: 1.65rem; font-weight: 750; letter-spacing: -0.015em; }
 /* Las cifras se rotulan como en un molde: angostas, firmes y tabulares. */
 .hero-v, .cuadrito-v, .tile .v, .person .peso, .chart .last, .body-fig .val { font-stretch: 72%; font-weight: 720; letter-spacing: -0.01em; }
@@ -412,7 +411,7 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .chip { border-radius: 8px; }
 .pill { border-radius: 6px; }
 .field input, .field select, .field textarea { background: var(--card); border: 1.5px solid var(--edge); border-radius: var(--r); min-height: 44px; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px #c9d6fb; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--seleccion); }
 .card, .tile, .cuadrito, .modo { border: 1.5px solid var(--edge); }
 .icon-btn, .estrella { border-radius: var(--r); }
 .avatar { border-radius: 8px; }
@@ -425,7 +424,7 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .hero-k, .cuadrito-k, .tile .k { color: var(--dim); font-weight: 650; letter-spacing: 0.01em; }
 .hero-cambio.bien, .cuadrito-cambio.bien, .tile .d.bien { color: var(--good); }
 .hero-cambio.atencion, .cuadrito-cambio.atencion, .tile .d.atencion { color: var(--warn); }
-.linea-semana { background: var(--soft); border: 1.5px dashed #9fb0d6; }
+.linea-semana { background: var(--soft); border: 1.5px dashed #4a5672; }
 .linea-semana:hover { border-style: solid; border-color: var(--accent); }
 .linea-semana b { font-weight: 750; color: var(--accent); }
 .icono { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -476,12 +475,12 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .b-magra { fill: var(--accent); }
 .ley.magra::before { background: var(--accent); }
 .cifra.magra { border-color: var(--accent); }
-.insight.bien { border-color: var(--good); background: #f4fbf7; }
-.insight.atencion { border-color: var(--warn); background: #fff8ee; }
-.notice.ok { color: #0a5c3a; }
-.notice.warn { color: #7a4100; }
-.modo[aria-selected='true'] { border: 2px solid var(--accent); background: #eef2fd; }
-.dialogo-fondo { background: rgba(16, 28, 66, 0.4); }
+.insight.bien { border-color: var(--good); background: #142a22; }
+.insight.atencion { border-color: var(--warn); background: #2c2414; }
+.notice.ok { color: var(--good); }
+.notice.warn { color: var(--warn); }
+.modo[aria-selected='true'] { border: 2px solid var(--accent-tiza); background: #1c2440; }
+.dialogo-fondo { background: rgba(4, 6, 12, 0.7); }
 
 @media (prefers-reduced-motion: no-preference) {
   .cuadrito, .tile.tocable, .linea-semana, .enlace, .chip-btn { transition: border-color 0.15s ease-out, background-color 0.15s ease-out; }
@@ -497,11 +496,11 @@ details.guide summary { color: var(--accent); }
 /* Rótulos angostos, como los de un molde impreso. */
 .hero-k, .cuadrito-k, .tile .k, .body-fig .lab, .legend, .chart .axis { font-stretch: 82%; }
 .pieza-rotulo { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; }
-.pieza-rotulo h2 { font-size: 1.45rem; }
+.pieza-rotulo h1 { font-size: 1.45rem; }
 .muesca { width: 0.7em; height: 0.7em; fill: currentColor; vertical-align: 0.02em; }
 
 /* La ficha como una sola hoja: en el teléfono, la figura queda en la primera pantalla. */
-.ficha-c { grid-template-areas: 'hero' 'fig' 'semana' 'cuad' 'enl' 'cta'; }
+.ficha-c { grid-template-areas: 'hero' 'fig' 'semana' 'enl' 'cta'; }
 .ficha-c > .hero { grid-area: hero; }
 .ficha-c > .figura { grid-area: fig; padding: 8px 12px 12px; gap: 4px; }
 .ficha-c > .linea-semana { grid-area: semana; }
@@ -511,7 +510,7 @@ details.guide summary { color: var(--accent); }
 .ficha-c .body-fig { max-width: 340px; }
 .pieza-pie { text-align: center; }
 @media (min-width: 900px) {
-  .ficha-c { grid-template-areas: 'hero fig' 'semana fig' 'cuad fig' 'enl fig' 'cta fig'; grid-template-rows: repeat(4, min-content) 1fr; align-items: start; }
+  .ficha-c { grid-template-areas: 'hero fig' 'semana fig' 'enl fig' 'cta fig'; grid-template-rows: repeat(3, min-content) 1fr; align-items: start; }
   .ficha-c > .figura { align-self: stretch; justify-content: center; }
   .ficha-c .body-fig { max-width: 520px; }
 }
@@ -520,7 +519,7 @@ details.guide summary { color: var(--accent); }
 /* Cuadritos y tarjetas como celdas de una hoja dividida por líneas de corte, no como tarjetas sueltas. */
 .cuadritos, .tiles { gap: 1.5px; background: var(--edge); border: 1.5px solid var(--corte); border-radius: var(--r); overflow: hidden; }
 .cuadritos .cuadrito, .tiles .tile { border: 0; border-radius: 0; }
-.cuadrito:hover, .tile.tocable:hover { background: #f5f7ff; }
+.cuadrito:hover, .tile.tocable:hover { background: var(--hover-celda); }
 .tile-abrir::after { border-radius: 0; }
 /* Un cambio guarda su color en la muesca hasta la próxima medición. */
 .cuadrito-cambio .muesca, .tile .d .muesca { width: 0.8em; height: 0.8em; }
@@ -552,3 +551,57 @@ details > summary::before {
 }
 details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px); }
 .tiles > .tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ---------- Versión oscura: tiza sobre paño ---------- */
+.top { background: #1b2a78; }
+.top .perfil-boton .avatar { color: #1b2a78; }
+.btn.link, a, details.guide summary, .linea-semana b, .perfil-item.accion { color: var(--accent-tiza); }
+.peso-boton:hover .ver-mas, .enlace:hover > span:last-child { color: var(--accent-tiza); }
+.cuadrito:hover, .tile.tocable:hover, .linea-semana:hover { border-color: var(--accent-tiza); }
+:focus-visible { outline-color: var(--accent-tiza); }
+.chip-btn[aria-pressed='true'], .chip-select.activo { background: var(--accent); border-color: var(--accent); }
+.chart .line, .chart .trend, .chart .avg { stroke: var(--accent-tiza); }
+.chart .dot { stroke: var(--accent-tiza); }
+.chart .dot.end, .chart .avg-dot { fill: var(--accent-tiza); }
+.chart .area { fill: var(--accent-tiza); opacity: 0.08; }
+.legend i, .legend i.trend, .legend i.avg { border-top-color: var(--accent-tiza); }
+.b-magra, .ley.magra::before { fill: var(--accent-tiza); background: var(--accent-tiza); }
+.cifra.magra { border-color: var(--accent-tiza); }
+.body-fig .band-antes { stroke: var(--fg); opacity: 0.45; }
+.top .brand img { background: #fff; }
+
+/* Las cuatro cifras viven en la hoja del peso: una fila de celdas regladas, a la vista sin bajar. */
+.hero .cuadritos { grid-template-columns: repeat(4, minmax(0, 1fr)); border-color: var(--edge); margin-top: 4px; }
+.hero .cuadrito { min-height: 82px; padding: 10px 8px; gap: 2px; }
+.hero .cuadrito-v { font-size: 1.55rem; }
+.hero .cuadrito-v small { font-size: 0.7rem; }
+.hero .cuadrito-k { font-size: 0.72rem; line-height: 1.15; }
+.hero .cuadrito-pie { flex-direction: column; align-items: flex-start; gap: 0; }
+.hero .cuadrito .estado, .hero .cuadrito-cambio { font-size: 0.72rem; }
+.ficha-c .body-fig { max-width: 320px; }
+@media (min-width: 900px) { .ficha-c .body-fig { max-width: 520px; } .hero .cuadrito-v { font-size: 1.9rem; } }
+
+/* Rótulos de la figura legibles a 400 px aunque la figura sea más chica. */
+.body-fig .lab { font-size: 14.5px; }
+.body-fig .val { font-size: 17.5px; }
+.body-fig .chg text { font-size: 14.5px; }
+/* Una sola escala de esquinas y el foco siempre en tiza azul. */
+.perfil-boton, .chip-btn, .chip-select, .chip, .notice, .consumo-form, .captura-mini, .linea-semana { border-radius: var(--r); }
+.archivo-btn:focus-within, .cuadrito:focus-visible, .peso-boton:focus-visible, .linea-semana:focus-visible, .enlace:focus-visible, .tile-abrir:focus-visible { outline-color: var(--accent-tiza); }
+.nube-sincronizando { color: var(--accent-tiza); }
+.chip-link { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Revisión de la semana: marcas dibujadas. */
+.semana-revision li { display: flex; align-items: flex-start; gap: 8px; }
+.semana-revision .icono { width: 18px; height: 18px; margin-top: 3px; stroke-width: 2.5; }
+.semana-revision .si .icono { color: var(--good); }
+.semana-revision .no .icono { color: var(--bad); }
+/* Barras: tamaño contenido para que las fechas no bajen de 11 px. */
+.barras svg { max-width: 560px; max-height: none; margin: 0 auto; }
+.b-fecha { font-size: 11px; }
+/* Las cifras de las celdas quedan sobre la capa tocable (que sigue recibiendo el toque). */
+.tile.tocable > :not(h3) { position: relative; z-index: 1; pointer-events: none; }
+/* Bordes de mensajes en tono, no a todo contraste. */
+.insight.bien { border-color: color-mix(in srgb, var(--good) 45%, var(--card)); }
+.insight.atencion { border-color: color-mix(in srgb, var(--warn) 45%, var(--card)); }
+.semana-pantalla { max-width: 860px; }
