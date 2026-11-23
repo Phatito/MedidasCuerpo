@@ -81,6 +81,11 @@ ahí se llega a todo.
   tu **gasto real** (consumo − cambio de la tendencia × 7.700 kcal/kg) y te
   recomienda kcal según tu objetivo, nunca menos de 1.200 (mujeres) o 1.500
   (hombres). Es orientación, no indicación médica.
+- **Ficha compacta:** al abrir se ve el peso de tendencia y su cambio, la
+  acción de "Tu semana", cuatro cuadritos (grasa, músculo, cintura, grasa
+  visceral) y la figura con los perímetros. Cada cuadrito abre la pantalla de
+  esa medida con su gráfico, su estado y lo que indica; "Todas las cifras"
+  muestra el resto. En la pantalla del peso están el IMC, la meta y el consumo.
 - **Todas las mediciones:** tabla con edición y eliminación.
 - **Ajustes y datos** (⚙): persona principal, importar y exportar CSV,
   respaldo, y recordatorio semanal como evento de calendario.

@@ -4,3 +4,6 @@ dist
 test-results
 playwright-report
 public/ocr
+
+# Skill de diseño de terceros (40 MB): se reinstala con `npx skills add Leonxlnx/taste-skill`.
+.claude/skills/design-taste-frontend/
