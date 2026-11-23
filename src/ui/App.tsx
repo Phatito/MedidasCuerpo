@@ -1,10 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
 import { escribirRuta, leerRuta, personaInicio, type Ruta } from '../domain/rutas'
+import { hayServidor } from '../sync/api'
+import { programarSincronizacion, suscribirEstado } from '../sync/motor'
 import type { Medicion, Persona } from '../domain/types'
 import { db, guardarAjustes, leerAjustes, listarPersonas, listarTodasLasMediciones } from '../storage/db'
 import { Datos } from './Datos'
 import { Familia } from './Familia'
+import { IconoNube } from './IconoNube'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
 import type { Borrador } from './Medir'
@@ -36,6 +39,17 @@ export function App() {
       window.removeEventListener('popstate', alCambiar)
     }
   }, [])
+
+  // Sincronización: se programa al abrir (sin sesión, cada ciclo termina enseguida).
+  useEffect(() => (hayServidor() ? programarSincronizacion() : undefined), [])
+  useEffect(
+    () =>
+      suscribirEstado((e) => {
+        if (e.tipo === 'sesion-terminada')
+          setAviso({ hash: window.location.hash, texto: 'Tu sesión terminó en este dispositivo. Inicia sesión de nuevo para seguir sincronizando.' })
+      }),
+    [],
+  )
 
   const cargado = personas != null && ajustes !== undefined
   const principal = personaInicio(personas ?? [], ajustes?.personaPrincipalId)
@@ -140,6 +154,7 @@ export function App() {
               onFamilia={() => navegar({ pantalla: 'familia' })}
             />
           )}
+          <IconoNube onAbrir={() => navegar({ pantalla: 'ajustes' })} />
           <button type="button" className="icon-btn" aria-label="Ajustes y datos" onClick={() => navegar({ pantalla: 'ajustes' })}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <circle cx="12" cy="12" r="3" />

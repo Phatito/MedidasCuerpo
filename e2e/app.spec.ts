@@ -1111,3 +1111,147 @@ test('un respaldo hecho antes del cambio de nombre se sigue restaurando', async 
   await page.getByRole('button', { name: 'Sí, restaurar' }).click()
   await expect(page.getByText('Respaldo restaurado.')).toBeVisible()
 })
+
+// ---------- Cuenta y sincronización ----------
+
+const BASE = 'http://localhost:4173/MedidasCuerpo/'
+const FRASE_E2E = 'mi frase secreta de prueba'
+const unico = (nombre: string) => `${nombre}.${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`
+const nube = (page: Page) => page.getByRole('button', { name: /^Sincronización:/ })
+
+async function abrirCuenta(page: Page) {
+  await page.getByRole('button', { name: 'Ajustes y datos' }).click()
+  await expect(page.getByRole('heading', { name: 'Cuenta y sincronización' })).toBeVisible()
+}
+async function crearCuentaE2E(page: Page, usuario: string) {
+  await abrirCuenta(page)
+  await page.getByRole('button', { name: 'Crear cuenta' }).click()
+  await page.getByLabel('Nombre de usuario').fill(usuario)
+  await page.getByLabel('Frase secreta', { exact: true }).fill(FRASE_E2E)
+  await page.getByLabel('Repite la frase secreta').fill(FRASE_E2E)
+  await page.getByLabel('Entiendo que si olvido la frase no se puede recuperar').check()
+  await page.getByRole('button', { name: 'Crear cuenta y sincronizar' }).click()
+  await expect(page.getByText(`Conectado como ${usuario}`)).toBeVisible({ timeout: 20_000 })
+}
+async function entrarE2E(page: Page, usuario: string) {
+  await page.goto('./')
+  await abrirCuenta(page)
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click()
+  await page.getByLabel('Nombre de usuario').fill(usuario)
+  await page.getByLabel('Frase secreta', { exact: true }).fill(FRASE_E2E)
+  await page.getByRole('button', { name: 'Entrar y sincronizar' }).click()
+  await expect(page.getByText(`Conectado como ${usuario}`)).toBeVisible({ timeout: 20_000 })
+}
+
+test('lo registrado en el PC aparece en el celular, cifrado en el camino', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const usuario = unico('ana')
+  const pc = await (await browser.newContext({ baseURL: BASE })).newPage()
+  const cuerpos: string[] = []
+  pc.on('request', (r) => {
+    if (r.url().startsWith('http://localhost:8787')) cuerpos.push(r.postData() ?? '')
+  })
+  await agregarAna(pc)
+  await medir(pc, haceDias(0), '72,5', '88')
+  await crearCuentaE2E(pc, usuario)
+  await expect(nube(pc)).toHaveAttribute('aria-label', 'Sincronización: al día')
+  expect(cuerpos.join('\n')).not.toContain('Ana')
+  expect(cuerpos.join('\n')).not.toContain('72.5')
+
+  const cel = await (await browser.newContext({ baseURL: BASE, viewport: { width: 400, height: 800 } })).newPage()
+  await entrarE2E(cel, usuario)
+  await cel.getByRole('button', { name: /ir al inicio/ }).click()
+  await expect(cel.locator('.perfil-nombre')).toHaveText('Ana')
+  await expect(cel.locator('.hero')).toContainText('72,5')
+
+  // Un cambio en el celular llega al PC.
+  await ir(cel, 'Medir')
+  await cel.getByLabel('Fecha').fill(haceDias(1))
+  await cel.getByLabel('Peso (kg)').fill('73')
+  await cel.getByRole('button', { name: 'Guardar medición' }).click()
+  await abrirCuenta(cel)
+  await cel.getByRole('button', { name: 'Sincronizar ahora' }).click()
+  await expect(cel.getByText(/Sincronizado/)).toBeVisible()
+  await pc.getByRole('button', { name: 'Sincronizar ahora' }).click()
+  await expect(pc.getByText(/Sincronizado/)).toBeVisible()
+  await ir(pc, 'Historial')
+  await expect(filas(pc)).toHaveCount(2)
+})
+
+test('sin conexión se guarda igual y se sincroniza al volver', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const usuario = unico('beto')
+  const ctx = await browser.newContext({ baseURL: BASE })
+  const pc = await ctx.newPage()
+  await agregarAna(pc)
+  await crearCuentaE2E(pc, usuario)
+  await ctx.setOffline(true)
+  await pc.evaluate(() => window.dispatchEvent(new Event('offline')))
+  await expect(nube(pc)).toHaveAttribute('aria-label', 'Sincronización: sin conexión')
+  await medir(pc, haceDias(0), '70', '85')
+  await ctx.setOffline(false)
+  await pc.evaluate(() => window.dispatchEvent(new Event('online')))
+  await expect(nube(pc)).toHaveAttribute('aria-label', 'Sincronización: al día', { timeout: 20_000 })
+  const cel = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await entrarE2E(cel, usuario)
+  await ir(cel, 'Historial')
+  await expect(filas(cel)).toHaveCount(1)
+})
+
+test('cerrar sesión conserva los datos y quita la nube', async ({ browser }) => {
+  test.setTimeout(60_000)
+  const pc = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await agregarAna(pc)
+  await crearCuentaE2E(pc, unico('caro'))
+  await pc.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await expect(pc.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
+  await expect(nube(pc)).toHaveCount(0)
+  await pc.getByRole('button', { name: /ir al inicio/ }).click()
+  await expect(pc.locator('.perfil-nombre')).toHaveText('Ana')
+})
+
+test('entrar con otra cuenta en un dispositivo con datos pregunta antes', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const otra = unico('dani')
+  const aparte = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await aparte.goto('./')
+  await crearCuentaE2E(aparte, otra)
+
+  const pc = await (await browser.newContext({ baseURL: BASE })).newPage()
+  await agregarAna(pc)
+  await crearCuentaE2E(pc, unico('eli'))
+  await pc.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await pc.getByRole('button', { name: 'Iniciar sesión' }).click()
+  await pc.getByLabel('Nombre de usuario').fill(otra)
+  await pc.getByLabel('Frase secreta', { exact: true }).fill(FRASE_E2E)
+  await pc.getByRole('button', { name: 'Entrar y sincronizar' }).click()
+  const dialogo = pc.getByRole('dialog', { name: /datos que no son de/ })
+  await expect(dialogo).toBeVisible({ timeout: 20_000 })
+  await expect(dialogo.getByRole('button', { name: 'Subirlos a esta cuenta' })).toBeVisible()
+  await expect(dialogo.getByRole('button', { name: 'Reemplazarlos por los de la nube' })).toBeVisible()
+  await dialogo.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(pc.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
+  await pc.getByRole('button', { name: /ir al inicio/ }).click()
+  await expect(pc.locator('.perfil-nombre')).toHaveText('Ana')
+})
+
+test('crear cuenta exige frase larga, confirmación y un nombre libre', async ({ page }) => {
+  test.setTimeout(60_000)
+  const usuario = unico('fede')
+  await page.goto('./')
+  await crearCuentaE2E(page, usuario)
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await page.getByRole('button', { name: 'Crear cuenta' }).click()
+  await page.getByLabel('Nombre de usuario').fill(usuario)
+  await page.getByLabel('Frase secreta', { exact: true }).fill('corta')
+  await page.getByLabel('Repite la frase secreta').fill('corta')
+  await page.getByRole('button', { name: 'Crear cuenta y sincronizar' }).click()
+  await expect(page.getByText(/al menos 12 caracteres/)).toBeVisible()
+  await page.getByLabel('Frase secreta', { exact: true }).fill(FRASE_E2E)
+  await page.getByLabel('Repite la frase secreta').fill(FRASE_E2E)
+  await page.getByRole('button', { name: 'Crear cuenta y sincronizar' }).click()
+  await expect(page.getByText(/Marca la casilla/)).toBeVisible()
+  await page.getByLabel('Entiendo que si olvido la frase no se puede recuperar').check()
+  await page.getByRole('button', { name: 'Crear cuenta y sincronizar' }).click()
+  await expect(page.getByText('Ese nombre de usuario ya está en uso')).toBeVisible({ timeout: 20_000 })
+})

@@ -6,6 +6,8 @@ import { DIAS_SEMANA, generarIcs } from '../domain/reminders'
 import type { Persona } from '../domain/types'
 import { exportarRespaldo, leerRespaldo, restaurarRespaldo, type Respaldo } from '../storage/backup'
 import { guardarAjustes, leerAjustes, listarMediciones } from '../storage/db'
+import { hayServidor } from '../sync/api'
+import { Cuenta } from './Cuenta'
 import { descargar } from './descargar'
 import { ImportarArchivo, plural } from './ImportarArchivo'
 
@@ -79,6 +81,8 @@ export function Datos({ personas, personaActual }: Props) {
   return (
     <>
       <h2>Ajustes y datos</h2>
+
+      {hayServidor() && <Cuenta />}
 
       {personas.length > 0 && (
         <section className="card stack">
