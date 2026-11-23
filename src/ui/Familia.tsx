@@ -70,7 +70,7 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
 
       {avisoRespaldo && (
         <div className="notice warn row">
-          <span>{avisoRespaldo} Viven solo en este navegador.</span>
+          <span>{avisoRespaldo} Sin cuenta, viven solo en este navegador.</span>
           <button className="btn" onClick={onIrDatos}>Hacer respaldo</button>
         </div>
       )}

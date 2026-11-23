@@ -6,4 +6,4 @@ compatibility_date = "2026-11-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "mesura"
-database_id = "PENDIENTE"
+database_id = "27ef8b64-4b4b-48df-a29c-e84b5b645f99"

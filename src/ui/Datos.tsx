@@ -171,7 +171,7 @@ export function Datos({ personas, personaActual }: Props) {
       <section className="card stack">
         <h3>Respaldo</h3>
         <p className="muted small">
-          Tus datos viven solo en este navegador. Si borras los datos de navegación o cambias de computador, se pierden a menos que tengas un respaldo.
+          Sin cuenta, tus datos viven solo en este navegador: si borras los datos de navegación o cambias de computador, se pierden a menos que tengas un respaldo. Con cuenta, además viajan cifrados a la nube.
         </p>
         <div className="row">
           <button className="btn primary" onClick={descargarRespaldo}>Descargar respaldo</button>

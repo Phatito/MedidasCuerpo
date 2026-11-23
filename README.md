@@ -19,10 +19,19 @@ pérdida de grasa con músculo mantenido o ganado).
 
 ## Dónde están tus datos
 
-Solo en el navegador del computador donde la usas. No hay cuentas ni servidor:
-nada de lo que registras sale de tu equipo. Por lo mismo, si borras los datos
-de navegación o cambias de computador, los datos se pierden salvo que tengas un
-respaldo.
+Tus datos son tuyos: se guardan en tu dispositivo y, si creas una cuenta, viajan
+cifrados; solo tú puedes leerlos.
+
+- **Sin cuenta:** todo queda en el navegador donde usas la app. Si borras los
+  datos de navegación o cambias de equipo, se pierden salvo que tengas un
+  respaldo.
+- **Con cuenta (opcional, en Ajustes y datos → Cuenta y sincronización):**
+  entras con un nombre de usuario y una frase secreta y tus datos se
+  sincronizan entre el PC y el celular. Se cifran en tu dispositivo con tu
+  frase antes de salir; el servidor (Cloudflare) solo guarda texto ilegible y
+  ni siquiera sabe en qué fechas te mediste. **Si olvidas la frase, la copia de
+  la nube no se puede recuperar** (tus datos siguen en cada dispositivo). Las
+  capturas de Xiaomi nunca se suben: solo los números que la app lee.
 
 **Haz respaldos:** pestaña Datos → Descargar respaldo. Para recuperarlos, en la
 misma pestaña elige el archivo en "Archivo de respaldo".
