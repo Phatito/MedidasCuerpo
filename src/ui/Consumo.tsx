@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { conConsumo, consumoVigente, KCAL_MAX, KCAL_MIN, sinConsumo } from '../domain/consumo'
 import { fechaLegible, hoyIso, parseNumero } from '../domain/numbers'
 import type { Persona } from '../domain/types'
@@ -13,7 +13,11 @@ export function Consumo({ persona }: { persona: Persona }) {
   const [abierto, setAbierto] = useState(false)
   const [kcal, setKcal] = useState('')
   const [desde, setDesde] = useState(hoy)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ campo: 'kcal' | 'desde'; texto: string } | null>(null)
+  const campoKcal = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (abierto) campoKcal.current?.focus()
+  }, [abierto])
   const historial = [...(persona.consumos ?? [])].reverse()
 
   function abrir() {
@@ -27,13 +31,14 @@ export function Consumo({ persona }: { persona: Persona }) {
     e.preventDefault()
     // "2.500" se lee como dos mil quinientos.
     const n = parseNumero(/^\d{1,3}(\.\d{3})+$/.test(kcal.trim()) ? kcal.trim().replace(/\./g, '') : kcal)
-    if (n == null || n < KCAL_MIN || n > KCAL_MAX) return setError(`Debe estar entre ${miles(KCAL_MIN)} y ${miles(KCAL_MAX)}`)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) return setError('Elige desde qué fecha')
+    if (n == null || n < KCAL_MIN || n > KCAL_MAX) return setError({ campo: 'kcal', texto: `Debe estar entre ${miles(KCAL_MIN)} y ${miles(KCAL_MAX)}` })
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) return setError({ campo: 'desde', texto: 'Elige desde qué fecha' })
+    if (desde > hoy) return setError({ campo: 'desde', texto: 'La fecha no puede ser futura' })
     try {
       await guardarPersona(conConsumo(persona, desde, Math.round(n)))
       setAbierto(false)
     } catch {
-      setError('No se pudo guardar.')
+      setError({ campo: 'kcal', texto: 'No se pudo guardar.' })
     }
   }
 
@@ -48,14 +53,34 @@ export function Consumo({ persona }: { persona: Persona }) {
           <div className="row consumo-campos">
             <div className="field">
               <label htmlFor="consumo-kcal">kcal al día</label>
-              <input id="consumo-kcal" inputMode="numeric" value={kcal} onChange={(e) => setKcal(e.target.value)} />
+              <input
+                id="consumo-kcal"
+                ref={campoKcal}
+                inputMode="numeric"
+                value={kcal}
+                onChange={(e) => setKcal(e.target.value)}
+                aria-invalid={error?.campo === 'kcal' || undefined}
+                aria-describedby={error?.campo === 'kcal' ? 'consumo-error' : undefined}
+              />
             </div>
             <div className="field">
               <label htmlFor="consumo-desde">Desde</label>
-              <input id="consumo-desde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
+              <input
+                id="consumo-desde"
+                type="date"
+                max={hoy}
+                value={desde}
+                onChange={(e) => setDesde(e.target.value)}
+                aria-invalid={error?.campo === 'desde' || undefined}
+                aria-describedby={error?.campo === 'desde' ? 'consumo-error' : undefined}
+              />
             </div>
           </div>
-          {error && <p className="error" role="alert">{error}</p>}
+          {error && (
+            <p className="error" role="alert" id="consumo-error">
+              {error.texto}
+            </p>
+          )}
           <div className="row">
             <button type="submit" className="btn primary">Guardar consumo</button>
             <button type="button" className="btn" onClick={() => setAbierto(false)}>Cancelar</button>

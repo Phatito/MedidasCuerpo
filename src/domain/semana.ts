@@ -151,8 +151,9 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
       const dentro = Math.abs(ritmo - RITMO_OBJETIVO_PCT[c.p.objetivo]) <= 0.25
       return dentro ? { codigo: previa.codigo, cumplida: true, texto: 'Seguiste en el ritmo de tu objetivo.' } : { codigo: previa.codigo, cumplida: false, texto: 'Te alejaste del ritmo de tu objetivo.' }
     }
-    case 'anota-consumo':
     case 'sigue-anotando':
+      return c.gasto?.estado === 'ok' ? { codigo: previa.codigo, cumplida: true, texto: 'Ya se puede estimar tu gasto real.' } : null
+    case 'anota-consumo':
       return c.consumo != null ? { codigo: previa.codigo, cumplida: true, texto: 'Tienes tu consumo anotado.' } : { codigo: previa.codigo, cumplida: false, texto: 'Aún no anotas tu consumo.' }
   }
 }
@@ -206,7 +207,8 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
   let revision: Revision[] = []
   if (conRevision && previa && !menor && !vieja) {
     const anterior = informe(p, ms.slice(0, -1), previa.fecha, false)
-    revision = (anterior?.acciones ?? []).map((a) => revisar(a, ctx)).filter((r): r is Revision => r != null)
+    // Sin una medición antes de la anterior, la semana pasada no tuvo informe que revisar.
+    revision = (anterior?.anterior != null ? anterior.acciones : []).map((a) => revisar(a, ctx)).filter((r): r is Revision => r != null)
   }
 
   return {

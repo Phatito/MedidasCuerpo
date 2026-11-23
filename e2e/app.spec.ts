@@ -1309,7 +1309,7 @@ test('anotar y cambiar el consumo de kcal', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' }).click()
   await page.getByLabel('kcal al día').fill('2200')
-  await page.getByLabel('Desde', { exact: true }).fill(haceDias(-1))
+  await page.getByLabel('Desde', { exact: true }).fill(haceDias(3))
   await page.getByRole('button', { name: 'Guardar consumo' }).click()
   await page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' }).click()
   const historial = page.getByRole('list', { name: 'Historial de consumo' })
@@ -1374,4 +1374,30 @@ test('editar a la persona conserva su consumo de kcal', async ({ page }) => {
   await ir(page, 'Ficha')
   await expect(page.getByText('objetivo: mantener')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Consumo: 2.500 kcal/día ✎' })).toBeVisible()
+})
+
+test('la tarjeta revisa la semana pasada y el editor de consumo se lee bien', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  // Números inventados: tres mediciones semanales.
+  const f = (n: number) => haceDias(n).split('-').reverse().join('/')
+  const csv = `Fecha;Peso\n${f(14)};80\n${f(7)};79,9\n${f(0)};79,8\n`
+  await page.getByLabel('Archivo CSV').setInputFiles({ name: 's.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
+  await page.getByRole('button', { name: 'Confirmar importación' }).click()
+  await expect(page.getByText('Se importaron 3 mediciones para Ana.')).toBeVisible()
+  await ir(page, 'Ficha')
+  const tarjeta = page.locator('.semana-card')
+  await expect(tarjeta.getByRole('heading', { name: 'La semana pasada' })).toBeVisible()
+  await expect(tarjeta).toContainText('Pendiente:')
+  await expect(tarjeta).toContainText('bajó')
+
+  await page.getByRole('button', { name: 'Anotar consumo ✎' }).click()
+  await expect(page.getByLabel('kcal al día')).toBeFocused()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.getByLabel('Desde', { exact: true }).fill(haceDias(-3))
+  await page.getByLabel('kcal al día').fill('2500')
+  await page.getByRole('button', { name: 'Guardar consumo' }).click()
+  await expect(page.getByText('La fecha no puede ser futura')).toBeVisible()
+  await expect(page.getByLabel('Desde', { exact: true })).toHaveAttribute('aria-invalid', 'true')
 })

@@ -160,3 +160,19 @@ describe('revisión final: casos de la revisión', () => {
     expect(inf.acciones[0].texto).toMatch(/en 1 semana/)
   })
 })
+
+describe('pulido de la revisión', () => {
+  test('con solo dos mediciones no hay revisión (la semana pasada no tuvo informe)', () => {
+    expect(informeSemanal(persona(), semanales([80, 79.9]), FIN)!.revision).toEqual([])
+  })
+  test('seguir anotando se cumple cuando ya hay estimación; si no, no se evalúa', () => {
+    const p = conConsumo(persona(), '2026-01-01', 2500)
+    const ms = semanales([90, 89.5, 89, 88.5, 88, 87.5, 87, 86.5])
+    // Una semana antes ya había estimación: no se pidió seguir anotando.
+    const inf = informeSemanal(p, ms, FIN)!
+    expect(inf.revision.find((r) => r.codigo === 'sigue-anotando')).toBeUndefined()
+    const q = conConsumo(persona(), sumar(FIN, -14), 2500)
+    const sin = informeSemanal(q, semanales([80, 79.9, 79.8]), FIN)!
+    expect(sin.revision.find((r) => r.codigo === 'sigue-anotando')).toBeUndefined()
+  })
+})

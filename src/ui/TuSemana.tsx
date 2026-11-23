@@ -8,7 +8,16 @@ import { listarMediciones } from '../storage/db'
 
 const miles = (n: number) => n.toLocaleString('es-CL')
 const ddmm = (f: string) => fechaLegible(f).slice(0, 5)
-const cambio = (kg: number) => `${kg < -0.05 ? '▼' : kg > 0.05 ? '▲' : '='} ${formatear(Math.abs(kg))} kg`
+/** Cambio en kg con flecha; el lector de pantalla oye "bajó" o "subió" en vez de la flecha. */
+function Cambio({ kg }: { kg: number }) {
+  const [flecha, palabra] = kg < -0.05 ? ['▼', 'bajó'] : kg > 0.05 ? ['▲', 'subió'] : ['=', 'sin cambio:']
+  return (
+    <>
+      <span aria-hidden="true">{flecha}</span>
+      <span className="sr-only">{palabra}</span> {formatear(Math.abs(kg))} kg
+    </>
+  )
+}
 const NOTA = 'Estimaciones orientativas a partir de tus datos, no indicación médica.'
 
 function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; hoy: string }) {
@@ -21,22 +30,22 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
         <h4>Qué cambió</h4>
         {inf.cambioTendenciaKg != null && (
           <p className="num">
-            Peso de tendencia: <b>{cambio(inf.cambioTendenciaKg)}</b> desde el {ddmm(inf.anterior!)}
+            Peso de tendencia: <b><Cambio kg={inf.cambioTendenciaKg} /></b> desde el {ddmm(inf.anterior!)}
           </p>
         )}
         {inf.composicion && (
           <div className="semana-cifras num">
             <span className="cifra grasa">
-              Grasa <b>{cambio(inf.composicion.grasaKg)}</b>
+              Grasa <b><Cambio kg={inf.composicion.grasaKg} /></b>
             </span>
             <span className="cifra magra">
-              Masa magra <b>{cambio(inf.composicion.magraKg)}</b>
+              Masa magra <b><Cambio kg={inf.composicion.magraKg} /></b>
             </span>
           </div>
         )}
         {inf.composicionTotal && (
           <p className="muted small num">
-            Desde el {fechaLegible(inf.composicionTotal.desde)}: grasa {cambio(inf.composicionTotal.grasaKg)}, masa magra {cambio(inf.composicionTotal.magraKg)}.
+            Desde el {fechaLegible(inf.composicionTotal.desde)}: grasa <Cambio kg={inf.composicionTotal.grasaKg} />, masa magra <Cambio kg={inf.composicionTotal.magraKg} />.
           </p>
         )}
       </div>
@@ -58,8 +67,8 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
           {g.estado === 'ok' ? (
             <>
               Gasto real estimado: <b>~{miles(g.gastoKcal)} kcal/día</b> (confianza {g.confianza})
-              {consumo != null && ` · anotaste ${miles(consumo)} kcal/día`}
-              {g.pisoAplicado && `. No se recomienda bajar de ${miles(g.recomendadaKcal)} kcal/día.`}
+              {consumo != null && ` · anotaste ${miles(consumo)} kcal/día`}. Para tu objetivo: <b>~{miles(g.recomendadaKcal)} kcal/día</b>
+              {g.pisoAplicado && ' (el mínimo recomendado; no bajes de ahí)'}.
             </>
           ) : (
             <>
