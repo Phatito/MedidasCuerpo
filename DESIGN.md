@@ -1,32 +1,32 @@
 ---
 name: Mesura
-description: Weekly body measurements read like a dressmaker's pattern sheet, chalked on dark wool.
+description: Weekly body measurements read like a dressmaker's pattern sheet, drawn in tailor's chalk on charcoal wool.
 colors:
-  envelope-navy: "#1b2a78"
-  cobalt: "#3d5cf0"
-  cobalt-deep: "#2f4bd6"
-  chalk-blue: "#93a8ff"
-  selection-navy: "#2c3f8f"
+  envelope-navy: "#1d2a48"
+  cobalt: "#3d6ab0"
+  cobalt-deep: "#345c9b"
+  chalk-blue: "#9cbde8"
+  selection-navy: "#34507d"
   on-cobalt: "#ffffff"
-  wool: "#0f131b"
-  sheet: "#171c27"
-  soft-fold: "#1f2532"
-  cut-rule: "#2b3242"
-  cell-hover: "#1c2232"
-  pattern-piece: "#1d2540"
-  seam-dash: "#4a5672"
-  chalk: "#eef1f6"
-  chalk-line: "#e9edf5"
-  graphite: "#a3acbd"
-  state-good: "#52d69c"
-  state-good-bg: "#13372a"
-  state-warn: "#f2b45a"
-  state-warn-bg: "#3b2a12"
-  state-bad: "#ff7a88"
-  range-low: "#6cc3f5"
-  range-ok: "#52d69c"
-  range-high: "#f2b45a"
-  range-very-high: "#ff7a88"
+  wool: "#16171a"
+  sheet: "#1b1c20"
+  soft-fold: "#222327"
+  cut-rule: "#3a3a3d"
+  sheet-edge: "#45443f"
+  seam-dash: "#5a5853"
+  field-edge: "#77736b"
+  pattern-piece: "#24262c"
+  chalk: "#ece9e2"
+  graphite: "#aaa69d"
+  state-good: "#9cc79a"
+  state-good-bg: "#1f2a20"
+  state-warn: "#e2c36b"
+  state-warn-bg: "#2c2717"
+  state-bad: "#e58a7f"
+  range-low: "#8fbbe6"
+  range-ok: "#9cc79a"
+  range-high: "#e2c36b"
+  range-very-high: "#e58a7f"
 typography:
   display:
     fontFamily: "'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif"
@@ -130,9 +130,8 @@ components:
     padding: "12px 14px"
     height: "96px"
   figure-cell-hover:
-    backgroundColor: "{colors.cell-hover}"
-  figure-row-cell:
-    backgroundColor: "{colors.sheet}"
+    backgroundColor: "{colors.soft-fold}"
+  figure-band-cell:
     textColor: "{colors.chalk}"
     padding: "10px 8px"
     height: "82px"
@@ -153,54 +152,57 @@ components:
 
 **Creative North Star: "The Pattern Sheet"**
 
-Mesura reads like a dressmaker's pattern sheet, chalked on dark wool. The ground is a blue-black wool (wool), sheets lie on it one tone lighter (sheet), and everything is drawn in tailor's chalk: near-white chalk for text and cutting lines, a chalk blue for the marks that mean "now". A deep navy band runs across the top like the envelope a pattern ships in. Each person is a pattern piece and each measurement a labeled mark on it. The body figure is literally a pattern piece: a navy wool fill, a chalk cutting line, a dashed chalk-blue seam allowance inside it, a double-headed grainline down the center, and each girth a chalk-blue band with a triangular notch where its dimension line meets the piece.
+Mesura reads like a dressmaker's pattern sheet, drawn in tailor's chalk on charcoal wool. The ground is a neutral charcoal wool (wool), never blue slate. Sheets lie on it barely lifted (sheet) and are defined by their chalk cutting lines, not by a lighter fill. Everything is drawn in warm chalk white; a pale chalk blue marks what is "now"; a deep navy wool band runs across the top like the envelope a pattern ships in. Each person is a pattern piece and each measurement a labeled mark on it. The body figure is literally a pattern piece: a wool fill, a chalk cutting line, a dashed chalk-blue seam allowance inside it, a double-headed grainline down the center, and each girth a chalk-blue band with a triangular notch where its dimension line meets the piece.
 
-The system is dark, dense and drafted rather than decorated. The pattern world was first built light (cool paper, white sheets, ink); the owner asked for dark colors, so the same grammar now ships as chalk on wool, and that preference is the reason the palette is dark. Depth comes from cloth on cloth and from rules, never from glow. Figures are set narrow and firm on Archivo's width axis, the way a pattern prints its sizes; reading text stays at normal width. Meaning lives in line style: solid is now, dashed is before or alongside, a filled triangle notch is a change. Color is reserved: cobalt fills only the action, chalk blue draws the current reading, and green, amber and red mean states.
+The system is dark, dense and drafted rather than decorated. The pattern world was first built light; the owner asked for dark colors ("prefiero colores oscuros"), so the same grammar ships as chalk on wool, and that preference is the reason the palette is dark. Depth comes from lines on cloth, never from glow or from stacked fills. Figures are set narrow and firm on Archivo's width axis, the way a pattern prints its sizes; reading text stays at normal width. Meaning lives in line style: solid is now, dashed is before or alongside, a filled triangle notch is a change. Color is reserved and muted: a chalk-blue fill for the action, chalk blue for the current reading, and states in soft chalk tones (muted green, chalk yellow, chalk red).
 
 The rejected category default is the neon health dashboard: glowing cards, saturated cyan and purple accents, gradients. Dark here is cloth, not a screen.
 
 **Key Characteristics:**
-- Blue-black wool ground with one-tone-lighter sheets and 1.5px rules.
-- One navy envelope band at the top; cobalt fill only for the primary action and active toggles; chalk blue for every line, link and focus.
+- Neutral charcoal wool ground; sheets barely lifted and drawn by 1.5px chalk cutting lines.
+- One navy envelope band at the top; a muted cobalt fill only for the primary action and pressed toggles; chalk blue for every line, link and focus.
+- States in chalk tones, never bright: muted green, chalk yellow, chalk red, chalk blue.
 - Condensed tabular numerals (wdth 72) for every figure; condensed labels (wdth 82); normal width for prose.
 - Solid / dashed / notch line grammar shared by the body figure, charts and the week line.
 - 10px corners on everything that holds content or takes a tap; no pills.
 
 ## Colors
 
-A wool-and-chalk palette: blue-black cloth, near-white chalk, one cobalt for action and one chalk blue for marks, plus a disciplined set of bright state inks tuned for AA on dark.
+A chalk-and-wool palette: neutral charcoal cloth, warm chalk white, one muted cobalt fill for action, one pale chalk blue for marks, and state tones that read as chalk, not ink.
 
 ### Primary
 - **Envelope Navy** (envelope-navy): the header band only. The single large colored area on any screen; white text and controls sit on it, and the profile avatar's initial takes this navy on a white tile.
-- **Cobalt** (cobalt): fill of primary buttons ("Registrar medición") and pressed toggles, always under white text. Never used as a line or as text on the dark ground.
-- **Pressed Cobalt** (cobalt-deep): hover and press state of primary buttons only.
-- **Chalk Blue** (chalk-blue): the blue as ink. Links, the "Tu semana." lead-in, chart trend and average lines, the end dot, girth bands, the seam allowance, the grainline and notch pins on the body figure, hover borders on cells and the week line, and every focus outline.
+- **Chalk-Blue Fill** (cobalt): fill of primary buttons ("Registrar medición"), pressed toggles and selects, always under white text. Never a line and never text on the wool.
+- **Pressed Fill** (cobalt-deep): hover and press state of primary buttons only.
+- **Chalk Blue** (chalk-blue): blue as chalk. Links, the "Tu semana." lead-in, chart trend and average lines and their end dot, the lean bars of the week chart, girth bands, the seam allowance, grainline and notch pins on the body figure, hover borders on cells and the week line, the selected register mode, and every focus outline.
 - **Selection Navy** (selection-navy): text selection and the 3px focus ring around a focused input.
 
 ### Neutral
-- **Wool** (wool): the page ground.
-- **Sheet** (sheet): cards, figure cells, inputs, secondary buttons, toggles; every surface that carries content.
-- **Soft Fold** (soft-fold): quiet fills: neutral tags, chips, menu item hover and current item, informational notices, the inline intake form.
-- **Cut Rule** (cut-rule): default 1.5px borders, dashed chart gridlines, table rules, the 1.5px gutters between figure cells. A quiet rule, not a boundary a control depends on.
-- **Cell Hover** (cell-hover): the wash a figure cell takes on hover.
+- **Charcoal Wool** (wool): the page ground. Neutral; a blue cast is a regression.
+- **Sheet** (sheet): cards, figure cells, inputs, secondary buttons, toggles, the week line on the ficha. Barely above the wool on purpose: the line, not the fill, makes the sheet.
+- **Soft Fold** (soft-fold): quiet fills and washes: neutral tags, menu item hover, notices, the inline intake form, the selected register mode, and the hover wash of a figure cell.
+- **Cut Rule** (cut-rule): inner rules: the lines that divide the ficha's figure band, the gutters between "Todas las cifras" tiles, dashed chart gridlines, menu dividers.
+- **Sheet Edge** (sheet-edge): the default 1.5px border of every sheet, tile and register mode. A quiet cut, not a boundary a control depends on.
+- **Seam Dash** (seam-dash): the dashed border of the "Tu semana" line, the one container drawn as a seam rather than a cut.
+- **Field Edge** (field-edge): borders of inputs, selects and textareas. Set to hold 3:1 against the sheet; a control's boundary never uses sheet-edge or cut-rule.
 - **Pattern Piece** (pattern-piece): the body figure's fill and the cover stroke over the seam allowance.
-- **Seam Dash** (seam-dash): the dashed border of the "Tu semana" line, the one UI container drawn as a seam rather than a cut.
-- **Chalk** (chalk): text, figures, the dashed "each weigh-in" line in charts, the dashed previous-value band on the figure, the range-bar dot.
-- **Chalk Line** (chalk-line): the cutting lines: the ficha's weight sheet border, the outer border of the "Todas las cifras" grid, the body figure's outline.
-- **Graphite** (graphite): labels, units, secondary text, chevrons, inactive change values.
+- **Chalk** (chalk): text, figures, and the cutting lines: the ficha's weight sheet border, the outer border of the "Todas las cifras" grid, the body figure's outline; also the dashed "each weigh-in" chart line and the dashed previous-value band on the figure, and the range-bar dot.
+- **Graphite** (graphite): labels, units, secondary text, chevrons and icons in lines, inactive change values.
 
 ### Tertiary (states)
-- **Good Green** (state-good on state-good-bg): a change in the direction of the person's goal, success notices, "yes" marks in the weekly review.
-- **Caution Amber** (state-warn on state-warn-bg): a change against the goal, pending items, warnings, the fat bars in the week chart.
-- **Alarm Red** (state-bad): errors, destructive actions, "no" marks in the weekly review.
-- **Range inks** (range-low, range-ok, range-high, range-very-high): the four segments of a health-range bar and the matching state word ("Bajo", "Normal", "Alto", "Muy alto"). Never used for anything else.
+- **Muted Green** (state-good on state-good-bg): a change in the direction of the person's goal, success notices, "yes" marks in the weekly review.
+- **Chalk Yellow** (state-warn on state-warn-bg): a change against the goal, pending items, warnings, the fat bars in the week chart.
+- **Chalk Red** (state-bad): errors, destructive actions, "no" marks in the weekly review.
+- **Range tones** (range-low, range-ok, range-high, range-very-high): the four segments of a health-range bar and the matching state word ("Bajo", "Normal", "Alto", "Muy alto"). Never used for anything else.
 
 ### Named Rules
-**The Envelope Rule.** One large colored area per screen: the navy header band. Below it, cobalt appears only as the fill of the one primary action and of pressed toggles; every other blue is chalk-blue line or text.
+**The Envelope Rule.** One large colored area per screen: the navy header band. Below it, the cobalt fill appears only on the one primary action and on pressed toggles; every other blue is chalk-blue line or text.
 
-**The Chalk Rule.** On wool, blue as ink is chalk blue, never cobalt. Cobalt is a fill under white text; chalk blue is the line, the link, the mark and the focus ring.
+**The Chalk Rule.** On wool, blue as ink is chalk blue, never the cobalt fill. The fill sits under white text; chalk blue is the line, the link, the mark and the focus ring.
 
-**The State Ink Rule.** Green, amber and red mean a state and nothing else. A change value is graphite unless it is judged against the person's goal; then it takes green or amber.
+**The Chalk Tone Rule.** Every state color is a soft chalk tone with AA contrast on the wool. No saturated or bright state inks; if a state color glows, it is wrong.
+
+**The State Ink Rule.** Green, yellow and red mean a state and nothing else. A change value is graphite unless it is judged against the person's goal; then it takes green or yellow.
 
 ## Typography
 
@@ -211,11 +213,11 @@ A wool-and-chalk palette: blue-black cloth, near-white chalk, one cobalt for act
 
 ### Hierarchy
 - **Display** (720, 4.2rem, line-height 0.95, wdth 72, tabular): the trend weight on the ficha. One per screen.
-- **Figure** (720, wdth 72, tabular): every measured value. 2rem in "Todas las cifras" tiles, 2.2rem on a metric screen, 1.55rem in the ficha's four-cell row (1.9rem from 900px). Units drop to a small graphite span at normal tracking.
+- **Figure** (720, wdth 72, tabular): every measured value. 2rem in "Todas las cifras" tiles, 2.2rem on a metric screen, 1.55rem in the ficha's figure band (1.9rem from 900px), 17.5px on the body figure. Units drop to a small graphite span.
 - **Headline** (750, 1.65rem, wdth 88, -0.015em): screen titles, set as h1; the person's name on the ficha at 1.45rem beside the goal and date.
 - **Title** (700, 1.1rem, wdth 88): section and card titles; the "Mesura" wordmark sets at 760, 1.3rem, wdth 80 in the band.
 - **Body** (400, 16px, line-height 1.5, wdth 100): prose, insights, the week's action. Secondary text at 0.875rem.
-- **Label** (650, 0.78rem, wdth 82, +0.01em, sentence case): labels over figures ("Peso de tendencia", "Grasa"), chart axes, legends; 0.72rem in the ficha's four-cell row; body-figure labels at 14.5px.
+- **Label** (650, 0.78rem, wdth 82, +0.01em, sentence case): labels over figures ("Peso de tendencia", "Grasa"), chart axes, legends; 0.72rem in the ficha's figure band, truncated on one line; body-figure labels at 14.5px.
 
 ### Named Rules
 **The Narrow Numeral Rule.** Every measured number is set at wdth 72, weight 720, tabular. Prose numbers stay at body width.
@@ -224,26 +226,28 @@ A wool-and-chalk palette: blue-black cloth, near-white chalk, one cobalt for act
 
 ## Layout
 
-A single centered column (max 1200px) with 16px side gutters on phones and 20px from 600px up. The ficha stacks one weight sheet (name and goal on one line, trend weight with its notch line, and the four key figures as a ruled row of cells inside the same sheet), then the body figure (max 320px wide on phones), the week line, the links sheet and the full-width "Registrar medición" button. Name, trend weight and all four figures share the first viewport at 400px. From 900px it becomes two columns, with the body figure sheet spanning the full height of the right column (figure up to 520px wide).
+A single centered column (max 1200px) with 16px side gutters on phones and 20px from 600px up. The ficha stacks one weight sheet (name, goal and date on one line; trend weight with its notch line; the four key figures as a ruled band inside the same sheet), then the body figure (max 320px wide on phones), the week line, the links sheet and the full-width "Registrar medición" button. Name, trend weight and all four figures share the first viewport at 400px. From 900px it becomes two columns, with the body figure sheet spanning the full height of the right column (figure up to 520px wide).
 
-Rhythm runs in small steps: 4 / 8 / 12 / 14 / 18px. Sheets pad 18px; figure cells pad 12px 14px with a 96px minimum height (10px 8px and 82px in the ficha row); stacks gap 12–18px; the main column sits 22px under the band. "Todas las cifras" tiles flow in an auto-fill grid (min 160px); a lone last tile spans the row. Breakpoints in use: 600, 760, 860 and 900px. Nothing scrolls horizontally at 400px except full-size charts, which sit in their own scroller.
+Rhythm runs in small steps: 4 / 8 / 12 / 14 / 18px. Sheets pad 18px; tiles pad 12px 14px with a 96px minimum height; figure-band cells pad 10px 8px with an 82px minimum; stacks gap 12–18px. "Todas las cifras" tiles flow in a ruled grid; a lone last tile spans the row. Breakpoints in use: 600, 760, 860 and 900px. Nothing scrolls horizontally at 400px except full-size charts, which sit in their own scroller.
 
 ## Elevation & Depth
 
-Flat. Depth is cloth on cloth: sheets one tone above the wool, separated by 1.5px rules. The weight sheet and the cifras grid take a chalk-line border, which lifts them by contrast, not by shadow.
+Flat. Depth is line on cloth: sheets sit one hair above the wool and are drawn by their edges. The weight sheet and the "Todas las cifras" grid take a full chalk cutting line, which lifts them by contrast, not by shadow; every other sheet takes the quieter sheet-edge.
 
 ### Shadow Vocabulary
-- **Floating menu** (`box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55)`): the profile menu, the only element that floats over the sheet.
+- **Floating menu** (`box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6)`): the profile menu, the only element that floats over the sheet.
 - **Dialog scrim** (`background: rgba(4, 6, 12, 0.7)`): behind modal dialogs; the dialog itself takes a cobalt border, no shadow.
 
 ### Named Rules
-**The Paper On Paper Rule.** Surfaces never cast shadows at rest. Only an overlay that truly floats (the profile menu) gets the one soft black shadow; no glows, no colored halos except the input focus ring.
+**The Cutting Line Rule.** A sheet is made by its line, not its fill. Lift a surface with a chalk or sheet-edge border, never with a lighter fill, a glow or a shadow.
+
+**The Cloth On Cloth Rule.** Surfaces never cast shadows at rest. Only an overlay that truly floats (the profile menu) gets the one soft black shadow; no glows, no colored halos except the input focus ring.
 
 ## Shapes
 
-Square-ish and drafted. Content containers, buttons, toggles, chips, notices, inputs, icon buttons, the profile selector and the week line all take 10px corners; tags take 6px, chips and avatars 8px, range-bar segments 2px. Borders are 1.5px everywhere (2px for the selected register mode, in chalk blue). Figure cells are not separate cards: they are cells of one ruled sheet, a bordered grid whose 1.5px cut-rule gutters read as cutting lines.
+Square-ish and drafted. Content containers, buttons, toggles, chips, notices, inputs, icon buttons, the star toggle, the profile selector and the week line all take 10px corners; tags take 6px, chips and avatars 8px, range-bar segments 2px. Borders are 1.5px everywhere (2px for the selected register mode, in chalk blue). Grouped figures are never separate cards: on the ficha they are a band ruled by cut-rule lines above, below and between cells; in "Todas las cifras" they are cells of one grid with a chalk outer line and cut-rule gutters.
 
-The recurring geometry is the **notch**: a small filled triangle (point down for a decrease, up for an increase) used for every change value and at the end of every girth dimension line on the body figure. Icons are drawn strokes on a 24px grid, 2px stroke, round caps and joins, inheriting color: open, back, plus, yes, no, edit and "this week" (three ruled lines with an arrow). Disclosure markers are a drawn chevron that rotates open.
+The recurring geometry is the **notch**: a small filled triangle (point down for a decrease, up for an increase) used for every change value and at the end of every girth dimension line on the body figure. Icons are drawn strokes on a 24px grid, 2px stroke, round caps and joins, inheriting color: open, back, plus, yes, no, edit, star, and "this week" (three ruled lines with an arrow). Disclosure markers are a drawn chevron that rotates open.
 
 ## Components
 
@@ -251,60 +255,66 @@ The recurring geometry is the **notch**: a small filled triangle (point down for
 Firm, drafted, never pill-shaped.
 - **Shape:** 10px corners, 1.5px border, 44px minimum height.
 - **Primary:** cobalt fill, white text, weight 700. The ficha's "Registrar medición" is the large variant: full width, 52px, 1.05rem, weight 800, with the drawn plus icon at 18px.
-- **Hover / Focus:** primary deepens to pressed cobalt (no brightness filter); secondary's border lightens to graphite. Focus is a 2.5px chalk-blue outline, 2px offset; white inside the band.
-- **Secondary:** sheet fill, cut-rule border, chalk text. "Volver" adds the drawn back chevron.
-- **Link:** no fill, chalk-blue text, 44px tall hit area, underline on hover.
+- **Hover / Focus:** primary deepens to the pressed fill (no brightness filter). Focus is a 2.5px chalk-blue outline, 2px offset; white inside the band.
+- **Secondary:** sheet fill, edge border, chalk text. "Volver" adds the drawn back chevron.
+- **Link:** no fill, chalk-blue text, 44px tall hit area.
 
 ### Toggles (chips)
-- **Style:** 44px tall, 10px corners, sheet fill, 1.5px cut-rule border, 0.875rem weight 700.
-- **State:** pressed / active fills cobalt with white text; hover lightens the border to graphite.
+- **Style:** 44px tall, 10px corners, sheet fill, 1.5px border, 0.875rem weight 700.
+- **State:** pressed / active fills cobalt with white text.
 
 ### Cards / Sheets
 - **Corner Style:** 10px.
 - **Background:** sheet on wool.
 - **Shadow Strategy:** none (see Elevation).
-- **Border:** 1.5px cut-rule; the ficha weight sheet takes a chalk-line border.
+- **Border:** 1.5px sheet-edge; the ficha weight sheet takes the chalk cutting line.
 - **Internal Padding:** 18px.
-- **Insight sheets:** a good or caution insight keeps the sheet shape with a faint state-tinted fill and a border mixed 45% state ink into the sheet.
+- **Insight sheets:** a good or caution insight keeps the sheet shape with its state wash fill and a border mixed 45% state tone into the sheet.
 
 ### Inputs / Fields
-- **Style:** sheet fill, 1.5px cut-rule border, 10px corners, 44px minimum height, graphite 0.8rem label above.
+- **Style:** sheet fill, 1.5px field-edge border (3:1), 10px corners, 44px minimum height, graphite 0.8rem label above.
 - **Focus:** border turns cobalt with a 3px selection-navy ring, no outline.
-- **Error:** 0.8rem alarm-red text under the field, weight 600.
+- **Error:** 0.8rem chalk-red text under the field, weight 600.
 
 ### Navigation (envelope band)
 The header is a full-width navy band: the logo on a white 9px-rounded tile, the condensed wordmark (hidden under 600px), the profile selector as a translucent white control with a white initial tile, and a settings icon button with a 45%-white border. Hover is a 14% white wash. Focus outlines turn white.
 
-### Figure Cells
-Two arrangements of one cell. On the ficha, the four key figures sit as a ruled row of four cells inside the weight sheet (cut-rule outer border, state word and change stacked under the value). In "Todas las cifras", tiles form a two-column grid with a chalk-line outer border. Each cell: condensed graphite label, narrow figure with small unit, the state word in its range ink and the change as notch plus value. Gutters are 1.5px cut rule; hover washes the cell to cell hover and turns the border chalk blue; the whole cell is the tap target and opens its chart.
+### Figure Band (ficha)
+The four key figures as a ruled band of the weight sheet: no box and no fill of its own, a cut-rule line above and below, a cut-rule line between cells, the first cell flush with the sheet's text. Each cell: condensed graphite label on one line, narrow figure with small unit, then the state word in its range tone and the change as notch plus value, stacked. Hover washes the cell in soft fold; the whole cell is the tap target and opens its chart.
+
+### Figure Tiles (Todas las cifras)
+A two-column grid of cells inside one chalk cutting line, with 1.5px cut-rule gutters. Same cell anatomy as the band, at 2rem figures; hover washes to soft fold and draws a chalk-blue edge.
 
 ### Range Bar
-A 5px bar of four 2px-rounded segments in the range inks, with a 12px chalk dot ringed in sheet color marking the current value. Always paired with the state word in text.
+A 5px bar of four 2px-rounded segments in the range tones, with a 12px chalk dot ringed in sheet color marking the current value. Always paired with the state word in text.
 
 ### Week Line
-"Tu semana" as one tappable line: sheet fill, 1.5px dashed seam-dash border, the drawn "this week" icon, a chalk-blue bold lead-in, two-line clamp, a drawn chevron. Hover turns the border solid chalk blue: the seam becomes a cut.
+"Tu semana" as one tappable line: sheet fill, 1.5px dashed seam-dash border, the drawn "this week" icon in graphite, a chalk-blue bold lead-in, two-line clamp, a drawn chevron. Hover turns the border solid chalk blue: the seam becomes a cut.
 
 ### Body Figure (signature)
-The person as a pattern piece in SVG: pattern-piece fill, 1.6px chalk-line cutting line traced in on open (0.9s, ease-out-expo, skipped under reduced motion), a dashed chalk-blue seam allowance clipped inside, a chalk-blue grainline with arrowheads. Each girth: a 2.5px chalk-blue band, the previous value as a dashed chalk band beneath it at 45%, a thin chalk leader to a condensed label, the value in narrow figures, and the change as a drawn notch plus number. The figure carries a full text description for screen readers.
+The person as a pattern piece in SVG: pattern-piece fill, 1.6px chalk cutting line traced in on open (0.9s, ease-out-expo, skipped under reduced motion), a dashed chalk-blue seam allowance clipped inside, a chalk-blue grainline with arrowheads. Each girth: a 2.5px chalk-blue band with filled chalk-blue pins, the previous value as a dashed chalk band beneath it at 45%, a thin chalk leader to a condensed label, the value in narrow figures, and the change as a drawn notch plus number in graphite or its state tone. The figure carries a full text description for screen readers.
 
 ### Charts
-Same line grammar: dashed cut-rule gridlines, condensed graphite axes. With a trend or average present, the chalk-blue line is the 3px solid reading and each weigh-in is a 1.25px dashed chalk line at 55% with open dots; the last value is labeled in narrow chalk figures. A single series draws solid chalk blue with an 8% chalk-blue area. Legends draw their line samples in the same styles. The week's fat and lean bars use caution amber and chalk blue.
+Same line grammar: dashed cut-rule gridlines, condensed graphite axes. With a trend or average present, the chalk-blue line is the 3px solid reading and each weigh-in is a 1.25px dashed chalk line at 55% with open dots; the last value is labeled in narrow chalk figures. A single series draws solid chalk blue with an 8% chalk-blue area. Legends draw their line samples in the same styles. The week's fat and lean bars use chalk yellow and chalk blue.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** set every measured number in Archivo at wdth 72, weight 720, tabular figures.
-- **Do** mark every change with the notch triangle (down for less, up for more) plus a screen-reader word, colored green or amber only when judged against the goal.
+- **Do** mark every change with the notch triangle (down for less, up for more) plus a screen-reader word, colored green or yellow only when judged against the goal.
 - **Do** draw "now" as a solid line and "before" or "each reading" as a dashed one, on the figure and in charts alike.
-- **Do** draw lines, links and focus in chalk blue; keep cobalt for fills under white text.
+- **Do** define a sheet by its cutting line: chalk for the weight sheet and the cifras grid, sheet-edge for the rest.
+- **Do** draw lines, links and focus in chalk blue; keep the cobalt fill for surfaces under white text.
 - **Do** keep 10px corners and 1.5px borders on every container, control and input.
-- **Do** group related figures as cells of one ruled sheet rather than loose cards.
-- **Do** keep every tap target at least 44px and pair every color state with a word.
+- **Do** group related figures as a ruled band or a ruled grid rather than loose cards.
+- **Do** keep every tap target at least 44px, control borders at 3:1, and pair every color state with a word.
 
 ### Don't:
 - **Don't** turn the dark into a neon health dashboard: no glows, gradients or saturated cyan and purple accents.
+- **Don't** tint the wool or the sheets blue; the ground is neutral charcoal.
+- **Don't** lift a sheet with a lighter fill; lift it with a line.
 - **Don't** use pill shapes (999px radius) for buttons, toggles, chips or tags.
 - **Don't** fill a second large area with color below the envelope band.
-- **Don't** use green, amber, red or the range inks decoratively.
+- **Don't** use green, yellow, red or the range tones decoratively.
 - **Don't** add shadows or glows to resting surfaces; the floating menu's shadow is the only one.
 - **Don't** set labels in tracked uppercase.
