@@ -55,7 +55,7 @@ async function stills(browser) {
   await og.close();
   console.log('✓ og-image.png');
   const p = await openPromo(browser, 'v');
-  await p.evaluate(() => window.seek(27.5));
+  await p.evaluate(() => window.seek(window.DURATION - 0.5));
   await p.screenshot({ path: path.join(MK, 'promo-poster.png') });
   await p.close();
   console.log('✓ promo-poster.png');
