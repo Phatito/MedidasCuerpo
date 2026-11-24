@@ -92,9 +92,9 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
     <section className="card stack" ref={(el) => void (vigente.current = el != null)}>
       <h3>Captura de Xiaomi Home</h3>
       <p className="muted small">
-        En Xiaomi Home abre el informe de tu pesada y haz una captura larga, o varias capturas normales (una por cada parte del informe) y elígelas
-        juntas. Si las pasas a otro equipo, que sea sin comprimir: por WhatsApp como documento, por correo o con cable. Las imágenes se leen aquí mismo y
-        nunca salen de tu dispositivo.
+        En Xiaomi Home comparte el informe de tu pesada y elige <b>Guardar en Archivos</b>; luego aquí toca el botón y elige <b>Elegir archivo</b> (en
+        Android, <b>Archivos</b>). También sirven varias capturas normales del informe elegidas juntas. Si la pasas a otro equipo, que sea sin comprimir:
+        por WhatsApp como documento, no como foto. Las imágenes se leen aquí mismo y nunca salen de tu dispositivo.
       </p>
       <div className="row">
         <label className="btn primary grande archivo-btn">
