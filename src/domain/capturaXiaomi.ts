@@ -226,3 +226,21 @@ export function leerCapturaXiaomi(lineasCrudas: LineaOcr[], anchoImagen: number)
   }
   return { fecha, hora, valores, revisar: ORDEN.filter((c) => revisar.has(c)) }
 }
+
+/** Junta varias capturas del mismo informe: cada valor sale de la primera captura que lo tenga, con su marca de revisar. */
+export function unirLecturas(lecturas: LecturaCaptura[]): LecturaCaptura {
+  const valores: Partial<Record<CampoCaptura, number>> = {}
+  const revisar: CampoCaptura[] = []
+  let fecha: string | null = null
+  let hora: string | null = null
+  for (const l of lecturas) {
+    if (fecha == null && l.fecha != null) [fecha, hora] = [l.fecha, l.hora]
+    for (const campo of ORDEN) {
+      const v = l.valores[campo]
+      if (v == null || valores[campo] != null) continue
+      valores[campo] = v
+      if (l.revisar.includes(campo)) revisar.push(campo)
+    }
+  }
+  return { fecha, hora, valores, revisar }
+}

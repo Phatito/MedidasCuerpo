@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { leerCapturaXiaomi, type LineaOcr, type PalabraOcr } from '../../src/domain/capturaXiaomi'
+import { leerCapturaXiaomi, unirLecturas, type LineaOcr, type PalabraOcr } from '../../src/domain/capturaXiaomi'
 
 // Números inventados. Ancho de la imagen preparada: 620 px.
 const ANCHO = 620
@@ -145,4 +145,12 @@ describe('fecha de la captura', () => {
     expect(conFecha('15/13/2026').fecha).toBeNull()
   })
   test('una fecha válida sí', () => expect(conFecha('29/02/2028').fecha).toBe('2028-02-29'))
+})
+
+describe('varias capturas del mismo informe', () => {
+  test('se suman los valores; la fecha y el peso salen de la que los tenga', () => {
+    const a = { fecha: '2026-11-23', hora: '07:33', valores: { pesoKg: 90.1, grasaPct: 25.4 }, revisar: ['grasaPct' as const] }
+    const b = { fecha: null, hora: null, valores: { grasaPct: 25.4, aguaPct: 52.1, metabolismoBasalKcal: 1800 }, revisar: [] }
+    expect(unirLecturas([a, b])).toEqual({ fecha: '2026-11-23', hora: '07:33', valores: { pesoKg: 90.1, grasaPct: 25.4, aguaPct: 52.1, metabolismoBasalKcal: 1800 }, revisar: ['grasaPct'] })
+  })
 })

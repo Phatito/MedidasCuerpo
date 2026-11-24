@@ -1,5 +1,5 @@
 import type { LineaOcr } from '../domain/capturaXiaomi'
-import { debeInvertir, tamanoOcr } from '../domain/imagen'
+import { debeInvertir, muyChica, tamanoOcr } from '../domain/imagen'
 
 declare const __VERSION_LECTOR__: string
 
@@ -11,14 +11,35 @@ export class ImagenIlegible extends Error {
   }
 }
 
+/** La imagen es demasiado chica para leer los rótulos (por ejemplo, la achicó WhatsApp). */
+export class ImagenChica extends Error {
+  constructor(
+    readonly ancho: number,
+    readonly alto: number,
+  ) {
+    super('imagen muy chica')
+    this.name = 'ImagenChica'
+  }
+}
+
 /**
  * Lee el texto de una imagen en este mismo navegador: la imagen nunca sale del dispositivo.
  * El lector (tesseract.js) se carga solo al usarlo, desde los archivos de `ocr/` del propio sitio.
  */
 export async function reconocerImagen(imagen: Blob, alProgreso?: (fraccion: number) => void): Promise<{ lineas: LineaOcr[]; ancho: number }> {
+  let mapa: ImageBitmap
+  try {
+    mapa = await createImageBitmap(imagen)
+  } catch {
+    throw new ImagenIlegible()
+  }
+  if (muyChica(mapa.width, mapa.height)) {
+    mapa.close()
+    throw new ImagenChica(mapa.width, mapa.height)
+  }
   let lienzo: HTMLCanvasElement
   try {
-    lienzo = await preparar(imagen)
+    lienzo = await preparar(mapa)
   } catch {
     throw new ImagenIlegible()
   }
@@ -49,8 +70,7 @@ export async function reconocerImagen(imagen: Blob, alProgreso?: (fraccion: numb
 }
 
 /** Gris, invertida si es una captura en modo oscuro, y a 620 px de ancho. */
-async function preparar(imagen: Blob): Promise<HTMLCanvasElement> {
-  const mapa = await createImageBitmap(imagen)
+async function preparar(mapa: ImageBitmap): Promise<HTMLCanvasElement> {
   const { ancho, alto } = tamanoOcr(mapa.width, mapa.height)
   // Se reduce a la mitad paso a paso: una reducción grande de una vez deja las cifras finas mal dibujadas ("33,6" → "33").
   let fuente: CanvasImageSource = mapa

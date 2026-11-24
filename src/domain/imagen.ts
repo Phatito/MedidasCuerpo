@@ -12,3 +12,13 @@ export function debeInvertir(brilloMedio: number): boolean {
 export function tamanoOcr(ancho: number, alto: number): { ancho: number; alto: number } {
   return { ancho: ANCHO_OCR, alto: Math.round((alto * ANCHO_OCR) / ancho) }
 }
+
+/**
+ * Bajo este ancho las letras chicas del informe (los rótulos) ya no se pueden leer: es lo que pasa cuando WhatsApp
+ * achica una captura larga a 1280 px de alto. Cualquier captura sin comprimir de un teléfono actual mide 720 px o más.
+ */
+export const ANCHO_MINIMO = 600
+
+export function muyChica(ancho: number, _alto: number): boolean {
+  return ancho < ANCHO_MINIMO
+}

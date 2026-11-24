@@ -1050,7 +1050,7 @@ test('una captura comprimida muestra un error y no cambia el formulario', async 
   await agregarAna(page)
   await ir(page, 'Medir')
   await leerCaptura(page, CAPTURA_CHICA)
-  await expect(page.getByText('No pude leer esta imagen. Usa la captura completa del informe de Xiaomi Home, sin recortar ni comprimir.')).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByText(/Esta imagen es muy pequeña/)).toBeVisible({ timeout: 90_000 })
   await page.getByRole('tab', { name: /Escribir/ }).click()
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
 })
@@ -1456,4 +1456,26 @@ test('en Ajustes, una imagen en lugar de un CSV explica dónde subirla', async (
   await ir(page, 'Datos')
   await page.getByLabel('Archivo CSV').setInputFiles(CAPTURA)
   await expect(page.getByText(/Esto es una imagen/)).toBeVisible()
+})
+
+test('una captura achicada (como la que deja WhatsApp) explica cómo pasarla sin comprimir', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await leerCaptura(page, fileURLToPath(new URL('./fixtures/captura-xiaomi-whatsapp.jpg', import.meta.url)))
+  await expect(page.getByText(/muy pequeña/)).toBeVisible()
+  await expect(page.getByText(/WhatsApp/).first()).toBeVisible()
+})
+
+test('se pueden elegir varias capturas del mismo informe y se juntan', async ({ page }) => {
+  test.setTimeout(120_000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
+  await page.getByLabel('Elegir la captura de Xiaomi Home').setInputFiles([
+    fileURLToPath(new URL('./fixtures/captura-xiaomi-parte1.png', import.meta.url)),
+    fileURLToPath(new URL('./fixtures/captura-xiaomi-parte2.png', import.meta.url)),
+  ])
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 100_000 })
+  await expect(page.getByLabel('Peso (kg)')).not.toHaveValue('')
+  await expect(page.getByLabel('Metabolismo basal (kcal)')).not.toHaveValue('')
 })

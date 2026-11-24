@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { leerCapturaXiaomi, type LecturaCaptura } from '../domain/capturaXiaomi'
-import { ImagenIlegible, reconocerImagen } from './ocr'
+import { leerCapturaXiaomi, unirLecturas, type LecturaCaptura } from '../domain/capturaXiaomi'
+import { ImagenChica, ImagenIlegible, reconocerImagen } from './ocr'
 
 interface Props {
   /** Antes de leer: devuelve false si el usuario no quiere reemplazar lo que tiene sin guardar. */
@@ -31,7 +31,7 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
   const vigente = useRef(true)
   const ultimaPegada = useRef<number | null>(null)
 
-  async function leer(imagen: Blob) {
+  async function leer(imagenes: Blob[]) {
     if (!puedeLeer()) {
       // Así se puede volver a elegir el mismo archivo.
       setClave((k) => k + 1)
@@ -42,19 +42,30 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
     setLeyendo(0)
     onLeyendo?.(true)
     try {
-      const { lineas, ancho } = await reconocerImagen(imagen, (f) => vigente.current && setLeyendo(f))
+      // Varias capturas del mismo informe (por ejemplo, una por cada parte) se leen una tras otra y se juntan.
+      const lecturas: LecturaCaptura[] = []
+      for (const [i, imagen] of imagenes.entries()) {
+        const { lineas, ancho } = await reconocerImagen(imagen, (f) => vigente.current && setLeyendo((i + f) / imagenes.length))
+        lecturas.push(leerCapturaXiaomi(lineas, ancho))
+      }
       try {
         localStorage.setItem(CLAVE_USADO, '1')
       } catch {
         /* solo cambia el aviso de la descarga */
       }
       if (!vigente.current) return
-      const lectura = leerCapturaXiaomi(lineas, ancho)
+      const lectura = unirLecturas(lecturas)
       if (Object.keys(lectura.valores).length === 0) setError(ERROR)
-      else onLectura(lectura, imagen, inicio)
+      else onLectura(lectura, imagenes[0], inicio)
     } catch (e) {
       if (!vigente.current) return
-      setError(e instanceof ImagenIlegible ? ERROR : 'No se pudo cargar el lector de capturas. Revisa tu conexión la primera vez que lo uses e inténtalo de nuevo.')
+      setError(
+        e instanceof ImagenChica
+          ? `Esta imagen es muy pequeña (${e.ancho} × ${e.alto} px) para leer las letras chicas del informe. Suele pasar al mandarla por WhatsApp como foto, que la achica. Pásala sin comprimir (por WhatsApp como documento, por correo o con cable), o haz varias capturas normales del informe y elígelas juntas.`
+          : e instanceof ImagenIlegible
+            ? ERROR
+            : 'No se pudo cargar el lector de capturas. Revisa tu conexión la primera vez que lo uses e inténtalo de nuevo.',
+      )
     } finally {
       onLeyendo?.(false)
       if (vigente.current) {
@@ -68,26 +79,27 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
   useEffect(() => {
     if (!pegada || ultimaPegada.current === pegada.id) return
     ultimaPegada.current = pegada.id
-    void leer(pegada.imagen)
+    void leer([pegada.imagen])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pegada?.id])
 
   function elegir(e: ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0]
-    if (archivo) void leer(archivo)
+    const archivos = [...(e.target.files ?? [])]
+    if (archivos.length) void leer(archivos)
   }
 
   return (
     <section className="card stack" ref={(el) => void (vigente.current = el != null)}>
       <h3>Captura de Xiaomi Home</h3>
       <p className="muted small">
-        En Xiaomi Home abre el informe de tu pesada y haz una captura de pantalla completa. Pásala al computador sin comprimir (AirDrop, iCloud Drive o
-        como archivo por correo). La imagen se lee aquí mismo y nunca sale de tu dispositivo.
+        En Xiaomi Home abre el informe de tu pesada y haz una captura larga, o varias capturas normales (una por cada parte del informe) y elígelas
+        juntas. Si las pasas a otro equipo, que sea sin comprimir: por WhatsApp como documento, por correo o con cable. Las imágenes se leen aquí mismo y
+        nunca salen de tu dispositivo.
       </p>
       <div className="row">
         <label className="btn primary grande archivo-btn">
-          Leer captura de Xiaomi Home
-          <input key={clave} type="file" accept="image/*" aria-label="Elegir la captura de Xiaomi Home" onChange={elegir} disabled={leyendo != null} />
+          Leer capturas de Xiaomi Home
+          <input key={clave} type="file" accept="image/*" multiple aria-label="Elegir la captura de Xiaomi Home" onChange={elegir} disabled={leyendo != null} />
         </label>
         <span className="muted small">o pega la imagen (Ctrl+V)</span>
       </div>
