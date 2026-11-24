@@ -16,7 +16,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png', 'favicon.svg', 'apple-touch-icon.png', 'logo.svg'],
+      includeAssets: ['icon-192.png', 'icon-512.png', 'favicon-64.png', 'apple-touch-icon.png', 'logo-mark.png'],
       // La tipografía también se guarda en el dispositivo: sin esto la app sin conexión caería a la fuente del sistema.
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,woff2}'],

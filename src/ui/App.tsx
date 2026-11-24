@@ -144,7 +144,7 @@ export function App() {
       <header className="top">
         <div className="wrap">
           <button type="button" className="brand" onClick={() => navegar(alInicio)} aria-label="Mesura, ir al inicio">
-            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" />
+            <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="" />
             <span className="brand-nombre">Mesura</span>
           </button>
           {personas && personas.length > 0 && (
