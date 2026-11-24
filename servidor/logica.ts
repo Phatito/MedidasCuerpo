@@ -1,4 +1,5 @@
 import type { Almacen, Pieza } from './almacen.ts'
+import type { ImagenCaptura, LectorCaptura } from './ia.ts'
 
 /**
  * Rutas del servidor de sincronización. Solo guarda texto cifrado: nunca ve nombres, fechas ni medidas.
@@ -10,6 +11,11 @@ const MAX_FALLOS = 5
 const BLOQUEO = 15 * MIN
 const MAX_PIEZA = 16 * 1024
 const MAX_CUERPO = 1024 * 1024
+// Lectura de capturas: hasta 4 imágenes de hasta 4 MB cada una (en base64).
+const MAX_CUERPO_CAPTURA = 18 * 1024 * 1024
+const MAX_IMAGENES = 4
+const MAX_IMAGEN = 4 * 1024 * 1024
+const TIPOS_IMAGEN = new Set(['image/jpeg', 'image/png', 'image/webp'])
 // Subida: 40 piezas por llamada (una consulta cada una) para no pasar el límite de 50 consultas por petición del plan gratuito de D1.
 export const MAX_SUBIDA = 40
 // Bajada: una sola consulta, de a 500.
@@ -66,9 +72,9 @@ function iguales(a: string, b: string): boolean {
   return d === 0
 }
 
-async function leerJson(req: Request): Promise<{ ok: true; dato: unknown } | { ok: false; estado: number }> {
+async function leerJson(req: Request, max = MAX_CUERPO): Promise<{ ok: true; dato: unknown } | { ok: false; estado: number }> {
   const crudo = await req.text()
-  if (crudo.length > MAX_CUERPO) return { ok: false, estado: 413 }
+  if (crudo.length > max) return { ok: false, estado: 413 }
   try {
     return { ok: true, dato: JSON.parse(crudo) }
   } catch {
@@ -85,7 +91,7 @@ async function usuarioDeToken(req: Request, almacen: Almacen, ahora: number): Pr
   return { usuario: s.usuario, hash }
 }
 
-export async function manejar(req: Request, almacen: Almacen, ahora: number): Promise<Response> {
+export async function manejar(req: Request, almacen: Almacen, ahora: number, servicios: { leerCaptura?: LectorCaptura } = {}): Promise<Response> {
   const origen = req.headers.get('Origin')
   const url = new URL(req.url)
   const ruta = url.pathname.replace(/\/+$/, '') || '/'
@@ -165,6 +171,25 @@ export async function manejar(req: Request, almacen: Almacen, ahora: number): Pr
         },
         origen,
       )
+    }
+
+    if (ruta === '/leer-captura' && req.method === 'POST') {
+      if (!servicios.leerCaptura) return json(503, { error: 'La lectura con IA no está configurada' }, origen)
+      const c = await leerJson(req, MAX_CUERPO_CAPTURA)
+      if (!c.ok) return vacia(c.estado, origen)
+      const imagenes = ((c.dato ?? {}) as { imagenes?: unknown }).imagenes
+      const validas =
+        Array.isArray(imagenes) &&
+        imagenes.length >= 1 &&
+        imagenes.length <= MAX_IMAGENES &&
+        imagenes.every((i: ImagenCaptura) => TIPOS_IMAGEN.has(i?.tipo) && typeof i?.datos === 'string' && i.datos.length <= MAX_IMAGEN && bytesDe(i.datos) > 0)
+      if (!validas) return json(400, { error: 'Se esperaban de 1 a 4 imágenes JPG, PNG o WebP' }, origen)
+      try {
+        const lectura = await servicios.leerCaptura((imagenes as ImagenCaptura[]).map(({ tipo, datos }) => ({ tipo, datos })))
+        return json(200, { lectura }, origen)
+      } catch {
+        return json(502, { error: 'No se pudo leer la captura con IA' }, origen)
+      }
     }
 
     if (ruta === '/cuenta' && req.method === 'DELETE') {

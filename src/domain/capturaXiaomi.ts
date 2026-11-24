@@ -32,6 +32,8 @@ export interface LecturaCaptura {
   valores: Partial<Record<CampoCaptura, number>>
   /** Campos leídos que no se pudieron comprobar con otros datos del informe, o que no cuadran. */
   revisar: CampoCaptura[]
+  /** 'ia' cuando la leyó la IA (Gemini) en vez del lector local. */
+  fuente?: 'ia'
 }
 
 const ORDEN: CampoCaptura[] = [

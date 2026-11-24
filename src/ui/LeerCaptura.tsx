@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { leerCapturaXiaomi, unirLecturas, type LecturaCaptura } from '../domain/capturaXiaomi'
+import { leerConIA, puedeLeerConIA } from '../sync/capturaIA'
 import { ImagenChica, ImagenIlegible, reconocerImagen } from './ocr'
 
 interface Props {
@@ -27,6 +28,7 @@ function lectorYaUsado(): boolean {
 export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) {
   const [leyendo, setLeyendo] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [conIA, setConIA] = useState(false)
   const [clave, setClave] = useState(0)
   const vigente = useRef(true)
   const ultimaPegada = useRef<number | null>(null)
@@ -42,6 +44,17 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
     setLeyendo(0)
     onLeyendo?.(true)
     try {
+      // Con la cuenta iniciada, la IA (Gemini, a través de tu servidor) lee el informe; si falla, se usa el lector local.
+      let conIA: LecturaCaptura | null = null
+      if (await puedeLeerConIA()) {
+        setConIA(true)
+        conIA = await leerConIA(imagenes).catch(() => null)
+        setConIA(false)
+      }
+      if (conIA) {
+        if (vigente.current) onLectura(conIA, imagenes[0], inicio)
+        return
+      }
       // Varias capturas del mismo informe (por ejemplo, una por cada parte) se leen una tras otra y se juntan.
       const lecturas: LecturaCaptura[] = []
       for (const [i, imagen] of imagenes.entries()) {
@@ -93,8 +106,8 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       <h3>Captura de Xiaomi Home</h3>
       <p className="muted small">
         En Xiaomi Home comparte el informe de tu pesada y elige <b>Guardar en Archivos</b>; luego aquí toca el botón y elige <b>Elegir archivo</b> (en
-        Android, <b>Archivos</b>). También sirven varias capturas normales del informe elegidas juntas. Si la pasas a otro equipo, que sea sin comprimir:
-        por WhatsApp como documento, no como foto. Las imágenes se leen aquí mismo y nunca salen de tu dispositivo.
+        Android, <b>Archivos</b>). También sirven varias capturas normales del informe elegidas juntas. Con tu cuenta iniciada, la captura se envía a la
+        IA de Google (Gemini) a través de tu servidor para leerla, y no se guarda; sin cuenta se lee aquí mismo y no sale de tu dispositivo.
       </p>
       <div className="row">
         <label className="btn primary grande archivo-btn">
@@ -105,7 +118,7 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       </div>
       {/* Región de estado siempre presente: anuncia el inicio de la lectura una vez, no cada porcentaje. */}
       <p role="status" className={leyendo != null ? '' : 'sr-only'}>
-        {leyendo != null ? 'Leyendo la captura…' : ''}
+        {leyendo != null ? (conIA ? 'Leyendo la captura con IA…' : 'Leyendo la captura…') : ''}
       </p>
       {leyendo != null && (
         <div className="stack">

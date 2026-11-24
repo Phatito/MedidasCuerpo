@@ -218,10 +218,14 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
           <div className="stack">
             <h3 ref={tituloLectura} tabIndex={-1}>Captura leída</h3>
             <p className="notice info">Revisa los valores y pulsa Guardar.</p>
-            <p className="muted small">
-              Los campos marcados <span className="marca desde-captura">de la captura</span> cuadran con otras cifras del mismo informe; los marcados{' '}
-              <span className="marca revisar">revisa con la imagen</span> no se pudieron comprobar: compáralos con tu captura.
-            </p>
+            {lectura.datos.fuente === 'ia' ? (
+              <p className="muted small">Leída con IA (Gemini). Compara los valores con tu captura antes de guardar.</p>
+            ) : (
+              <p className="muted small">
+                Los campos marcados <span className="marca desde-captura">de la captura</span> cuadran con otras cifras del mismo informe; los marcados{' '}
+                <span className="marca revisar">revisa con la imagen</span> no se pudieron comprobar: compáralos con tu captura.
+              </p>
+            )}
           </div>
         </div>
       )}

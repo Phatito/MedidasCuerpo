@@ -1479,3 +1479,16 @@ test('se pueden elegir varias capturas del mismo informe y se juntan', async ({ 
   await expect(page.getByLabel('Peso (kg)')).not.toHaveValue('')
   await expect(page.getByLabel('Metabolismo basal (kcal)')).not.toHaveValue('')
 })
+
+test('con la cuenta iniciada, la captura se lee con IA a través del servidor', async ({ page }) => {
+  test.setTimeout(60_000)
+  await agregarAna(page)
+  await crearCuentaE2E(page, `ia${Date.now() % 100000}`)
+  await ir(page, 'Medir')
+  // Una imagen chica, que el lector local no puede leer: la IA (falsa en el servidor de prueba) sí.
+  await leerCaptura(page, fileURLToPath(new URL('./fixtures/captura-xiaomi-whatsapp.jpg', import.meta.url)))
+  await expect(page.getByText(LEIDA)).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByLabel('Peso (kg)')).toHaveValue('77,7')
+  await expect(page.getByLabel('Grasa corporal (%)')).toHaveValue('21,1')
+  await expect(page.getByText(/Leída con IA/)).toBeVisible()
+})

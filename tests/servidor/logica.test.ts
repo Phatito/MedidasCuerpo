@@ -153,3 +153,42 @@ describe('CORS', () => {
     expect(ajeno.headers.get('Access-Control-Allow-Origin')).toBeNull()
   })
 })
+
+describe('leer una captura con IA', () => {
+  const imagen = { tipo: 'image/jpeg', datos: Buffer.from('imagen falsa').toString('base64') }
+  const conIA = (metodo: string, ruta: string, cuerpo: unknown, token: string | undefined, lector?: (i: { tipo: string; datos: string }[]) => Promise<unknown>) =>
+    manejar(
+      new Request(B + ruta, { method: metodo, headers: { Origin: ORIGEN, 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(cuerpo) }),
+      almacen,
+      ahora,
+      { leerCaptura: lector },
+    )
+
+  test('exige una sesión', async () => {
+    expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, undefined, async () => ({}))).status).toBe(401)
+  })
+  test('sin la clave configurada avisa que no está disponible', async () => {
+    const token = await cuentaConSesion()
+    expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, token)).status).toBe(503)
+  })
+  test('rechaza cuerpos que no son imágenes', async () => {
+    const token = await cuentaConSesion()
+    const lector = async () => ({})
+    expect((await conIA('POST', '/leer-captura', { imagenes: [] }, token, lector)).status).toBe(400)
+    expect((await conIA('POST', '/leer-captura', { imagenes: [{ tipo: 'text/html', datos: 'QQ==' }] }, token, lector)).status).toBe(400)
+    expect((await conIA('POST', '/leer-captura', { imagenes: Array(5).fill(imagen) }, token, lector)).status).toBe(400)
+  })
+  test('entrega las imágenes al lector y devuelve lo que lee', async () => {
+    const token = await cuentaConSesion()
+    let recibidas: unknown = null
+    const r = await conIA('POST', '/leer-captura', { imagenes: [imagen] }, token, async (i) => ((recibidas = i), { pesoKg: 90.1 }))
+    expect(r.status).toBe(200)
+    expect(await r.json()).toEqual({ lectura: { pesoKg: 90.1 } })
+    expect(recibidas).toEqual([imagen])
+  })
+  test('si la IA falla responde 502', async () => {
+    const token = await cuentaConSesion()
+    const r = await conIA('POST', '/leer-captura', { imagenes: [imagen] }, token, async () => { throw new Error('caída') })
+    expect(r.status).toBe(502)
+  })
+})
