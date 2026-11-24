@@ -10,6 +10,8 @@ interface Props {
   personaFija?: Persona
   personaInicial?: Persona | null
   onImportado?: (cuantas: number) => void
+  /** Si se elige una imagen (una captura de Xiaomi Home) en vez de un CSV, se entrega aquí para leerla. */
+  onImagen?: (imagen: File) => void
 }
 
 interface Csv {
@@ -22,7 +24,7 @@ interface Csv {
 export const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
 /** Importar mediciones desde un CSV: elegir archivo, revisar columnas, ver el resumen y confirmar. */
-export function ImportarArchivo({ personas, personaFija, personaInicial, onImportado }: Props) {
+export function ImportarArchivo({ personas, personaFija, personaInicial, onImportado, onImagen }: Props) {
   const [personaId, setPersonaId] = useState(personaFija?.id ?? personaInicial?.id ?? personas[0]?.id ?? '')
   // Tras restaurar un respaldo la persona elegida puede ya no existir: se usa la primera disponible.
   const persona = personaFija ?? personas.find((p) => p.id === personaId) ?? personas[0] ?? null
@@ -48,6 +50,14 @@ export function ImportarArchivo({ personas, personaFija, personaInicial, onImpor
     const archivo = e.target.files?.[0]
     if (!archivo) return
     setAvisoCsv(null)
+    // Una captura (PNG, JPG…) no es un CSV: se lee como captura de Xiaomi Home, o se explica dónde subirla.
+    if (archivo.type.startsWith('image/') || /\.(png|jpe?g|webp|heic|heif|gif|bmp)$/i.test(archivo.name)) {
+      setCsv(null)
+      setClaveCsv((k) => k + 1)
+      if (onImagen) onImagen(archivo)
+      else setAvisoCsv({ tipo: 'bad', texto: 'Esto es una imagen, no un CSV. Para leer una captura de Xiaomi Home ve a Registrar medición → Captura de Xiaomi Home.' })
+      return
+    }
     const { columnas, filas } = parseCsv(decodificarTexto(new Uint8Array(await archivo.arrayBuffer())))
     if (columnas.length === 0 || filas.length === 0) {
       setCsv(null)
@@ -93,7 +103,7 @@ export function ImportarArchivo({ personas, personaFija, personaInicial, onImpor
             {selectorPersona('datos-persona-importar')}
             <div className="field" style={{ maxWidth: 420 }}>
               <label htmlFor="datos-csv">Archivo CSV</label>
-              <input key={claveCsv} id="datos-csv" type="file" accept=".csv,text/csv,text/plain" onChange={elegirCsv} />
+              <input key={claveCsv} id="datos-csv" type="file" accept=".csv,text/csv,text/plain,image/*" onChange={elegirCsv} />
             </div>
             {csv && resultado && (
               <div className="stack">

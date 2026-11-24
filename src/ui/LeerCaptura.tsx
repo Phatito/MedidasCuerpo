@@ -82,7 +82,7 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       <h3>Captura de Xiaomi Home</h3>
       <p className="muted small">
         En Xiaomi Home abre el informe de tu pesada y haz una captura de pantalla completa. Pásala al computador sin comprimir (AirDrop, iCloud Drive o
-        como archivo por correo). La imagen se lee aquí mismo y nunca sale de tu computador.
+        como archivo por correo). La imagen se lee aquí mismo y nunca sale de tu dispositivo.
       </p>
       <div className="row">
         <label className="btn primary grande archivo-btn">

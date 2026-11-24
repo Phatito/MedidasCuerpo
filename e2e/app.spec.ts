@@ -1441,3 +1441,19 @@ test('la tarjeta revisa la semana pasada y el editor de consumo se lee bien', as
   await expect(page.getByText('La fecha no puede ser futura')).toBeVisible()
   await expect(page.getByLabel('Desde', { exact: true })).toHaveAttribute('aria-invalid', 'true')
 })
+
+test('una captura subida en la pestaña Archivo se lee como captura de Xiaomi Home', async ({ page }) => {
+  test.setTimeout(60000)
+  await agregarAna(page)
+  await ir(page, 'Medir')
+  await page.getByRole('tab', { name: /Archivo/ }).click()
+  await page.getByLabel('Archivo CSV').setInputFiles(CAPTURA)
+  await expect(page.getByText('Captura leída')).toBeVisible({ timeout: 45000 })
+})
+
+test('en Ajustes, una imagen en lugar de un CSV explica dónde subirla', async ({ page }) => {
+  await agregarAna(page)
+  await ir(page, 'Datos')
+  await page.getByLabel('Archivo CSV').setInputFiles(CAPTURA)
+  await expect(page.getByText(/Esto es una imagen/)).toBeVisible()
+})

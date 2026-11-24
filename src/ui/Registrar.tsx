@@ -122,6 +122,10 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Pro
             personas={personas}
             personaFija={persona}
             onImportado={(n) => onListo(`${plural(n, 'medición importada', 'mediciones importadas')}.`)}
+            onImagen={(imagen) => {
+              setModo('captura')
+              setPegada((p) => ({ id: (p?.id ?? 0) + 1, imagen }))
+            }}
           />
         </section>
       </div>
