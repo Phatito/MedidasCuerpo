@@ -34,28 +34,14 @@ Los textos y datos del video se editan en `marketing/promo.html`. La línea de t
 
 ## La marca
 
-Una cinta métrica cerrada en anillo (degradado violeta → cian, con marcas de medida) y, dentro, una línea de tendencia en zigzag que dibuja una "M" y sale por la abertura de la cinta hasta un punto verde: medir con constancia para ver el progreso.
+El logo se hizo con la IA de diseño de Canva (para la versión oscura de la app): una cinta de medir que aprieta una cintura, sobre una báscula. El original completo, con la palabra "Mesura", está en `marketing/logo-canva.png`. Los íconos de la app (`public/icon-*.png`, `apple-touch-icon.png`), la marca de la barra (`public/logo-mark.png`) y el favicon (`public/favicon-64.png`) son recortes cuadrados del símbolo, sin el texto. Las propuestas anteriores dibujadas a mano están en `marketing/logos/`.
 
-### Colores
+## El video (24 s)
 
-| Uso | Color |
-|---|---|
-| Fondo | `#0e1220` |
-| Tarjetas | `#171c30` |
-| Violeta (acento) | `#7c5cff` |
-| Cian | `#35e3ff` |
-| Verde (bien / progreso) | `#3fe0a5` |
-| Naranja (atención) | `#ffb454` |
-| Texto | `#f2f4fb` (secundario `#b8bfd6`) |
+1. La cinta entra de golpe y se cierra sobre la cintura; la báscula sube.
+2. Semana a semana la cinta aprieta, la cintura se afina y la báscula baja de 96,4 a 92,5 kg (números inventados).
+3. La cinta se vuelve la línea de tendencia.
+4. La app real en un teléfono: la ficha, el gráfico de grasa y "Tu semana" (capturas en `marketing/capturas/`, con datos inventados).
+5. Cierre con el logo, "Mide tu progreso." y la dirección.
 
-Tipografía: **Plus Jakarta Sans** ExtraBold (800) para la marca y títulos; 500–700 para texto.
-En la palabra, "Medidas" va en `#f2f4fb` y "Cuerpo" en `#35e3ff`.
-
-### Reglas
-
-- **Tamaño mínimo:** símbolo 16 px (usar `favicon.svg`, sin marcas de cinta); logo horizontal 24 px de alto.
-- **Espacio libre:** alrededor del logo, como mínimo el diámetro del punto verde × 2 (≈ 1/6 del alto del símbolo).
-- **Fondo:** siempre sobre oscuro (`#0e1220`, `#171c30` o una foto oscura). En fondos claros, colocar el símbolo dentro de la baldosa oscura (como `favicon.svg`).
-- **Sí:** usar los archivos SVG tal cual; escalar en proporción; usar los colores de la paleta.
-- **No:** cambiar colores ni el degradado, estirar, rotar, añadir sombras o contornos, separar el punto verde, cerrar la abertura del anillo, poner el símbolo blanco sobre fondo blanco, ni reescribir la palabra con otra tipografía.
-- Texto sobre fondo siempre con contraste AA (blanco `#f2f4fb` o `#b8bfd6` sobre los fondos de la paleta).
+El logo del video es un redibujo animable del de Canva (cintura, cinta y báscula como trazos SVG dentro de `promo.html`).
