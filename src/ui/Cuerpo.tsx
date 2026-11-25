@@ -109,7 +109,7 @@ export function Cuerpo({ sexo, medidas }: Props) {
           .map(
             (m) =>
               `${ETIQUETAS[m.campo].nombre.toLowerCase()} ${formatear(m.valor)} cm` +
-              (m.cambio == null ? '' : ` (${m.cambio < 0 ? 'bajó' : 'subió'} ${formatear(Math.abs(m.cambio))})`),
+              (m.cambio == null ? '' : ` (${m.cambio < 0 ? 'bajó' : 'subió'}${m.leve ? ' levemente' : ''} ${formatear(Math.abs(m.cambio))})`),
           )
           .join(', ')
   return (
@@ -155,7 +155,7 @@ export function Cuerpo({ sexo, medidas }: Props) {
             <text className="lab" x={textoX} y={z.rotuloY - 8} textAnchor={ancla}>{ROTULO[m.campo]}</text>
             <text className="val" x={textoX} y={z.rotuloY + 10} textAnchor={ancla}>{formatear(m.valor)} cm</text>
             {m.cambio != null && (
-              <g className="chg">
+              <g className={`chg ${m.sentido ?? 'neutro'}${m.leve ? ' leve' : ''}`}>
                 {(() => {
                   // La muesca va hacia afuera del rótulo; el número, a su lado.
                   const mx = der ? textoX : textoX - 9

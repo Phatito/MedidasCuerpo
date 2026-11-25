@@ -5,7 +5,9 @@ import { informeSemanal, type InformeSemanal } from '../domain/semana'
 import type { Medicion, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { Consumo } from './Consumo'
+import { textoCambio } from './Cinta'
 import { Icono, Muesca } from './Icono'
+import { NOMBRE_ZONA } from '../domain/cinta'
 
 const miles = (n: number) => n.toLocaleString('es-CL')
 const ddmm = (f: string) => fechaLegible(f).slice(0, 5)
@@ -26,6 +28,27 @@ function Partes({ inf, persona, hoy }: { inf: InformeSemanal; persona: Persona; 
   const g = inf.gasto
   return (
     <>
+      {inf.cinta && inf.cinta.veredicto !== 'faltan' && (
+        <div className={`semana-cinta cinta-veredicto ${inf.cinta.tono}`}>
+          <h4>Lo que dice la cinta</h4>
+          {inf.cinta.fecha !== inf.fecha && <p className="muted small">Perímetros del {ddmm(inf.cinta.fecha)}.</p>}
+          <p className="cinta-veredicto-t">{inf.cinta.titulo}</p>
+          <ul className="semana-cinta-cambios num">
+            {[...inf.cinta.cambios]
+              .sort((a, b) => Math.abs(b.cambio) - Math.abs(a.cambio))
+              .slice(0, 3)
+              .map((c) => (
+                <li key={c.zona} className={`cinta-cambio ${c.sentido}${c.leve ? ' leve' : ''}`}>
+                  {NOMBRE_ZONA[c.zona]} {c.cambio === 0 ? '=' : <Muesca cambio={c.cambio} />} {formatear(Math.abs(c.cambio))} cm
+                  <span className="sr-only">, {textoCambio(c)}</span>
+                </li>
+              ))}
+          </ul>
+          <p className="small">{inf.cinta.texto}</p>
+          {inf.cinta.contraste && <p className={`small cinta-contraste ${inf.cinta.contraste.coincide ? 'si' : 'no'}`}>{inf.cinta.contraste.texto}</p>}
+        </div>
+      )}
+
       <div className="semana-cambio">
         <h4>Qué cambió</h4>
         {inf.cambioTendenciaKg != null && (

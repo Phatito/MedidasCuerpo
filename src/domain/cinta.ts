@@ -37,6 +37,9 @@ export interface LecturaCinta {
   texto: string
   contraste: { coincide: boolean; texto: string } | null
   faltanMedidas: Zona[]
+  /** Cambio de peso y de cintura en el mismo tramo: con ellos se lee el sentido de cada cambio. */
+  dPesoKg: number
+  dCinturaCm: number
 }
 
 export const ZONAS: Zona[] = ['cintura', 'cadera', 'pecho', 'cuello', 'brazo', 'muslo']
@@ -52,7 +55,28 @@ const PESO_ESTABLE_KG = 0.5
 
 const r1 = (x: number) => Math.round(x * 10) / 10
 
-function valorZona(m: Medicion, z: Zona): number | null {
+/** La zona del cuerpo a la que pertenece un perímetro. */
+export function zonaDeCampo(campo: string): Zona | null {
+  for (const z of ZONAS) {
+    const l = LADOS[z]
+    if (l ? [l.sinLado, l.izq, l.der].includes(campo as CampoNumerico) : CAMPO[z as keyof typeof CAMPO] === campo) return z
+  }
+  return null
+}
+
+/**
+ * Qué significa un cambio: en el torso, bajar es bueno (menos grasa); en brazos y muslos, subir es bueno
+ * (músculo) salvo que la cintura también suba, y bajar es atención si el peso también baja.
+ */
+export function sentidoCambio(z: Zona, cambio: number, dPesoKg: number, dCinturaCm: number): Sentido {
+  if (cambio === 0) return 'neutro'
+  if (TORSO.includes(z)) return cambio < 0 ? 'bien' : 'atencion'
+  if (cambio > 0) return dCinturaCm > 0 ? 'neutro' : 'bien'
+  return dPesoKg < 0 ? 'atencion' : 'neutro'
+}
+
+/** El valor de una zona en una medición: brazos y muslos, promedio de los lados si los hay. */
+export function valorZona(m: Medicion, z: Zona): number | null {
   const l = LADOS[z]
   if (!l) return m[CAMPO[z as keyof typeof CAMPO]] ?? null
   const lados = [m[l.izq], m[l.der]].filter((v): v is number => v != null)
@@ -118,12 +142,7 @@ export function leerCinta(p: Persona, mediciones: Medicion[], base: BaseCinta = 
     const b = bases.get(z)
     if (v == null || !b) continue
     const cambio = r1(v - valorZona(b, z)!)
-    let sentido: Sentido = 'neutro'
-    if (cambio !== 0) {
-      if (TORSO.includes(z)) sentido = cambio < 0 ? 'bien' : 'atencion'
-      else if (cambio > 0) sentido = dCintura > 0 ? 'neutro' : 'bien'
-      else sentido = dPeso < 0 ? 'atencion' : 'neutro'
-    }
+    const sentido = sentidoCambio(z, cambio, dPeso, dCintura)
     const historia = ms.filter((m) => m.fecha <= ult.fecha && valorZona(m, z) != null).map((m) => ({ fecha: m.fecha, valor: r1(valorZona(m, z)!) }))
     cambios.push({ zona: z, campo: campoZona(ult, z), valor: r1(v), desde: b.fecha, cambio, leve: cambio !== 0 && Math.abs(cambio) < LEVE_CM, sentido, historia })
   }
@@ -190,5 +209,5 @@ export function leerCinta(p: Persona, mediciones: Medicion[], base: BaseCinta = 
     }
   }
 
-  return { fecha: ult.fecha, desde, base, cambios, veredicto, tono, titulo: TITULO[veredicto], texto, contraste, faltanMedidas }
+  return { fecha: ult.fecha, desde, base, cambios, veredicto, tono, titulo: TITULO[veredicto], texto, contraste, faltanMedidas, dPesoKg: r1(dPeso), dCinturaCm: dCintura }
 }

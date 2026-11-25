@@ -25,6 +25,9 @@ export interface MedidaFigura {
   valor: number
   /** Frente a la medición anterior más reciente que tenga ese perímetro; null si no hay o no cambió. */
   cambio: number | null
+  /** Qué significa el cambio (lo pone la lectura de la cinta); sin él se dibuja neutro. */
+  sentido?: 'bien' | 'atencion' | 'neutro'
+  leve?: boolean
 }
 
 export interface Asimetria {

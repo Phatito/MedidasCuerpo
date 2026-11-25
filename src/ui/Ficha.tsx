@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { leerCinta } from '../domain/cinta'
 import { cuadritos, type Cuadrito } from '../domain/cifras'
 import { resumenFicha } from '../domain/ficha'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
@@ -8,6 +9,7 @@ import { tendenciaPeso } from '../domain/trend'
 import type { Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
 import { OBJETIVO, Tarjeta } from './Cifra'
+import { CabezaCinta, FilasCinta, medidasConBase, useBaseCinta } from './Cinta'
 import { Cuerpo } from './Cuerpo'
 import { Icono, Muesca } from './Icono'
 
@@ -59,6 +61,7 @@ function TarjetaPerimetro({ c, ultimaFecha, onAbrir }: { c: Cuadrito; ultimaFech
 /** Ficha: lo importante a la vista; el detalle, a un toque. */
 export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMedida, onVerCifras }: Props) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
+  const [base, setBase] = useBaseCinta()
   if (mediciones == null) return <p className="muted">Cargando…</p>
   const hoy = hoyIso()
   const r = resumenFicha(persona, mediciones, { hoy })
@@ -78,6 +81,8 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         ? `Tu última medición es del ${fechaLegible(informe.fecha).slice(0, 5)}: mídete para recibir un plan nuevo.`
         : (informe.acciones[0]?.texto ?? 'Mira qué cambió esta semana.')
   const cs = cuadritos(persona, mediciones, hoy)
+  const cinta = leerCinta(persona, mediciones, base)
+  const medidas = medidasConBase(r.medidas, cinta, mediciones)
 
   return (
     <div className="ficha-c">
@@ -131,8 +136,9 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
         </section>
       )}
 
-      <section className="card stack figura" aria-label="Perímetros">
-        <Cuerpo sexo={persona.sexo} medidas={r.medidas} />
+      <section className="card stack figura" {...(cinta ? { 'aria-labelledby': 'cinta-titulo' } : { 'aria-label': 'Perímetros' })}>
+        {cinta && <CabezaCinta lectura={cinta} base={base} onBase={setBase} />}
+        <Cuerpo sexo={persona.sexo} medidas={medidas} />
         {r.fechaPerimetros && <p className="pieza-pie muted small">Perímetros del {fechaLegible(r.fechaPerimetros)}</p>}
         {r.ultima && r.medidas.length === 0 && <p className="muted small">Registra perímetros para verlos sobre la figura.</p>}
         {r.asimetrias.map((a) => (
@@ -140,6 +146,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
             {a.zona === 'brazo' ? 'Brazo' : 'Muslo'} {a.mayor === 'izq' ? 'izquierdo' : 'derecho'} {formatear(a.diferencia)} cm mayor que el {a.mayor === 'izq' ? 'derecho' : 'izquierdo'}.
           </p>
         ))}
+        {cinta && <FilasCinta lectura={cinta} onVerMedida={onVerMedida} />}
       </section>
 
       {lineaSemana && (
