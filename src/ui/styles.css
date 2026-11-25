@@ -990,3 +990,100 @@ main.con-pestanas { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 }
 /* El encabezado (con el menú de perfiles) va sobre las pestañas; los diálogos, sobre todo. */
 .top { position: relative; z-index: 35; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Movimiento, con los principios de Emil Kowalski:
+   - curvas ease-out propias (entrar rápido y frenar suave), nunca "ease" ni lineales en la interfaz;
+   - interacciones cortas (≤ 300 ms); solo lo decorativo y poco frecuente dura más;
+   - nada aparece desde escala 0: desde 0,95 y opacidad 0;
+   - lo que se toca responde al presionar (escala 0,97);
+   - los menús se abren desde donde se tocaron;
+   - el hover solo existe donde hay mouse;
+   - transiciones (interrumpibles) para cambios de estado, keyframes solo para entradas;
+   - con "reducir movimiento" se conserva la opacidad y se quita el desplazamiento.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-cajon: cubic-bezier(0.32, 0.72, 0, 1);
+  --rapido: 160ms;
+  --medio: 240ms;
+}
+
+/* Presionar: todo lo tocable se hunde un poco, al instante; al soltar vuelve con ease-out. */
+.btn, .pestana, .segmento, .registro-tipo, .cinta-fila, .zona-flecha, .pastilla, .cuadrito, .peso-boton, .linea-semana, .enlace,
+.chip-btn, .modo, .veredicto-mas, .cinta-base button, .icon-btn, .perfil-boton, .brand {
+  transition: transform var(--rapido) var(--ease-out), background-color var(--medio) var(--ease-out), border-color var(--medio) var(--ease-out),
+    color var(--medio) var(--ease-out), box-shadow var(--medio) var(--ease-out), opacity var(--medio) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active, .segmento:active, .registro-tipo:active, .cinta-fila:active, .zona-flecha:active, .pastilla:active, .cuadrito:active,
+.peso-boton:active, .linea-semana:active, .enlace:active, .chip-btn:active, .modo:active, .cinta-base button:active, .icon-btn:active, .perfil-boton:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
+}
+.pestana:active .icono { transform: scale(0.9); transition-duration: 80ms; }
+.pestana-mas:active .pestana-mas-circulo { transform: scale(0.92); }
+.pestana .icono, .pestana-mas-circulo { transition: transform var(--medio) var(--ease-out), color var(--medio) var(--ease-out); }
+
+/* Cambiar de pestaña es frecuente: sin rebote, solo el color y la marca, rápido. */
+.pestana[aria-current='page'] .icono { transform: none; }
+.pestana::before { transition: opacity var(--medio) var(--ease-out), transform var(--medio) var(--ease-out); }
+
+/* El hover, solo con mouse: en el teléfono no queda "pegado" después de tocar. */
+@media (hover: none) {
+  .segmento:hover, button.registro-tipo:hover, .cuadrito:hover, .peso-boton:hover, .linea-semana:hover, .enlace:hover, .cinta-fila:hover,
+  .pestana-mas:hover .pestana-mas-circulo { transform: none; filter: none; }
+}
+
+/* Cada pantalla entra con un leve desplazamiento hacia arriba (corto, para no hacer esperar). */
+@keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes entrar-escala { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes bajar { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes desenfoque { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pantalla { animation: entrar 280ms var(--ease-out) both; }
+  /* Las tarjetas de una pantalla llegan escalonadas (40 ms entre una y otra). */
+  .pantalla > .card, .pantalla > section, .pantalla > .tiles, .ficha-c > *, .peso-layout .pl-col > * {
+    animation: entrar 320ms var(--ease-out) both;
+  }
+  .ficha-c > :nth-child(2), .peso-layout .pl-col > :nth-child(2) { animation-delay: 40ms; }
+  .ficha-c > :nth-child(3), .peso-layout .pl-col > :nth-child(3) { animation-delay: 80ms; }
+  .ficha-c > :nth-child(4) { animation-delay: 120ms; }
+  .ficha-c > :nth-child(n + 5) { animation-delay: 160ms; }
+  /* Los menús se abren desde su botón: escala 0,96 → 1, rápido. */
+  .perfil-menu { transform-origin: top right; animation: entrar-escala 180ms var(--ease-out) both; }
+  /* El aviso de "guardado" baja desde arriba. */
+  .aviso-app.notice { animation: bajar 260ms var(--ease-out) both; }
+  /* Los números grandes entran con un leve desenfoque al cambiar de pantalla. */
+  .hero-v, .zona-v, .segmento-v { animation: desenfoque 360ms var(--ease-out) both; }
+  /* El panel de cada zona entra al cambiar de zona. */
+  .explorar-zona { animation: entrar 260ms var(--ease-out) both; }
+  /* Los diálogos: el fondo aparece; la caja sube desde 0,96. */
+  .dialogo-fondo { animation: aparecer 200ms var(--ease-out) both; }
+  .dialogo-fondo > * { animation: entrar-escala 240ms var(--ease-cajon) both; }
+  /* El paso a paso de la cinta: el panel de cada paso entra deslizando. */
+  .cinta-paso > * { animation: entrar 300ms var(--ease-out) both; }
+  .cinta-paso > :nth-child(2) { animation-delay: 40ms; }
+  .cinta-paso > :nth-child(3) { animation-delay: 80ms; }
+  .cinta-paso > :nth-child(n + 4) { animation-delay: 120ms; }
+  /* Sello del veredicto: desde 0,8 (no desde casi cero) con un rebote corto. */
+  .veredicto-sello { animation: sello-k 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  /* Barras: crecen con la curva de cajón, escalonadas. */
+  .comp-barra { animation: crecer 520ms var(--ease-cajon) both; }
+}
+@keyframes sello-k { from { transform: scale(0.8) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Con "reducir movimiento": solo opacidad, sin desplazamientos ni escalas. */
+@media (prefers-reduced-motion: reduce) {
+  .pantalla, .ficha-c > *, .explorar-zona, .perfil-menu, .aviso-app.notice { animation: aparecer 160ms linear both; }
+  .btn:active, .segmento:active, .registro-tipo:active, .cinta-fila:active, .pastilla:active { transform: none; }
+}
+
+/* Transiciones de estado (interrumpibles): selección de tarjetas, pastillas y zonas. */
+.segmento, .pastilla, .cinta-base button { transition-property: transform, background-color, border-color, color, box-shadow; }
+.gv-elegido, .gv-globo, .gv-cursor { transition: transform 140ms var(--ease-out), cx 140ms var(--ease-out), cy 140ms var(--ease-out), x1 140ms var(--ease-out), x2 140ms var(--ease-out); }
+.band-brillo { transition: opacity var(--medio) var(--ease-out); }
+.cinta-progreso li { transition: background-color var(--medio) var(--ease-out), transform var(--medio) var(--ease-out), border-color var(--medio) var(--ease-out); }
+.maniqui-camara { transition: transform 700ms var(--ease-in-out); }

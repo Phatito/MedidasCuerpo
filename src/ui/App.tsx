@@ -196,7 +196,8 @@ export function App() {
         ) : !cargado || !vista ? (
           <p className="muted">Cargando tus datos…</p>
         ) : (
-          <>
+          // Cada pantalla entra con su animación; cambiar de medida dentro de la misma pantalla no la repite.
+          <div key={`${vista.pantalla}-${'personaId' in vista ? vista.personaId : ''}`} className="pantalla">
             {/* Volver solo aparece si lleva a otra pantalla: sin personas, Familia no tiene adónde volver. */}
             {vista.pantalla !== 'ficha' && escribirRuta(atras) !== escribirRuta(vista) && (
               <button type="button" className="btn volver" onClick={() => volver(atras)}>
@@ -266,7 +267,7 @@ export function App() {
               <TodasLasCifras persona={personaDeRuta} onVerMedida={(medida) => navegar({ pantalla: 'medida', personaId: personaDeRuta.id, medida })} />
             )}
             {vista.pantalla === 'ajustes' && <Datos personas={personas} personaActual={persona} />}
-          </>
+          </div>
         )}
       </main>
     </>

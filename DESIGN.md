@@ -182,4 +182,11 @@ Do:
 - Do draw "now" as a solid line and "before" or "each reading" as a dashed one, on the figure and in charts alike.
 - Do define a sheet by its cutting line: chalk for the weight sheet and the cifras grid, sheet-edge for the rest.
 - (+4 more)
+Motion (Emil Kowalski's principles):
+- Custom ease-out (cubic-bezier(0.23, 1, 0.32, 1)) for entering and state changes; ease-in-out only for the mannequin camera; drawer curve (0.32, 0.72, 0, 1) for bars and dialogs.
+- Interactions ≤ 300 ms (press 80 ms, state 160–240 ms); only one-off drawings (chart line, tape wrap) run longer.
+- Nothing appears from scale 0: enter from 0.95–0.96 and opacity 0; menus scale from their trigger (transform-origin).
+- Every tappable thing presses to scale 0.97; hover exists only on hover-capable devices.
+- State changes use transitions (interruptible); keyframes only for first appearance. Frequent actions (switching tabs) get no bounce.
+- Reduced motion keeps opacity fades and drops movement.
 Full: .impeccable/design-full.md (read a section when you need its detail)
