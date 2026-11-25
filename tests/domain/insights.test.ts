@@ -217,3 +217,11 @@ describe('pendientes menores de la revisión', () => {
     expect(todo(ms, persona({ objetivo: 'ganar_musculo' }))).not.toContain('Lo que estás haciendo funciona')
   })
 })
+
+describe('comentarios: la cinta primero', () => {
+  test('el primer mensaje es la lectura de la cinta', () => {
+    const ms = [m('2026-11-09', { pesoKg: 80, cinturaCm: 90, brazoCm: 34 }), m('2026-11-16', { pesoKg: 79, cinturaCm: 88.5, brazoCm: 34 })]
+    const [primero] = interpretar(persona(), ms)
+    expect(primero).toMatchObject({ codigo: 'cinta', tono: 'bien', titulo: 'Pierdes grasa y conservas músculo' })
+  })
+})

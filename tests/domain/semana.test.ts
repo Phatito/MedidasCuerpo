@@ -175,3 +175,27 @@ describe('pulido de la revisión', () => {
     expect(sin.revision.find((r) => r.codigo === 'sigue-anotando')).toBeUndefined()
   })
 })
+
+describe('informe semanal: la cinta', () => {
+  test('el informe trae la lectura de la cinta', () => {
+    const inf = informeSemanal(persona(), semanales([80, 79], (i) => ({ cinturaCm: [90, 89][i] })), FIN)!
+    expect(inf.cinta).toMatchObject({ veredicto: 'pierde-grasa' })
+  })
+
+  test('brazos que bajan con el peso activan proteger músculo aunque la báscula no lo vea', () => {
+    const inf = informeSemanal(persona(), semanales([80, 79.4], (i) => ({ cinturaCm: [90, 89.5][i], brazoCm: [35, 34.7][i] })), FIN)!
+    expect(inf.cinta!.veredicto).toBe('pierde-musculo')
+    expect(codigos(inf)).toContain('proteger-musculo')
+  })
+
+  test('la cintura que sube activa reducir', () => {
+    const inf = informeSemanal(persona({ objetivo: 'mantener' }), semanales([80, 80.3], (i) => ({ cinturaCm: [90, 90.6][i] })), FIN)!
+    expect(codigos(inf)).toContain('reduce')
+  })
+
+  test('la revisión de proteger músculo mira los brazos de la cinta', () => {
+    const ms = semanales([80, 79.4, 79], (i) => ({ cinturaCm: [90, 89.5, 89][i], brazoCm: [35, 34.7, 34.7][i] }))
+    const inf = informeSemanal(persona(), ms, FIN)!
+    expect(inf.revision.find((r) => r.codigo === 'proteger-musculo')).toMatchObject({ cumplida: true })
+  })
+})

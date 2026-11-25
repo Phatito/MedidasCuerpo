@@ -1,3 +1,4 @@
+import { leerCinta, type LecturaCinta } from './cinta'
 import { consumoVigente } from './consumo'
 import { estimarGasto, ritmoSemanalPct, RITMO_OBJETIVO_PCT, serieDePeso, type EstimacionGasto } from './energia'
 import { derivar } from './metrics'
@@ -28,6 +29,8 @@ export interface InformeSemanal {
   acciones: Accion[]
   revision: Revision[]
   vieja: boolean
+  /** Lo que dicen los perímetros frente a la medición anterior con cinta; null sin perímetros. */
+  cinta: LecturaCinta | null
 }
 
 const MAX_ACCIONES = 2
@@ -86,6 +89,8 @@ interface Contexto {
   gasto: EstimacionGasto | null
   pesoTendencia: number
   ms: Medicion[]
+  /** La lectura de la cinta, solo si es de la última medición (si no, es vieja para decidir esta semana). */
+  cinta: LecturaCinta | null
 }
 
 function decidirAcciones(c: Contexto): Accion[] {
@@ -104,7 +109,8 @@ function decidirAcciones(c: Contexto): Accion[] {
     r.push({ codigo: 'muy-rapido', texto: ok ? `Vas muy rápido: sube a ~${kcal(ok.recomendadaKcal)} al día.` : 'Vas muy rápido: come un poco más para no perder músculo.' })
   }
   // Una pesada atípica suele ser agua: no se lee como pérdida de músculo.
-  if (!c.atipica && ((composicion && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo)) {
+  // La cinta manda: brazos o muslos que bajan con el peso avisan aunque la báscula no lo vea.
+  if (!c.atipica && ((composicion && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo || c.cinta?.veredicto === 'pierde-musculo')) {
     const [a, b] = rangoProteina(p, c.pesoTendencia)
     r.push({ codigo: 'proteger-musculo', texto: `Protege tu músculo: 1,6–2,2 g de proteína por kg (${a}–${b} g al día) y 2–3 sesiones de fuerza por semana.` })
   }
@@ -114,6 +120,9 @@ function decidirAcciones(c: Contexto): Accion[] {
   }
   if (p.objetivo === 'ganar_musculo' && composicion && composicion.grasaKg > 0 && composicion.grasaKg > composicion.magraKg) {
     r.push(ok ? { codigo: 'reduce', texto: `Reduce un poco: ~${kcal(ok.recomendadaKcal)} al día.` } : sinEstimacion ? sigueAnotando : { codigo: 'reduce', texto: 'Reduce un poco lo que comes: la grasa sube más que el músculo.' })
+  }
+  if (c.cinta?.veredicto === 'gana-grasa' && p.objetivo !== 'ganar_musculo') {
+    r.push(ok ? { codigo: 'reduce', texto: `Reduce un poco: ~${kcal(ok.recomendadaKcal)} al día; tu cintura subió.` } : { codigo: 'reduce', texto: 'Reduce un poco lo que comes: tu cintura subió.' })
   }
   if (consumo == null) r.push({ codigo: 'anota-consumo', texto: 'Anota cuánto comes al día para estimar tu gasto real.' })
   if (!r.length) {
@@ -133,6 +142,13 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
       if (ritmo == null) return null
       return ritmo >= -1 ? { codigo: previa.codigo, cumplida: true, texto: 'Ya no bajas tan rápido.' } : { codigo: previa.codigo, cumplida: false, texto: 'Sigues bajando más de 1 % por semana.' }
     case 'proteger-musculo': {
+      const ext = c.cinta?.cambios.filter((x) => x.zona === 'brazo' || x.zona === 'muslo') ?? []
+      if (ext.length) {
+        const bajan = ext.filter((x) => x.cambio < 0)
+        return bajan.length
+          ? { codigo: previa.codigo, cumplida: false, texto: `Tus ${bajan.map((x) => (x.zona === 'brazo' ? 'brazos' : 'muslos')).join(' y ')} volvieron a bajar.` }
+          : { codigo: previa.codigo, cumplida: true, texto: 'Tus brazos y muslos ya no bajan.' }
+      }
       if (!c.comparable) return null
       const cae = (composicion != null && composicion.magraKg <= -CAIDA_MAGRA_KG) || c.caidaMusculo
       return cae ? { codigo: previa.codigo, cumplida: false, texto: 'Tu masa magra volvió a bajar.' } : { codigo: previa.codigo, cumplida: true, texto: 'Tu masa magra se mantuvo.' }
@@ -141,6 +157,8 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
       if (ritmo == null) return null
       return ritmo <= -0.25 ? { codigo: previa.codigo, cumplida: true, texto: 'Saliste del estancamiento.' } : { codigo: previa.codigo, cumplida: false, texto: 'Sigues estancado.' }
     case 'reduce': {
+      const cintura = c.cinta?.cambios.find((x) => x.zona === 'cintura')
+      if (cintura) return cintura.cambio > 0 ? { codigo: previa.codigo, cumplida: false, texto: 'Tu cintura sigue subiendo.' } : { codigo: previa.codigo, cumplida: true, texto: 'Tu cintura ya no sube.' }
       if (composicion == null) return null
       const sube = composicion != null && composicion.grasaKg > 0 && composicion.grasaKg > composicion.magraKg
       return sube ? { codigo: previa.codigo, cumplida: false, texto: 'La grasa sigue subiendo más que el músculo.' } : { codigo: previa.codigo, cumplida: true, texto: 'La grasa ya no sube más que el músculo.' }
@@ -187,6 +205,7 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
   }
 
   const vieja = diasEntre(ultima.fecha, hoy) > DIAS_VIEJA
+  const cinta = leerCinta(p, ms, 'anterior')
   const gasto = vieja ? null : estimarGasto(p, ms)
   const ctx: Contexto = {
     p,
@@ -199,6 +218,7 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
     gasto,
     pesoTendencia: tendencia,
     ms,
+    cinta: cinta?.fecha === ultima.fecha ? cinta : null,
   }
   const acciones = vieja ? [] : decidirAcciones(ctx)
 
@@ -224,6 +244,7 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
     acciones,
     revision,
     vieja,
+    cinta,
   }
 }
 

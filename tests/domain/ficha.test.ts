@@ -95,7 +95,7 @@ test('la tendencia trae las últimas 10 mediciones', () => {
 
 test('el mensaje es la primera interpretación', () => {
   const r = resumenFicha(p, [m('2026-11-01', { pesoKg: 80, cinturaCm: 90 }), m('2026-11-08', { pesoKg: 80.2, cinturaCm: 88.5 })])
-  expect(r.mensaje?.codigo).toBe('recomposicion')
+  expect(r.mensaje?.codigo).toBe('cinta')
 })
 
 test('la entrada desordenada da el mismo resultado', () => {

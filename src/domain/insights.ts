@@ -1,9 +1,11 @@
+import { leerCinta } from './cinta'
 import { derivar } from './metrics'
 import { diasEntre, fechaLegible, formatear } from './numbers'
 import type { Medicion, Persona } from './types'
 
 export type Tono = 'bien' | 'atencion' | 'neutro'
 export type Codigo =
+  | 'cinta'
   | 'primera_medicion'
   | 'recomposicion'
   | 'baja_peso_grasa'
@@ -247,6 +249,11 @@ export function interpretar(p: Persona, mediciones: Medicion[]): Mensaje[] {
   }
   const ult = ms[ms.length - 1]
   const out = compararUltimas(p, ms[ms.length - 2], ult)
+  // La cinta manda: su lectura va primero, con lo que dice la báscula al lado.
+  const cinta = leerCinta(p, ms)
+  if (cinta && cinta.veredicto !== 'faltan') {
+    out.unshift({ tono: cinta.tono, codigo: 'cinta', titulo: cinta.titulo, texto: cinta.contraste ? `${cinta.texto} ${cinta.contraste.texto}` : cinta.texto })
+  }
   const t = tendencia(p, ms)
   if (t) out.push(t)
   if (ms.length >= 3) out.push(desdeInicio(p, ms[0], ult))
