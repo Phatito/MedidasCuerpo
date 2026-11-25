@@ -187,8 +187,9 @@ export async function manejar(req: Request, almacen: Almacen, ahora: number, ser
       try {
         const lectura = await servicios.leerCaptura((imagenes as ImagenCaptura[]).map(({ tipo, datos }) => ({ tipo, datos })))
         return json(200, { lectura }, origen)
-      } catch {
-        return json(502, { error: 'No se pudo leer la captura con IA' }, origen)
+      } catch (e) {
+        // El detalle (sin la clave) sirve para diagnosticar: modelo inexistente, clave inválida, cuota agotada.
+        return json(502, { error: 'No se pudo leer la captura con IA', detalle: String((e as Error)?.message ?? e).slice(0, 300) }, origen)
       }
     }
 

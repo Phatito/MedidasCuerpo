@@ -35,19 +35,37 @@ const ESQUEMA = {
   properties: { fecha: { type: 'STRING', nullable: true }, hora: { type: 'STRING', nullable: true }, ...Object.fromEntries(Object.keys(CAMPOS).map((k) => [k, NUMERO])) },
 }
 
-export function lectorGemini(clave: string, modelo: string, pedir: typeof fetch = fetch): LectorCaptura {
+// Si un modelo está saturado, se reintenta una vez y luego se prueba el siguiente.
+export const MODELOS_GEMINI = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest']
+const SATURADO = new Set([429, 500, 503])
+
+export function lectorGemini(clave: string, modelos: string | string[], pedir: typeof fetch = fetch, esperaMs = 1200): LectorCaptura {
+  const lista = Array.isArray(modelos) ? modelos : [modelos]
   return async (imagenes) => {
-    const res = await pedir(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: INSTRUCCIONES }, ...imagenes.map((i) => ({ inline_data: { mime_type: i.tipo, data: i.datos } }))] }],
-        generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: ESQUEMA },
-      }),
+    const cuerpo = JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: INSTRUCCIONES }, ...imagenes.map((i) => ({ inline_data: { mime_type: i.tipo, data: i.datos } }))] }],
+      generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: ESQUEMA },
     })
-    if (!res.ok) throw new Error(`Gemini respondió ${res.status}`)
-    const datos = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
-    const texto = datos.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
-    return JSON.parse(texto)
+    let ultimo = ''
+    for (const modelo of lista) {
+      for (let intento = 0; intento < 2; intento++) {
+        const res = await pedir(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': clave },
+          body: cuerpo,
+        })
+        if (res.ok) {
+          const datos = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
+          const texto = datos.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+          return JSON.parse(texto)
+        }
+        const detalle = ((await res.text().catch(() => '')) || '').replace(/\s+/g, ' ').slice(0, 300)
+        ultimo = `Gemini (${modelo}) respondió ${res.status}: ${detalle}`
+        // Un error que no es de saturación (clave inválida, modelo inexistente) no se reintenta con el mismo modelo.
+        if (!SATURADO.has(res.status)) break
+        if (esperaMs) await new Promise((r) => setTimeout(r, esperaMs))
+      }
+    }
+    throw new Error(ultimo)
   }
 }
