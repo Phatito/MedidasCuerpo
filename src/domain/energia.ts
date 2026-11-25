@@ -1,3 +1,4 @@
+import { conPeso } from './medicion'
 import { diasConConsumo } from './consumo'
 import { diasEntre } from './numbers'
 import { tendenciaPeso, type PuntoTendencia } from './trend'
@@ -20,7 +21,7 @@ function sumarDias(fecha: string, dias: number): string {
 }
 
 export function serieDePeso(ms: Medicion[], hasta?: string): PuntoTendencia[] {
-  return tendenciaPeso(ms.filter((m) => hasta == null || m.fecha <= hasta).map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
+  return tendenciaPeso(conPeso(ms).filter((m) => hasta == null || m.fecha <= hasta).map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
 }
 
 /**

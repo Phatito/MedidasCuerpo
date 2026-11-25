@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { leerCinta } from '../domain/cinta'
+import { conPeso } from '../domain/medicion'
 import { cuadritos, type Cuadrito } from '../domain/cifras'
 import { resumenFicha } from '../domain/ficha'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
@@ -66,7 +67,7 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
   const hoy = hoyIso()
   const r = resumenFicha(persona, mediciones, { hoy })
   const peso = r.tarjetas.find((t) => t.clave === 'pesoKg') ?? null
-  const serie = tendenciaPeso(mediciones.map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
+  const serie = tendenciaPeso(conPeso(mediciones).map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
   const fechas = [...new Set(serie.map((s) => s.fecha))]
   const ultimaT = serie[serie.length - 1]
   const previaFecha = fechas.length > 1 ? fechas[fechas.length - 2] : null

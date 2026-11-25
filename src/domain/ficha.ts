@@ -1,3 +1,4 @@
+import { conPeso } from './medicion'
 import { clasificar, type Clasificacion, type MedidaConEstado } from './estados'
 import { interpretar, type Mensaje, type Tono } from './insights'
 import { derivar } from './metrics'
@@ -121,8 +122,8 @@ function dato(p: Persona, m: Medicion, clave: Exclude<ClaveTarjeta, 'pesoKg'>): 
 }
 
 function referencia(clave: ClaveTarjeta, valor: number, m: Medicion): string | null {
-  if (clave === 'musculoTotalKg' || clave === 'masaOseaKg' || clave === 'musculoKg') return `${formatear((valor / m.pesoKg) * 100)} % del peso`
-  if (clave === 'proteinaPct') return `${formatear((m.pesoKg * valor) / 100)} kg`
+  if (m.pesoKg != null && (clave === 'musculoTotalKg' || clave === 'masaOseaKg' || clave === 'musculoKg')) return `${formatear((valor / m.pesoKg) * 100)} % del peso`
+  if (m.pesoKg != null && clave === 'proteinaPct') return `${formatear((m.pesoKg * valor) / 100)} kg`
   if (clave === 'grasaKg') return 'masa grasa'
   if (clave === 'pesoSinGrasaKg') return 'masa magra'
   return null
@@ -164,22 +165,28 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     return d >= ASIMETRIA_MINIMA_CM ? [{ zona: l.zona, mayor: izq > der ? ('izq' as const) : ('der' as const), diferencia: d }] : []
   })
 
-  const serieCompleta = tendenciaPeso(ms.map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
-  const tendencia = serieCompleta[serieCompleta.length - 1].tendencia
-  const cambioPeso = ms.length > 1 ? diferencia(tendencia, serieCompleta[0].tendencia) : null
-  const tarjetaPeso: TarjetaFicha = {
-    clave: 'pesoKg',
-    valor: redondear1(tendencia),
-    estimada: false,
-    cambio: cambioPeso,
-    desde: cambioPeso == null ? null : ms[0].fecha,
-    tono: tonoDe('pesoKg', cambioPeso, tendencia, p),
-    nota: null,
-    ultimaPesada: ultima.pesoKg,
-    clasificacion: null,
-    referencia: null,
-    fecha: ultima.fecha,
-  }
+  // El peso sale solo de las pesadas: una medición de solo cinta no lo tiene.
+  const pesadas = conPeso(ms)
+  const ultimaP = pesadas[pesadas.length - 1]
+  const serieCompleta = tendenciaPeso(pesadas.map((m) => ({ fecha: m.fecha, valor: m.pesoKg })))
+  const tendencia = serieCompleta.length ? serieCompleta[serieCompleta.length - 1].tendencia : null
+  const cambioPeso = tendencia != null && pesadas.length > 1 ? diferencia(tendencia, serieCompleta[0].tendencia) : null
+  const tarjetaPeso: TarjetaFicha | null =
+    tendencia == null
+      ? null
+      : {
+          clave: 'pesoKg',
+          valor: redondear1(tendencia),
+          estimada: false,
+          cambio: cambioPeso,
+          desde: cambioPeso == null ? null : pesadas[0].fecha,
+          tono: tonoDe('pesoKg', cambioPeso, tendencia, p),
+          nota: null,
+          ultimaPesada: ultimaP.pesoKg,
+          clasificacion: null,
+          referencia: null,
+          fecha: ultimaP.fecha,
+        }
 
   const otras: TarjetaFicha[] = CLAVES.flatMap((clave) => {
     // Cada medida sale de la última medición que la tenga: una pesada sola no borra la grasa visceral del informe anterior.
@@ -201,9 +208,10 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
         desde: cambio == null ? null : previa!.fecha,
         tono,
         nota: clave === 'grasaVisceral' && tono === 'atencion' ? 'Elevada' : null,
-        clasificacion: medidaConEstado
-          ? clasificar(medidaConEstado, medidaConEstado === 'musculoPct' ? (actual.valor / fuente.pesoKg) * 100 : actual.valor, p, fuente.fecha)
-          : null,
+        clasificacion:
+          !medidaConEstado || (medidaConEstado === 'musculoPct' && fuente.pesoKg == null)
+            ? null
+            : clasificar(medidaConEstado, medidaConEstado === 'musculoPct' ? (actual.valor / fuente.pesoKg!) * 100 : actual.valor, p, fuente.fecha),
         referencia: referencia(clave, actual.valor, fuente),
         fecha: fuente.fecha,
       },
@@ -215,7 +223,7 @@ export function resumenFicha(p: Persona, mediciones: Medicion[], opciones: { hoy
     fechaPerimetros: figura?.fecha ?? null,
     medidas,
     asimetrias,
-    tarjetas: [tarjetaPeso, ...otras],
+    tarjetas: tarjetaPeso ? [tarjetaPeso, ...otras] : otras,
     serie: serieCompleta.slice(-MEDICIONES_EN_TENDENCIA),
     meta: p.metaPesoKg == null ? null : proyeccionMeta(serieCompleta, p.metaPesoKg, opciones.hoy),
     mensaje: interpretar(p, ms)[0] ?? null,

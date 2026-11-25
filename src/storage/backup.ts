@@ -1,4 +1,5 @@
 import { KCAL_MAX, KCAL_MIN } from '../domain/consumo'
+import { medicionCompleta } from '../domain/medicion'
 import { parseFecha } from '../domain/numbers'
 import { CAMPOS_NUMERICOS, type Ajustes, type Medicion, type Persona } from '../domain/types'
 import { validarValor } from '../domain/validation'
@@ -59,7 +60,8 @@ function personaValida(x: unknown): boolean {
 function medicionValida(x: unknown, idsPersonas: Set<unknown>): boolean {
   if (!esObjeto(x) || !esTexto(x.id) || !idsPersonas.has(x.personaId)) return false
   if (typeof x.fecha !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x.fecha) || parseFecha(x.fecha) !== x.fecha) return false
-  if (typeof x.pesoKg !== 'number') return false
+  if (x.pesoKg != null && typeof x.pesoKg !== 'number') return false
+  if (!medicionCompleta(x as unknown as Medicion)) return false
   // Un campo opcional presente debe ser un número dentro de rango: un texto rompería las pantallas.
   return CAMPOS_NUMERICOS.every((c) => x[c] == null || (typeof x[c] === 'number' && validarValor(c, x[c] as number) == null))
 }

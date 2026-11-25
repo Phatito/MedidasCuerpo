@@ -1,3 +1,4 @@
+import { medicionCompleta } from './medicion'
 import { idMedicion, parseFecha, parseNumero } from './numbers'
 import { CAMPOS_NUMERICOS, ETIQUETAS, type CampoNumerico, type Medicion } from './types'
 import { validarValor } from './validation'
@@ -163,16 +164,14 @@ export function filasAMediciones(
     const error = (motivo: string) => errores.push({ fila: numero, motivo })
 
     if (asignacion.fecha == null) return error('No hay una columna asignada a la fecha')
-    if (asignacion.pesoKg == null) return error('No hay una columna asignada al peso')
     if (opciones.columnas != null && fila.slice(opciones.columnas).some((c) => c !== '')) {
       return error('Tiene más columnas que el encabezado; si usa coma decimal, el archivo debe separar con punto y coma')
     }
     const fecha = parseFecha(celda(fila, 'fecha'), orden)
     if (fecha == null) return error(`La fecha "${celda(fila, 'fecha')}" no es válida`)
     if (opciones.hoy != null && fecha > opciones.hoy) return error(`La fecha ${celda(fila, 'fecha')} es futura`)
-    if (celda(fila, 'pesoKg') === '') return error('Falta el peso')
 
-    const medicion: Medicion = { id: idMedicion(personaId, fecha), personaId, fecha, pesoKg: 0, origen: 'csv' }
+    const medicion: Medicion = { id: idMedicion(personaId, fecha), personaId, fecha, origen: 'csv' }
     for (const campo of CAMPOS_NUMERICOS) {
       const texto = celda(fila, campo)
       if (texto === '') continue
@@ -183,6 +182,7 @@ export function filasAMediciones(
       if (fuera) return error(`El valor de ${nombre} (${texto}) está fuera de rango: ${fuera.toLowerCase()}`)
       medicion[campo] = valor
     }
+    if (!medicionCompleta(medicion)) return error('Falta el peso (o alguna medida con cinta)')
     const nota = celda(fila, 'nota')
     if (nota) medicion.nota = nota
 

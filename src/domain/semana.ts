@@ -1,3 +1,4 @@
+import { conPeso } from './medicion'
 import { leerCinta, type LecturaCinta } from './cinta'
 import { consumoVigente } from './consumo'
 import { estimarGasto, ritmoSemanalPct, RITMO_OBJETIVO_PCT, serieDePeso, type EstimacionGasto } from './energia'
@@ -176,7 +177,9 @@ function revisar(previa: Accion, c: Contexto): Revision | null {
 }
 
 function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolean): InformeSemanal | null {
-  const ms = porFecha(todas)
+  // "Tu semana" va de pesada a pesada; la cinta se lee de todas las mediciones (también las de solo cinta).
+  const conCinta = porFecha(todas)
+  const ms = conPeso(conCinta)
   const ultima = ms[ms.length - 1]
   if (!ultima) return null
   const previa = ms.length > 1 ? ms[ms.length - 2] : null
@@ -205,7 +208,7 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
   }
 
   const vieja = diasEntre(ultima.fecha, hoy) > DIAS_VIEJA
-  const cinta = leerCinta(p, ms, 'anterior')
+  const cinta = leerCinta(p, conCinta, 'anterior')
   const gasto = vieja ? null : estimarGasto(p, ms)
   const ctx: Contexto = {
     p,
@@ -218,7 +221,8 @@ function informe(p: Persona, todas: Medicion[], hoy: string, conRevision: boolea
     gasto,
     pesoTendencia: tendencia,
     ms,
-    cinta: cinta?.fecha === ultima.fecha ? cinta : null,
+    // Cuenta para decidir si es más nueva que la pesada anterior (la cinta puede tomarse otro día).
+    cinta: cinta && cinta.fecha > (previa?.fecha ?? '') ? cinta : null,
   }
   const acciones = vieja ? [] : decidirAcciones(ctx)
 

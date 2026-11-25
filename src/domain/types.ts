@@ -19,7 +19,7 @@ export interface Medicion {
   id: string
   personaId: string
   fecha: string
-  pesoKg: number
+  pesoKg?: number
   grasaPct?: number
   musculoKg?: number
   grasaVisceral?: number

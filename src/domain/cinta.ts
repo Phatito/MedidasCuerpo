@@ -133,7 +133,7 @@ export function leerCinta(p: Persona, mediciones: Medicion[], base: BaseCinta = 
     if (b) bases.set(z, b)
   }
   const ref = bases.get('cintura') ?? [...bases.values()][0] ?? null
-  const dPeso = ref ? ult.pesoKg - ref.pesoKg : 0
+  const dPeso = ref && ref.pesoKg != null && ult.pesoKg != null ? ult.pesoKg - ref.pesoKg : 0
   const dCintura = bases.has('cintura') ? r1(valorZona(ult, 'cintura')! - valorZona(bases.get('cintura')!, 'cintura')!) : 0
 
   const cambios: CambioCinta[] = []

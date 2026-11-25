@@ -46,10 +46,10 @@ export function grasaMarina(
 
 export function derivar(p: Persona, m: Medicion): Derivados {
   const estaturaOk = p.estaturaCm > 0
-  const imc = estaturaOk ? m.pesoKg / (p.estaturaCm / 100) ** 2 : null
+  const imc = estaturaOk && m.pesoKg != null ? m.pesoKg / (p.estaturaCm / 100) ** 2 : null
   const estimada = m.grasaPct == null ? grasaMarina(p.sexo, p.estaturaCm, m.cuelloCm, m.cinturaCm, m.caderaCm) : null
   const grasaPct = m.grasaPct ?? estimada
-  const masaGrasaKg = grasaPct == null ? null : (m.pesoKg * grasaPct) / 100
+  const masaGrasaKg = grasaPct == null || m.pesoKg == null ? null : (m.pesoKg * grasaPct) / 100
   return {
     imc,
     categoriaImc: imc == null ? null : categoria(imc),
@@ -58,6 +58,6 @@ export function derivar(p: Persona, m: Medicion): Derivados {
     grasaPct,
     grasaEstimada: m.grasaPct == null && estimada != null,
     masaGrasaKg,
-    masaMagraKg: masaGrasaKg == null ? null : m.pesoKg - masaGrasaKg,
+    masaMagraKg: masaGrasaKg == null || m.pesoKg == null ? null : m.pesoKg - masaGrasaKg,
   }
 }

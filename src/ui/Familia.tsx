@@ -114,7 +114,11 @@ export function Familia({ personas, onMedir, onIrDatos, onVerFicha, nueva = fals
               </div>
               {u ? (
                 <div>
-                  <div className="peso num">{formatear(u.pesoKg)} kg</div>
+                  <div className="peso num">{(() => {
+                    // El peso es el de la última pesada: una medición de solo cinta no lo tiene.
+                    const peso = (porPersona.get(p.id) ?? []).filter((x) => x.pesoKg != null).reduce<Medicion | null>((a, x) => (!a || x.fecha > a.fecha ? x : a), null)?.pesoKg
+                    return peso == null ? '—' : `${formatear(peso)} kg`
+                  })()}</div>
                   <div className="muted small">
                     Última medición: {fechaLegible(u.fecha)}
                     {estado.diasDesde === 0 && ' (hoy)'}

@@ -1,3 +1,4 @@
+import { fusionarMedicion } from '../domain/medicion'
 import Dexie, { type Table } from 'dexie'
 import type { Ajustes, Medicion, Persona } from '../domain/types'
 import { debeAplicarse } from '../sync/fusion'
@@ -122,6 +123,13 @@ export function listarTodasLasMediciones(): Promise<Medicion[]> {
 
 export async function guardarMedicion(m: Medicion): Promise<void> {
   await guardarMediciones([m])
+}
+
+/** Guarda uniendo con lo que ya hay ese día: completa los campos en vez de reemplazar la medición. */
+export async function unirMedicion(m: Medicion): Promise<Medicion> {
+  const unida = fusionarMedicion(await db.mediciones.get(m.id), m)
+  await guardarMediciones([unida])
+  return unida
 }
 
 export async function guardarMediciones(ms: Medicion[]): Promise<void> {

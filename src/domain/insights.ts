@@ -1,3 +1,4 @@
+import { conPeso, type ConPeso } from './medicion'
 import { leerCinta } from './cinta'
 import { derivar } from './metrics'
 import { diasEntre, fechaLegible, formatear } from './numbers'
@@ -69,7 +70,7 @@ function promedio(valores: (number | undefined | null)[]): number | null {
   return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null
 }
 
-function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
+function compararUltimas(p: Persona, ant: ConPeso, ult: ConPeso): Mensaje[] {
   const out: Mensaje[] = []
   const dPeso = redondear(ult.pesoKg - ant.pesoKg)
   const estable = Math.abs(dPeso) < Math.max(0.4, ant.pesoKg * 0.005)
@@ -196,7 +197,7 @@ function compararUltimas(p: Persona, ant: Medicion, ult: Medicion): Mensaje[] {
   return out
 }
 
-function tendencia(p: Persona, ms: Medicion[]): Mensaje | null {
+function tendencia(p: Persona, ms: ConPeso[]): Mensaje | null {
   if (ms.length < 4) return null
   const k = Math.min(4, Math.floor(ms.length / 2))
   const recientes = ms.slice(-k)
@@ -220,7 +221,7 @@ function tendencia(p: Persona, ms: Medicion[]): Mensaje | null {
   }
 }
 
-function desdeInicio(p: Persona, primera: Medicion, ult: Medicion): Mensaje {
+function desdeInicio(p: Persona, primera: ConPeso, ult: ConPeso): Mensaje {
   const partes = [cambio('peso', ult.pesoKg - primera.pesoKg, 'kg')]
   const dC = delta(primera.cinturaCm, ult.cinturaCm)
   if (dC != null) partes.push(cambio('cintura', dC, 'cm'))
@@ -248,15 +249,18 @@ export function interpretar(p: Persona, mediciones: Medicion[]): Mensaje[] {
     ]
   }
   const ult = ms[ms.length - 1]
-  const out = compararUltimas(p, ms[ms.length - 2], ult)
+  // Lo del peso se compara entre pesadas: una medición de solo cinta no tiene peso.
+  const pesadas = conPeso(ms)
+  const ultP = pesadas[pesadas.length - 1]
+  const out = pesadas.length >= 2 ? compararUltimas(p, pesadas[pesadas.length - 2], ultP) : []
   // La cinta manda: su lectura va primero, con lo que dice la báscula al lado.
   const cinta = leerCinta(p, ms)
   if (cinta && cinta.veredicto !== 'faltan') {
     out.unshift({ tono: cinta.tono, codigo: 'cinta', titulo: cinta.titulo, texto: cinta.contraste ? `${cinta.texto} ${cinta.contraste.texto}` : cinta.texto })
   }
-  const t = tendencia(p, ms)
+  const t = tendencia(p, pesadas)
   if (t) out.push(t)
-  if (ms.length >= 3) out.push(desdeInicio(p, ms[0], ult))
+  if (pesadas.length >= 3) out.push(desdeInicio(p, pesadas[0], ultP))
 
   const d = derivar(p, ult)
   if (d.cinturaEstatura != null && d.cinturaEstatura > 0.5) {
@@ -275,12 +279,13 @@ export function interpretar(p: Persona, mediciones: Medicion[]): Mensaje[] {
       texto: `Tu báscula marca nivel ${formatear(ult.grasaVisceral, 0)}. En la escala habitual de las básculas domésticas, 10 o más se considera alto.`,
     })
   }
-  if (d.imc != null && d.categoriaImc != null) {
+  const dP = ultP ? derivar(p, ultP) : null
+  if (dP?.imc != null && dP.categoriaImc != null) {
     out.push({
       tono: 'neutro',
       codigo: 'imc',
-      titulo: `IMC ${formatear(d.imc)}`,
-      texto: `Corresponde a la categoría de ${NOMBRE_IMC[d.categoriaImc]}. El IMC no distingue músculo de grasa, así que míralo junto con la cintura.`,
+      titulo: `IMC ${formatear(dP.imc)}`,
+      texto: `Corresponde a la categoría de ${NOMBRE_IMC[dP.categoriaImc]}. El IMC no distingue músculo de grasa, así que míralo junto con la cintura.`,
     })
   }
   return out

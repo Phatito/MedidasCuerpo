@@ -149,3 +149,21 @@ describe('consumo de kcal en el respaldo', () => {
     }
   })
 })
+
+test('un respaldo con una medición sin peso se restaura', async () => {
+  const solo = m('2026-11-19', { cinturaCm: 89 })
+  delete solo.pesoKg
+  await guardarMediciones([solo])
+  const json = JSON.stringify(await exportarRespaldo())
+  await borrarTodo()
+  await restaurarRespaldo(leerRespaldo(json))
+  expect((await listarMediciones('p1')).find((x) => x.fecha === '2026-11-19')).toMatchObject({ cinturaCm: 89 })
+})
+
+test('unir una medición de cinta al día que ya tiene pesada conserva el peso', async () => {
+  const { unirMedicion } = await import('../../src/storage/db')
+  const cinta = m('2026-11-12', { cinturaCm: 88 })
+  delete cinta.pesoKg
+  await unirMedicion(cinta)
+  expect((await listarMediciones('p1')).find((x) => x.fecha === '2026-11-12')).toMatchObject({ pesoKg: 72, cinturaCm: 88 })
+})
