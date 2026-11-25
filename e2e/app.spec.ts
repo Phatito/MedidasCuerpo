@@ -1550,7 +1550,7 @@ test('la ficha dice lo que muestra la cinta y compara con el inicio', async ({ p
   await expect(page.locator('svg.body-fig [data-medida="cinturaCm"] .chg.bien')).toContainText('1,6')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(400)
   await panel.getByRole('button', { name: /Cintura/ }).click()
-  await expect(page.getByRole('heading', { level: 1, name: /Cintura/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Cintura' })).toBeVisible()
   await page.goBack()
   await page.getByRole('button', { name: /Tu semana/ }).click()
   await expect(page.getByRole('heading', { name: 'Lo que dice la cinta' })).toBeVisible()
