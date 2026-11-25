@@ -11,6 +11,8 @@ const TRAZOS = {
   editar: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4',
   // Muesca del molde con una línea: "esta semana".
   semana: 'M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3',
+  // Persona (la ficha).
+  persona: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5c.6-3.6 3.7-5.5 7.5-5.5s6.9 1.9 7.5 5.5',
   // Flechas y señales del veredicto de la cinta.
   baja: 'M12 5v14M6 13l6 6 6-6',
   sube: 'M12 19V5M6 11l6-6 6 6',

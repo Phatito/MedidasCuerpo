@@ -1623,3 +1623,27 @@ test('el panel de peso cambia de medida tocando una tarjeta y se recorre con el 
   await expect(page.getByRole('heading', { level: 1, name: /IMC/ })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Medidas de la báscula' }).getByRole('button', { name: /^IMC/ })).toHaveAttribute('aria-pressed', 'true')
 })
+
+test('las pestañas llevan a peso, cuerpo y semana y marcan la activa', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 860 })
+  await agregarAna(page)
+  await medir(page, haceDias(7), '73', '90')
+  await medir(page, haceDias(0), '72,5', '89')
+  await irAFicha(page)
+  const pestanas = page.getByRole('navigation', { name: 'Secciones' })
+  await expect(pestanas.getByRole('link', { name: 'Ficha' })).toHaveAttribute('aria-current', 'page')
+  await pestanas.getByRole('link', { name: 'Peso' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: /Peso · Ana/ })).toBeVisible()
+  await expect(pestanas.getByRole('link', { name: 'Peso' })).toHaveAttribute('aria-current', 'page')
+  await pestanas.getByRole('link', { name: 'Cuerpo' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Cintura' })).toBeVisible()
+  await pestanas.getByRole('link', { name: 'Semana' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: /Tu semana/ })).toBeVisible()
+  // Atrás del navegador vuelve al cuerpo.
+  await page.goBack()
+  await expect(page.getByRole('heading', { level: 2, name: 'Cintura' })).toBeVisible()
+  await pestanas.getByRole('link', { name: 'Registrar medición' }).click()
+  await expect(page.getByRole('heading', { name: 'Registrar medición · Ana' })).toBeVisible()
+  // Mientras se registra, la barra no estorba.
+  await expect(pestanas).toBeHidden()
+})

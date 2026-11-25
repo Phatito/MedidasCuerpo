@@ -13,6 +13,7 @@ import { Ficha } from './Ficha'
 import { Historial } from './Historial'
 import type { Borrador } from './Medir'
 import { MedirCinta } from './MedirCinta'
+import { Pestanas } from './Pestanas'
 import { Registrar } from './Registrar'
 import { SelectorPerfil } from './SelectorPerfil'
 import { PantallaSemana } from './TuSemana'
@@ -182,7 +183,10 @@ export function App() {
           </button>
         </div>
       </header>
-      <main className="wrap" ref={principal_}>
+      {vista && personaDeRuta && ['ficha', 'medida', 'semana', 'cifras', 'mediciones'].includes(vista.pantalla) && (
+        <Pestanas persona={personaDeRuta} vista={vista} onIr={navegar} />
+      )}
+      <main className={`wrap${vista && personaDeRuta && ['ficha', 'medida', 'semana', 'cifras', 'mediciones'].includes(vista.pantalla) ? ' con-pestanas' : ''}`} ref={principal_}>
         {/* Región de avisos siempre presente, para que los lectores de pantalla anuncien su texto cuando aparece. */}
         <p id="aviso-app" role="status" className={avisoVisible ? 'notice ok aviso-app' : 'sr-only'}>
           {avisoVisible ? aviso!.texto : ''}

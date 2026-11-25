@@ -954,3 +954,37 @@ button.registro-tipo > .icono:last-child { width: 18px; height: 18px; color: var
 @keyframes sello { from { transform: scale(0.4) rotate(-25deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 @keyframes onda { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.8); opacity: 0; } }
 @keyframes subir { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Pestañas: abajo y fijas en el teléfono; bajo el encabezado en el PC. */
+.pestanas { position: fixed; inset: auto 0 0 0; z-index: 40; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--edge); padding-bottom: env(safe-area-inset-bottom); }
+.pestanas-fila { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 640px; margin: 0 auto; }
+.pestana {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 60px; padding: 6px 2px; color: var(--dim); text-decoration: none; font-size: 0.72rem; font-weight: 700;
+  transition: color 0.2s;
+}
+.pestana .icono { width: 22px; height: 22px; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pestana[aria-current='page'] { color: var(--fg); }
+.pestana[aria-current='page'] .icono { color: var(--costura); transform: translateY(-1px) scale(1.08); }
+.pestana[aria-current='page']::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--costura); }
+.pestana:focus-visible { outline: 2px solid var(--costura); outline-offset: -4px; border-radius: 10px; }
+.pestana:hover { color: var(--fg); }
+.pestana-mas-circulo { width: 50px; height: 50px; margin-top: -22px; border-radius: 50%; display: grid; place-items: center; background: var(--accent, #3b67b0); color: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 0 4px var(--bg); transition: transform 0.2s; }
+.pestana-mas-circulo .icono { width: 24px; height: 24px; color: #fff; stroke-width: 2.6; }
+.pestana-mas:hover .pestana-mas-circulo { transform: scale(1.06); }
+.pestana-mas-texto { font-size: 0.72rem; }
+main.con-pestanas { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+
+@media (min-width: 900px) {
+  .pestanas { position: sticky; top: 0; inset: auto; border-top: 0; border-bottom: 1px solid var(--edge); padding: 0; }
+  .pestanas-fila { display: flex; gap: 4px; max-width: 1200px; margin: 0 auto; padding: 0 20px; justify-content: flex-start; align-items: center; }
+  .pestana { flex-direction: row; gap: 8px; min-height: 52px; padding: 0 16px; font-size: 0.95rem; }
+  .pestana .icono { width: 20px; height: 20px; }
+  .pestana[aria-current='page']::before { top: auto; bottom: 0; left: 12px; right: 12px; border-radius: 3px 3px 0 0; }
+  .pestana-mas { order: 9; margin-left: auto; }
+  .pestana-mas-circulo { width: 34px; height: 34px; margin: 0; box-shadow: none; }
+  .pestana-mas-circulo .icono { width: 18px; height: 18px; }
+  .pestana-mas { padding: 6px 16px 6px 6px; border-radius: 999px; background: color-mix(in srgb, var(--accent, #3b67b0) 22%, transparent); color: var(--fg); min-height: 44px; }
+  .pestana-mas-texto { font-size: 0.95rem; }
+  main.con-pestanas { padding-bottom: 32px; }
+}
