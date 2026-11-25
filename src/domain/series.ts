@@ -3,7 +3,7 @@ import { diasEntre } from './numbers'
 import { CAMPOS_NUMERICOS, type CampoNumerico, type Medicion, type Persona } from './types'
 
 export type Metrica = CampoNumerico | 'imc' | 'grasaKg' | 'pesoSinGrasaKg'
-export type Periodo = '3m' | '1a' | 'todo'
+export type Periodo = '1m' | '3m' | '1a' | 'todo'
 
 const EXTRA_METRICAS = ['imc', 'grasaKg', 'pesoSinGrasaKg'] as const
 
@@ -12,7 +12,7 @@ export function esMedida(x: string): x is Metrica {
   return (CAMPOS_NUMERICOS as string[]).includes(x) || (EXTRA_METRICAS as readonly string[]).includes(x)
 }
 
-const DIAS: Record<Exclude<Periodo, 'todo'>, number> = { '3m': 92, '1a': 366 }
+const DIAS: Record<Exclude<Periodo, 'todo'>, number> = { '1m': 31, '3m': 92, '1a': 366 }
 
 export function valorMetrica(p: Persona, m: Medicion, metrica: Metrica): number | null {
   if (metrica === 'imc') return derivar(p, m).imc

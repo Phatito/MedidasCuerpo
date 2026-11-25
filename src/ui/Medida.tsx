@@ -1,26 +1,56 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { cuadritos, mensajesDe } from '../domain/cifras'
-import { resumenFicha, type ClaveTarjeta } from '../domain/ficha'
+import { PERIMETROS, resumenFicha, type CampoPerimetro, type ClaveTarjeta } from '../domain/ficha'
 import { interpretar, NOTA_ORIENTACION } from '../domain/insights'
 import { derivar } from '../domain/metrics'
 import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { serieMetrica, valorMetrica, type Metrica, type Periodo } from '../domain/series'
 import { tendenciaPeso } from '../domain/trend'
-import { CAMPOS_NUMERICOS, type Persona } from '../domain/types'
+import { CAMPOS_NUMERICOS, CAMPOS_PERIMETROS, type Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
-import { etiqueta, GUIA_ESTADOS, Mensajes, Tarjeta, TARJETA, textoMeta, useAngosto } from './Cifra'
+import { etiqueta, GUIA_ESTADOS, Mensajes, Tarjeta, TARJETA, textoMeta } from './Cifra'
 import { Consumo } from './Consumo'
 import { Muesca } from './Icono'
-import { Grafico } from './Grafico'
+import { ExplorarCuerpo } from './ExplorarCuerpo'
+import { GraficoVivo, MiniCurva } from './GraficoVivo'
+import { informeSemanal } from '../domain/semana'
 
 const PERIODOS: { id: Periodo; nombre: string }[] = [
-  { id: '3m', nombre: '3 meses' },
-  { id: '1a', nombre: '1 año' },
+  { id: '1m', nombre: '1M' },
+  { id: '3m', nombre: '3M' },
+  { id: '1a', nombre: '1A' },
   { id: 'todo', nombre: 'Todo' },
 ]
-const RAPIDAS: Metrica[] = ['pesoKg', 'grasaPct', 'musculoKg', 'cinturaCm']
-const NOMBRE_RAPIDA: Partial<Record<Metrica, string>> = { pesoKg: 'Peso', grasaPct: 'Grasa', musculoKg: 'Músculo', cinturaCm: 'Cintura' }
+const ORDEN_SEGMENTOS: Metrica[] = ['pesoKg', 'grasaPct', 'musculoKg', 'aguaPct', 'grasaVisceral', 'grasaKg', 'pesoSinGrasaKg', 'imc']
+// Para el color del cambio: si bajar es bueno o malo.
+const TONO: Partial<Record<Metrica, 'bajar' | 'subir' | 'neutro'>> = {
+  grasaPct: 'bajar', grasaKg: 'bajar', grasaVisceral: 'bajar', musculoKg: 'subir', musculoTotalKg: 'subir', pesoSinGrasaKg: 'subir', aguaPct: 'subir', proteinaPct: 'subir',
+}
+
+/** Barras apiladas: grasa abajo, masa magra arriba, por pesada. */
+function Composicion({ barras }: { barras: { fecha: string; grasaKg: number; magraKg: number }[] }) {
+  const max = Math.max(...barras.map((b) => b.grasaKg + b.magraKg))
+  const ultima = barras[barras.length - 1]
+  return (
+    <>
+      <div className="comp" role="img" aria-label={`Última pesada: ${formatear(ultima.grasaKg)} kg de grasa y ${formatear(ultima.magraKg)} kg de masa magra.`}>
+        {barras.map((b, k) => (
+          <div key={b.fecha} className="comp-col" style={{ animationDelay: `${k * 0.05}s` }}>
+            <div className="comp-barra" style={{ height: `${((b.grasaKg + b.magraKg) / max) * 100}%` }}>
+              <span className="comp-magra" style={{ flexGrow: b.magraKg }} />
+              <span className="comp-grasa" style={{ flexGrow: b.grasaKg }} />
+            </div>
+            <span className="comp-f num">{fechaLegible(b.fecha).slice(0, 5)}</span>
+          </div>
+        ))}
+      </div>
+      <p className="small num comp-leyenda">
+        <i className="comp-grasa" /> Grasa {formatear(ultima.grasaKg)} kg <i className="comp-magra" /> Masa magra {formatear(ultima.magraKg)} kg
+      </p>
+    </>
+  )
+}
 const EXTRAS: Metrica[] = ['imc', 'grasaKg', 'pesoSinGrasaKg']
 const esTarjeta = (m: Metrica): m is ClaveTarjeta => m in TARJETA
 
@@ -28,13 +58,16 @@ const esTarjeta = (m: Metrica): m is ClaveTarjeta => m in TARJETA
 export function PantallaMedida({ persona, medida, onCambiar }: { persona: Persona; medida: Metrica; onCambiar: (m: Metrica) => void }) {
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [periodo, setPeriodo] = useState<Periodo>('3m')
-  const angosto = useAngosto(640)
   if (mediciones == null) return <p className="muted">Cargando…</p>
   const hoy = hoyIso()
   const r = resumenFicha(persona, mediciones, { hoy })
   const { nombre, unidad } = etiqueta(medida)
   const disponibles = [...CAMPOS_NUMERICOS, ...EXTRAS].filter((k) => mediciones.some((m) => valorMetrica(persona, m, k) != null))
-  const masOpciones = disponibles.filter((k) => !RAPIDAS.includes(k))
+  // Las medidas de la báscula (y las que salen de ella) como tarjetas tocables; los perímetros van en el cuerpo.
+  const segmentos = [...ORDEN_SEGMENTOS, ...disponibles.filter((k) => !ORDEN_SEGMENTOS.includes(k))].filter(
+    (k) => disponibles.includes(k) && !(CAMPOS_PERIMETROS as Metrica[]).includes(k),
+  )
+  const composicion = informeSemanal(persona, mediciones, hoy)?.barras ?? []
 
   const enPeriodo = serieMetrica(persona, mediciones, medida, periodo, hoy)
   const periodoVisto: Periodo = enPeriodo.length < 2 ? 'todo' : periodo
@@ -49,6 +82,20 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
   const tarjeta = esTarjeta(medida) ? r.tarjetas.find((t) => t.clave === medida) : undefined
   const cuadrito = medida === 'cinturaCm' ? cuadritos(persona, mediciones, hoy).find((c) => c.medida === 'cinturaCm') : undefined
   const mensajes = mensajesDe(medida, r.ultima ? interpretar(persona, mediciones) : [])
+
+  // Los perímetros se exploran sobre el cuerpo.
+  if ((PERIMETROS as Metrica[]).includes(medida)) {
+    return (
+      <div className="stack medida-pantalla">
+        <h1>
+          Medidas con cinta · {persona.nombre}
+        </h1>
+        <ExplorarCuerpo persona={persona} mediciones={mediciones} medida={medida as CampoPerimetro} onCambiar={onCambiar} />
+        <Mensajes mensajes={mensajes} titulo="Qué indica" />
+        {mensajes.length > 0 && <p className="muted small">{NOTA_ORIENTACION}</p>}
+      </div>
+    )
+  }
   const imc = r.tarjetas.find((t) => t.clave === 'imc')
 
   return (
@@ -100,43 +147,55 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
       )}
 
       {puntos.length > 0 && (
-        <section className="card stack" aria-label="Gráfico">
-          <div className="grafico-controles">
-            <div className="chips" role="group" aria-label="Medida del gráfico">
-              {RAPIDAS.filter((k) => disponibles.includes(k)).map((k) => (
-                <button key={k} type="button" className="chip-btn" aria-pressed={medida === k} onClick={() => onCambiar(k)}>
-                  {NOMBRE_RAPIDA[k]}
-                </button>
-              ))}
-              {masOpciones.length > 0 && (
-                <select
-                  aria-label="Más medidas"
-                  className={`chip-select ${masOpciones.includes(medida) ? 'activo' : ''}`}
-                  value={masOpciones.includes(medida) ? medida : ''}
-                  onChange={(e) => e.target.value && onCambiar(e.target.value as Metrica)}
-                >
-                  <option value="">Más…</option>
-                  {masOpciones.map((k) => (
-                    <option key={k} value={k}>{etiqueta(k).nombre}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-            <div className="chips" role="group" aria-label="Período">
-              {PERIODOS.map((p) => (
-                <button key={p.id} type="button" className="chip-btn chico" aria-pressed={periodoVisto === p.id} onClick={() => setPeriodo(p.id)}>
-                  {p.nombre}
-                </button>
-              ))}
-            </div>
+        <section className="card stack panel-grafico" aria-label="Gráfico">
+          <div className="pastillas" role="group" aria-label="Período">
+            {PERIODOS.map((p) => (
+              <button key={p.id} type="button" className="pastilla" aria-pressed={periodoVisto === p.id} onClick={() => setPeriodo(p.id)}>
+                {p.nombre}
+              </button>
+            ))}
           </div>
-          <Grafico puntos={puntos} unidad={unidad} tendencia={tendencia} lienzoChico={angosto} />
+          <GraficoVivo
+            puntos={puntos}
+            unidad={unidad}
+            etiqueta={nombre}
+            tendencia={tendencia}
+            meta={medida === 'pesoKg' ? persona.metaPesoKg ?? null : null}
+            tono={TONO[medida] ?? (medida === 'pesoKg' ? (persona.objetivo === 'ganar_musculo' ? 'subir' : persona.objetivo === 'bajar_grasa' ? 'bajar' : 'neutro') : 'neutro')}
+            decimales={medida === 'grasaVisceral' || medida === 'metabolismoBasalKcal' || medida === 'edadCorporal' || medida === 'frecuenciaCardiacaLpm' ? 0 : 1}
+          />
           {medida === 'pesoKg' && puntos.length > 1 && (
-            <p className="muted small">La tendencia es un promedio que da más importancia a las pesadas recientes y suaviza las subidas y bajadas de un día.</p>
+            <p className="muted small">
+              <i className="leyenda-linea" /> La tendencia es un promedio que da más importancia a las pesadas recientes y suaviza las subidas y bajadas de un día. <i className="leyenda-punto" /> Cada pesada.
+            </p>
           )}
           {hayEstimada && <p className="muted small">Incluye valores estimados a partir de los perímetros (fórmula de la Marina de EE. UU.), no medidos por una báscula.</p>}
         </section>
       )}
+
+      <section aria-label="Medidas de la báscula" className="segmentos">
+        {segmentos.map((k) => {
+          const serie = serieMetrica(persona, mediciones, k, 'todo', hoy)
+          const u = serie[serie.length - 1]
+          return (
+            <button key={k} type="button" className="segmento" aria-pressed={medida === k} onClick={() => onCambiar(k)}>
+              <span className="segmento-n">{etiqueta(k).nombre}</span>
+              <span className="segmento-v num">
+                {formatear(u.valor, k === 'grasaVisceral' || k === 'metabolismoBasalKcal' || k === 'edadCorporal' || k === 'frecuenciaCardiacaLpm' ? 0 : 1)} <small>{etiqueta(k).unidad}</small>
+              </span>
+              <MiniCurva puntos={serie.slice(-12)} />
+            </button>
+          )
+        })}
+      </section>
+
+      {composicion.length > 1 && (medida === 'pesoKg' || medida === 'grasaPct' || medida === 'grasaKg' || medida === 'pesoSinGrasaKg') && (
+        <section className="card stack" aria-labelledby="composicion-t">
+          <h3 id="composicion-t">Grasa y masa magra por pesada</h3>
+          <Composicion barras={composicion.slice(-10)} />
+        </section>
+      )}
+
       {puntos.length === 0 && <p className="muted">Todavía no hay datos de {nombre.toLowerCase()}.</p>}
 
       <Mensajes mensajes={mensajes} titulo="Qué indica" />

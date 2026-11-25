@@ -1,3 +1,4 @@
+import type React from 'react'
 import type { CampoPerimetro, MedidaFigura } from '../domain/ficha'
 import { formatear } from '../domain/numbers'
 import { ETIQUETAS, type Sexo } from '../domain/types'
@@ -6,6 +7,9 @@ import { contorno, SILUETA, ZONAS } from './silueta'
 interface Props {
   sexo: Sexo
   medidas: MedidaFigura[]
+  /** La zona elegida (brilla) y qué hacer al tocar una: con esto, cada zona es un botón. */
+  seleccionada?: CampoPerimetro
+  onElegir?: (c: CampoPerimetro) => void
 }
 
 // Nombres cortos para que los rótulos quepan al costado de la figura.
@@ -26,7 +30,7 @@ const IZQ_X = -15
 const DER_X = 215
 const CODO = 18
 
-export function Cuerpo({ sexo, medidas }: Props) {
+export function Cuerpo({ sexo, medidas, seleccionada, onElegir }: Props) {
   const descripcion =
     medidas.length === 0
       ? 'Figura del cuerpo, sin perímetros registrados'
@@ -68,7 +72,34 @@ export function Cuerpo({ sexo, medidas }: Props) {
         const textoX = der ? DER_X + 7 : IZQ_X - 7
         const ancla = der ? 'start' : 'end'
         return (
-          <g key={m.campo} data-medida={m.campo}>
+          <g
+            key={m.campo}
+            data-medida={m.campo}
+            className={`${onElegir ? 'zona-tocable' : ''}${seleccionada === m.campo ? ' elegida' : ''}`}
+            {...(onElegir
+              ? {
+                  role: 'button',
+                  tabIndex: 0,
+                  'aria-pressed': seleccionada === m.campo,
+                  'aria-label': `${ETIQUETAS[m.campo].nombre}: ${formatear(m.valor)} cm. Ver su historia`,
+                  onClick: () => onElegir(m.campo),
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onElegir(m.campo)
+                    }
+                  },
+                }
+              : {})}
+          >
+            {onElegir && (
+              <>
+                {/* Áreas de toque: la banda sobre la figura y el rótulo. */}
+                <rect className="toque" x={z.x - z.w - 8} y={z.y - 16} width={2 * z.w + 16} height={32} />
+                <rect className="toque" x={der ? DER_X - 4 : IZQ_X - 96} y={z.rotuloY - 26} width={100} height={60} />
+                {seleccionada === m.campo && <path className="band-brillo" d={`M${z.x - z.w} ${z.y} Q${z.x} ${z.y + 7} ${z.x + z.w} ${z.y}`} />}
+              </>
+            )}
             {/* Antes: la medida anterior como línea punteada, a su escala, bajo la de ahora. */}
             {m.cambio != null && m.valor - m.cambio > 0 && (() => {
               const w = (z.w * (m.valor - m.cambio)) / m.valor

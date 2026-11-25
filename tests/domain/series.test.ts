@@ -13,6 +13,7 @@ const HOY = '2026-11-20'
 
 test('el período deja solo las mediciones dentro de él', () => {
   expect(serieMetrica(p, ms, 'pesoKg', '3m', HOY).map((x) => x.fecha)).toEqual(['2026-09-01', '2026-11-15'])
+  expect(serieMetrica(p, ms, 'pesoKg', '1m', HOY).map((x) => x.fecha)).toEqual(['2026-11-15'])
   expect(serieMetrica(p, ms, 'pesoKg', '1a', HOY).map((x) => x.fecha)).toEqual(['2026-03-01', '2026-09-01', '2026-11-15'])
   expect(serieMetrica(p, ms, 'pesoKg', 'todo', HOY)).toHaveLength(4)
 })
