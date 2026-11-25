@@ -697,3 +697,92 @@ input[type='file']::file-selector-button:hover { border-color: var(--accent-tiza
   .cinta-fila { grid-template-columns: minmax(0, 1fr) auto 3.8em 48px 1em; gap: 8px; }
   .cinta-linea { width: 48px; }
 }
+
+/* Registrar: dos caminos, báscula y cinta. */
+.registro-tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.registro-tipo {
+  display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 12px; border-radius: var(--r);
+  border: 1.5px solid var(--edge); background: var(--card); color: var(--fg); font: inherit; text-align: left;
+}
+.registro-tipo > span { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.registro-tipo .small { color: var(--dim); }
+.registro-tipo .icono { width: 26px; height: 26px; flex: none; }
+.registro-tipo.activo { border-color: var(--costura); box-shadow: inset 0 0 0 1px var(--costura); }
+button.registro-tipo { cursor: pointer; background: linear-gradient(135deg, var(--card), var(--soft)); }
+button.registro-tipo:hover { filter: brightness(1.12); }
+button.registro-tipo:focus-visible { outline: 2px solid var(--costura); outline-offset: 2px; }
+button.registro-tipo > .icono:last-child { width: 18px; height: 18px; color: var(--dim); }
+@media (max-width: 420px) { .registro-tipos { grid-template-columns: 1fr; } }
+
+/* Medidas con cinta, paso a paso. */
+.medir-cinta h1 { margin: 0; }
+.cinta-escena { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: center; overflow: hidden; }
+@media (max-width: 640px) { .cinta-escena { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
+.cinta-intro-t { font-size: 1.15rem; font-weight: 800; margin: 0; }
+.cinta-paso-n { margin: 0; }
+.cinta-paso-t { font-size: 1.8rem; margin: 0; letter-spacing: -0.01em; }
+.cinta-paso-t:focus { outline: none; }
+.cinta-consejo { margin: 0; font-size: 1.05rem; color: var(--fg); }
+.cinta-entrada { display: flex; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--costura); padding-bottom: 4px; }
+.cinta-entrada input {
+  flex: 1; min-width: 0; font: inherit; font-size: 2.6rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  color: var(--fg); background: none; border: 0; padding: 4px 0; outline: none;
+}
+.cinta-entrada input::placeholder { color: var(--edge); }
+.cinta-unidad { color: var(--dim); font-weight: 700; font-size: 1.2rem; }
+.cinta-ayuda { margin: 0; min-height: 1.5em; color: var(--dim); }
+.cinta-ayuda .cinta-cambio { display: inline-flex; font-size: inherit; }
+.cinta-botones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cinta-botones .btn { min-height: 48px; display: inline-flex; align-items: center; gap: 6px; }
+.cinta-botones .btn.primary { margin-left: auto; }
+.cinta-botones .icono { width: 18px; height: 18px; }
+.cinta-resumen { list-style: none; margin: 0; padding: 0; }
+.cinta-resumen li + li { border-top: 1px dashed var(--edge); }
+.cinta-resumen .cinta-fila { grid-template-columns: minmax(0, 1fr) auto 4.4em 1.2em; }
+
+/* Avance: una muesca por medida. */
+.cinta-progreso { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+.cinta-progreso li { height: 6px; border-radius: 3px; background: var(--soft); border: 1px solid var(--edge); transition: background 0.4s, transform 0.4s; }
+.cinta-progreso li.hecha { background: var(--costura); border-color: var(--costura); }
+.cinta-progreso li.saltada { background: none; border-style: dashed; }
+.cinta-progreso li.actual { transform: scaleY(1.7); border-color: var(--fg); }
+
+/* El maniquí. */
+.maniqui { width: 100%; height: min(40vh, 400px); display: block; margin: 0 auto; }
+.inicio .maniqui { height: min(44vh, 380px); }
+.maniqui-reticula line { stroke: var(--edge); stroke-width: 0.4; opacity: 0.35; }
+.maniqui .pieza { fill: var(--pieza); }
+.maniqui .corte { fill: none; stroke: var(--corte); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.maniqui .costura-ancha { fill: none; stroke: var(--costura); stroke-width: 15; stroke-dasharray: 5 4; opacity: 0.6; }
+.maniqui .costura-tapa { fill: none; stroke: var(--pieza); stroke-width: 12; }
+.maniqui-camara { transform-box: view-box; transform-origin: 0 0; transition: transform 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
+.maniqui-hecha { fill: none; stroke: var(--costura); stroke-width: 2.2; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: 0.9; }
+.cinta-trasera { fill: none; stroke: var(--warn); stroke-width: 2; stroke-dasharray: 3 3; opacity: 0.7; vector-effect: non-scaling-stroke; }
+.cinta-delantera { fill: none; stroke: var(--warn); stroke-width: 9; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.cinta-marcas { fill: none; stroke: var(--pieza); stroke-width: 5; stroke-dasharray: 0.5 2.5; vector-effect: non-scaling-stroke; }
+.maniqui-brillo { opacity: 0.8; }
+.cinta-lectura rect { fill: var(--warn); }
+.cinta-lectura-pico { fill: var(--warn); }
+.cinta-lectura text { font-family: var(--font); font-size: 8px; font-weight: 800; fill: var(--pieza); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .maniqui:not(.quieto) .cinta-trasera { stroke-dasharray: 100; stroke-dashoffset: 100; animation: cinta-vuelta 0.55s cubic-bezier(0.33, 1, 0.68, 1) 0.7s forwards; }
+  .maniqui:not(.quieto) .cinta-delantera { stroke-dasharray: 100; stroke-dashoffset: 100; animation: cinta-vuelta 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s forwards; }
+  .maniqui:not(.quieto) .cinta-marcas { opacity: 0; animation: aparecer 0.3s ease-out 1.7s forwards; }
+  .maniqui:not(.quieto) .cinta-ajuste { animation: cinta-ajuste 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.75s both; }
+  .maniqui:not(.quieto) .cinta-lectura { opacity: 0; animation: aparecer 0.35s ease-out 1.5s forwards; }
+  .maniqui:not(.quieto) .maniqui-brillo { animation: latido 2.4s ease-in-out 0.8s infinite; opacity: 0; }
+  .maniqui:not(.quieto) .maniqui-camara .sil { animation: aparecer 0.5s ease-out both; }
+}
+@keyframes cinta-vuelta { to { stroke-dashoffset: 0; } }
+@keyframes cinta-ajuste { 0% { transform: scaleX(1.14); } 60% { transform: scaleX(0.97); } 100% { transform: scaleX(1); } }
+@keyframes latido { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.85; } }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .maniqui-camara, .cinta-progreso li { transition: none; } }
+
+/* Ficha: el peso de tendencia y el último peso tomado, lado a lado. */
+.pesos { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 4px 28px; align-items: end; }
+.peso-col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.peso-col.ultimo { padding-left: 20px; border-left: 1px dashed var(--edge); }
+.peso-col.ultimo .hero-v { font-size: 2.1rem; color: var(--dim); }
+.peso-col.ultimo .hero-v small { font-size: 0.7em; }

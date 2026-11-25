@@ -18,6 +18,11 @@ describe('leerRuta', () => {
   test('ficha de una persona', () => expect(leerRuta('#/p/abc')).toEqual({ pantalla: 'ficha', personaId: 'abc' }))
   test('registrar con fecha', () =>
     expect(leerRuta('#/p/abc/registrar?fecha=2026-11-17')).toEqual({ pantalla: 'registrar', personaId: 'abc', fecha: '2026-11-17' }))
+  test('medidas con cinta, con y sin fecha', () => {
+    expect(leerRuta('#/p/abc/cinta')).toEqual({ pantalla: 'cinta', personaId: 'abc' })
+    expect(leerRuta('#/p/abc/cinta?fecha=2026-11-17')).toEqual({ pantalla: 'cinta', personaId: 'abc', fecha: '2026-11-17' })
+    expect(escribirRuta({ pantalla: 'cinta', personaId: 'abc', fecha: '2026-11-17' })).toBe('#/p/abc/cinta?fecha=2026-11-17')
+  })
   test('registrar con una fecha inválida la ignora', () => expect(leerRuta('#/p/abc/registrar?fecha=xx')).toEqual({ pantalla: 'registrar', personaId: 'abc' }))
   test('registrar sin fecha', () => expect(leerRuta('#/p/abc/registrar')).toEqual({ pantalla: 'registrar', personaId: 'abc' }))
   test('mediciones', () => expect(leerRuta('#/p/abc/mediciones')).toEqual({ pantalla: 'mediciones', personaId: 'abc' }))

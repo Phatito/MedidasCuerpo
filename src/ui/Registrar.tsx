@@ -5,6 +5,7 @@ import type { Persona } from '../domain/types'
 import { listarPersonas } from '../storage/db'
 import { ImportarArchivo, plural } from './ImportarArchivo'
 import { LeerCaptura } from './LeerCaptura'
+import { Icono } from './Icono'
 import { Medir, type Borrador } from './Medir'
 
 interface Props {
@@ -14,17 +15,29 @@ interface Props {
   onBorrador: (b: Borrador | null) => void
   /** Volver a la ficha con un aviso. */
   onListo: (aviso: string) => void
+  /** Abrir el paso a paso de las medidas con cinta. */
+  onCinta: () => void
 }
 
 type Modo = 'escribir' | 'captura' | 'archivo'
-const MODOS: { id: Modo; nombre: string; detalle: string }[] = [
+// Una medición nueva: la báscula se carga sobre todo con la captura; a mano, solo el peso.
+const MODOS_NUEVA: { id: Modo; nombre: string; detalle: string }[] = [
+  { id: 'captura', nombre: 'Captura de Xiaomi Home', detalle: 'elige o pega la imagen' },
+  { id: 'escribir', nombre: 'Solo peso', detalle: 'báscula básica, a mano' },
+  { id: 'archivo', nombre: 'Archivo', detalle: 'CSV o Excel con varias semanas' },
+]
+// Editar una medición guardada: todo junto, como siempre.
+const MODOS_EDITAR: { id: Modo; nombre: string; detalle: string }[] = [
   { id: 'escribir', nombre: 'Escribir', detalle: 'a mano, campo por campo' },
   { id: 'captura', nombre: 'Captura de Xiaomi Home', detalle: 'elige o pega la imagen' },
   { id: 'archivo', nombre: 'Archivo', detalle: 'CSV o Excel con varias semanas' },
 ]
 
-export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Props) {
-  const [modo, setModo] = useState<Modo>('escribir')
+export function Registrar({ persona, fecha, borrador, onBorrador, onListo, onCinta }: Props) {
+  const editar = fecha != null
+  const MODOS = editar ? MODOS_EDITAR : MODOS_NUEVA
+  // Un borrador de lo escrito a mano vuelve a su pestaña.
+  const [modo, setModo] = useState<Modo>(editar || borrador ? 'escribir' : 'captura')
   const personas = useLiveQuery(listarPersonas, [], [] as Persona[])
   const pestanas = useRef<HTMLDivElement>(null)
   const [lectura, setLectura] = useState<{ id: number; datos: LecturaCaptura; imagenUrl: string } | null>(null)
@@ -67,7 +80,26 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Pro
 
   return (
     <div className="stack registrar">
-      <h1>Registrar medición · {persona.nombre}</h1>
+      <h1>{editar ? 'Editar medición' : 'Registrar medición'} · {persona.nombre}</h1>
+      {!editar && (
+        <div className="registro-tipos">
+          <div className="registro-tipo activo" aria-current="true">
+            <Icono nombre="bascula" />
+            <span>
+              <b>Báscula</b>
+              <span className="small">captura o solo peso</span>
+            </span>
+          </div>
+          <button type="button" className="registro-tipo" onClick={onCinta}>
+            <Icono nombre="cinta" />
+            <span>
+              <b>Medidas con cinta</b>
+              <span className="small">paso a paso, con el maniquí</span>
+            </span>
+            <Icono nombre="abrir" />
+          </button>
+        </div>
+      )}
       <div className="modos" role="tablist" aria-label="Cómo cargar" ref={pestanas} onKeyDown={teclas}>
         {MODOS.map((m) => (
           <button
@@ -91,6 +123,7 @@ export function Registrar({ persona, fecha, borrador, onBorrador, onListo }: Pro
         <Medir
           key={`${persona.id}-${fecha ?? ''}`}
           persona={persona}
+          modo={editar ? 'completo' : 'bascula'}
           fechaInicial={fecha}
           borrador={fecha ? undefined : borrador}
           // Editar una medición de otra fecha no debe tocar el borrador de la medición nueva.

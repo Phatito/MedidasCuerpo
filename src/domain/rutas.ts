@@ -5,6 +5,7 @@ import type { Persona } from './types'
 export type Ruta =
   | { pantalla: 'ficha'; personaId: string }
   | { pantalla: 'registrar'; personaId: string; fecha?: string }
+  | { pantalla: 'cinta'; personaId: string; fecha?: string }
   | { pantalla: 'mediciones'; personaId: string }
   | { pantalla: 'semana'; personaId: string }
   | { pantalla: 'medida'; personaId: string; medida: Metrica }
@@ -33,9 +34,10 @@ export function leerRuta(hash: string): Ruta {
   if (partes[2] === 'cifras') return { pantalla: 'cifras', personaId }
   if (partes[2] === 'mediciones') return { pantalla: 'mediciones', personaId }
   if (partes[2] === 'semana') return { pantalla: 'semana', personaId }
-  if (partes[2] === 'registrar') {
+  if (partes[2] === 'registrar' || partes[2] === 'cinta') {
+    const pantalla = partes[2]
     const fecha = new URLSearchParams(consulta).get('fecha')
-    return fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? { pantalla: 'registrar', personaId, fecha } : { pantalla: 'registrar', personaId }
+    return fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? { pantalla, personaId, fecha } : { pantalla, personaId }
   }
   return INICIO
 }
@@ -60,6 +62,8 @@ export function escribirRuta(r: Ruta): string {
       return `#/p/${encodeURIComponent(r.personaId)}/cifras`
     case 'registrar':
       return `#/p/${encodeURIComponent(r.personaId)}/registrar${r.fecha ? `?fecha=${r.fecha}` : ''}`
+    case 'cinta':
+      return `#/p/${encodeURIComponent(r.personaId)}/cinta${r.fecha ? `?fecha=${r.fecha}` : ''}`
   }
 }
 

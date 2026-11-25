@@ -12,6 +12,7 @@ import { Icono } from './Icono'
 import { Ficha } from './Ficha'
 import { Historial } from './Historial'
 import type { Borrador } from './Medir'
+import { MedirCinta } from './MedirCinta'
 import { Registrar } from './Registrar'
 import { SelectorPerfil } from './SelectorPerfil'
 import { PantallaSemana } from './TuSemana'
@@ -137,6 +138,17 @@ export function App() {
   const alInicio: Ruta = principal ? fichaDe(principal.id) : { pantalla: 'familia' }
   const vista = destino ? null : ruta
   const atras: Ruta = persona ? fichaDe(persona.id) : alInicio
+
+  /** Tras guardar: si se vino desde la ficha, se vuelve atrás; si no (por ejemplo desde Registrar), se va a la ficha. */
+  function alListo(personaId: string, texto: string) {
+    const ficha = fichaDe(personaId)
+    if (anterior.current === escribirRuta(ficha) && history.state?.app) history.back()
+    else {
+      history.replaceState(history.state, '', escribirRuta(ficha))
+      setRuta(ficha)
+    }
+    setAviso(texto ? { hash: escribirRuta(ficha), texto } : null)
+  }
   const avisoVisible = !!(aviso && vista && aviso.hash === escribirRuta(vista))
 
   return (
@@ -185,7 +197,7 @@ export function App() {
             {vista.pantalla !== 'ficha' && escribirRuta(atras) !== escribirRuta(vista) && (
               <button type="button" className="btn volver" onClick={() => volver(atras)}>
                 <Icono nombre="volver" />
-                {vista.pantalla === 'registrar' ? 'Volver a la ficha' : 'Volver'}
+                {vista.pantalla === 'registrar' || vista.pantalla === 'cinta' ? 'Volver a la ficha' : 'Volver'}
               </button>
             )}
             {vista.pantalla === 'familia' && (
@@ -216,17 +228,12 @@ export function App() {
                 fecha={vista.fecha}
                 borrador={borradores.current.get(personaDeRuta.id)}
                 onBorrador={(b) => (b ? borradores.current.set(personaDeRuta.id, b) : borradores.current.delete(personaDeRuta.id))}
-                onListo={(texto) => {
-                  const ficha = fichaDe(personaDeRuta.id)
-                  // Si se vino desde la ficha, se vuelve atrás; si no (por ejemplo desde Todas las mediciones), se va a la ficha.
-                  if (anterior.current === escribirRuta(ficha) && history.state?.app) history.back()
-                  else {
-                    history.replaceState(history.state, '', escribirRuta(ficha))
-                    setRuta(ficha)
-                  }
-                  setAviso(texto ? { hash: escribirRuta(ficha), texto } : null)
-                }}
+                onListo={(texto) => alListo(personaDeRuta.id, texto)}
+                onCinta={() => navegar({ pantalla: 'cinta', personaId: personaDeRuta.id })}
               />
+            )}
+            {vista.pantalla === 'cinta' && personaDeRuta && (
+              <MedirCinta key={`${personaDeRuta.id}-${vista.fecha ?? ''}`} persona={personaDeRuta} fecha={vista.fecha} onListo={(texto) => alListo(personaDeRuta.id, texto)} />
             )}
             {vista.pantalla === 'mediciones' && personaDeRuta && (
               <>

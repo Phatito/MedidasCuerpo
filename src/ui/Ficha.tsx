@@ -96,10 +96,20 @@ export function Ficha({ persona, onMedir, onVerMediciones, onVerSemana, onVerMed
           </p>
         </div>
         {peso ? (
-          <button type="button" className="peso-boton" onClick={() => onVerMedida('pesoKg')} aria-label={`Peso de tendencia: ${formatear(peso.valor)} kg. Ver gráfico de peso`}>
-            <span className="hero-k">Peso de tendencia</span>
-            <span className="hero-v num">
-              {formatear(peso.valor)} <small>kg</small>
+          <button type="button" className="peso-boton" onClick={() => onVerMedida('pesoKg')} aria-label={`Peso de tendencia: ${formatear(peso.valor)} kg. Último peso tomado: ${formatear(peso.ultimaPesada!)} kg el ${fechaLegible(peso.fecha!).slice(0, 5)}. Ver gráfico de peso`}>
+            <span className="pesos">
+              <span className="peso-col">
+                <span className="hero-k">Peso de tendencia</span>
+                <span className="hero-v num">
+                  {formatear(peso.valor)} <small>kg</small>
+                </span>
+              </span>
+              <span className="peso-col ultimo">
+                <span className="hero-k">Último peso · {fechaLegible(peso.fecha!).slice(0, 5)}</span>
+                <span className="hero-v num">
+                  {formatear(peso.ultimaPesada!)} <small>kg</small>
+                </span>
+              </span>
             </span>
             <span className="small num peso-cambios">
               {cambioSemana != null && Math.abs(cambioSemana) >= 0.05 && (

@@ -122,8 +122,11 @@ function haceDias(n: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+/** Una medición con peso y cintura juntos: se usa el formulario completo (el de editar una fecha). */
 async function medir(page: Page, fecha: string, peso: string, cintura: string) {
-  await ir(page, 'Medir')
+  await irAFicha(page)
+  const id = new URL(page.url()).hash.split('/')[2]
+  await page.goto(`./#/p/${id}/registrar?fecha=${fecha}`)
   await page.getByLabel('Fecha').fill(fecha)
   await page.getByLabel('Peso (kg)').fill(peso)
   await page.getByLabel('Cintura (cm)').fill(cintura)

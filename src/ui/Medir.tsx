@@ -25,13 +25,19 @@ interface Props {
   lectura?: { id: number; datos: LecturaCaptura; imagenUrl: string }
   /** Registrar lee aquí si hay algo sin guardar y cuándo se escribió por última vez. */
   estado?: MutableRefObject<{ sucio: boolean; editadoEn: number }>
+  /** "bascula": solo peso (y lo demás de la báscula, plegado); las medidas con cinta van aparte y se conservan.
+   *  "completo": todo junto, para editar una medición guardada. */
+  modo?: 'bascula' | 'completo'
 }
 
+const CAMPOS_BASCULA_TODOS: CampoNumerico[] = [...CAMPOS_BASCULA, ...CAMPOS_BASCULA_EXTRA]
+const MAS_BASCULA: CampoNumerico[] = CAMPOS_BASCULA_TODOS.filter((c) => c !== 'pesoKg')
 type Textos = Record<CampoNumerico, string>
 const VACIO = Object.fromEntries(CAMPOS_NUMERICOS.map((c) => [c, ''])) as Textos
 const aTexto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada, lectura, estado }: Props) {
+export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvolucion, onGuardada, lectura, estado, modo = 'completo' }: Props) {
+  const bascula = modo === 'bascula'
   const mediciones = useLiveQuery(() => listarMediciones(persona.id), [persona.id])
   const [fecha, setFecha] = useState(fechaInicial ?? borrador?.fecha ?? hoyIso())
   const [textos, setTextos] = useState<Textos>(borrador?.textos ?? VACIO)
@@ -131,11 +137,18 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
     const err: typeof errores = {}
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) err.fecha = 'Elige una fecha'
     else if (fecha > hoyIso()) err.fecha = 'La fecha no puede ser futura'
-    const medicion: Medicion = { id: idMedicion(persona.id, fecha), personaId: persona.id, fecha, pesoKg: 0, origen: 'manual' }
-    for (const campo of CAMPOS_NUMERICOS) {
+    // En la báscula se conserva lo demás de ese día (las medidas con cinta); solo se reescriben los campos de la báscula.
+    const camposForm = bascula ? CAMPOS_BASCULA_TODOS : CAMPOS_NUMERICOS
+    const medicion: Medicion = { id: idMedicion(persona.id, fecha), personaId: persona.id, fecha, origen: 'manual' }
+    if (bascula && existente) {
+      for (const c of CAMPOS_PERIMETROS) if (existente[c] != null) medicion[c] = existente[c]
+    }
+    for (const campo of camposForm) {
       const texto = textos[campo].trim()
       if (texto === '') {
-        if (campo === 'pesoKg') err.pesoKg = 'El peso es obligatorio'
+        if (campo === 'pesoKg' && (bascula || !CAMPOS_PERIMETROS.some((c) => textos[c].trim() !== ''))) {
+          err.pesoKg = bascula ? 'El peso es obligatorio' : 'Escribe el peso o alguna medida con cinta'
+        }
         continue
       }
       const valor = parseNumero(texto)
@@ -237,22 +250,32 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
             {errores.fecha && <span className="error">{errores.fecha}</span>}
           </div>
         </div>
-        {existente && <p className="notice warn small">Ya hay una medición del {fechaLegible(fecha)}; al guardar se reemplazará.</p>}
+        {existente && (
+          <p className="notice warn small">
+            {bascula
+              ? `Ya hay una medición del ${fechaLegible(fecha)}: se actualizan los datos de la báscula y se conservan las medidas con cinta.`
+              : `Ya hay una medición del ${fechaLegible(fecha)}; al guardar se reemplazará.`}
+          </p>
+        )}
         {anterior && <p className="muted small">Medición anterior: {fechaLegible(anterior.fecha)}.</p>}
       </div>
       <div className="card">
         <fieldset>
           <legend>Báscula</legend>
-          <div className="form">{CAMPOS_BASCULA.map(campo)}</div>
-          <details className="guide" open={CAMPOS_BASCULA_EXTRA.some((c) => textos[c] !== '') || undefined}>
+          <div className="form">{(bascula ? ['pesoKg' as CampoNumerico] : CAMPOS_BASCULA).map(campo)}</div>
+          <details className="guide" open={(bascula ? MAS_BASCULA : CAMPOS_BASCULA_EXTRA).some((c) => textos[c] !== '') || undefined}>
             <summary>Más de la báscula</summary>
-            <div className="form">{CAMPOS_BASCULA_EXTRA.map(campo)}</div>
+            <div className="form">{(bascula ? MAS_BASCULA : CAMPOS_BASCULA_EXTRA).map(campo)}</div>
             <p className="muted small">Masa muscular total, masa ósea, proteína, metabolismo basal, edad corporal y frecuencia cardíaca, como en el informe de básculas como la Xiaomi.</p>
           </details>
-          <p className="muted small">Solo el peso es obligatorio. Si tu báscula o tu reporte InBody entrega los demás valores, cópialos aquí.</p>
+          <p className="muted small">
+            {bascula
+              ? 'Con una báscula básica, basta el peso. Si tienes la captura de Xiaomi Home, úsala: llena todo sola.'
+              : 'Escribe el peso o alguna medida con cinta. Si tu báscula o tu reporte InBody entrega los demás valores, cópialos aquí.'}
+          </p>
         </fieldset>
       </div>
-      <div className="card">
+      {!bascula && <div className="card">
         <fieldset>
           <legend>Perímetros</legend>
           {/* Las medidas sin lado ya no se piden; solo aparecen si la medición cargada las trae, para no perderlas. */}
@@ -271,7 +294,7 @@ export function Medir({ persona, fechaInicial, borrador, onBorrador, onVerEvoluc
           </details>
           <p className="muted small">Mide siempre a la misma hora y en el mismo punto. Con cuello y cintura (y cadera en mujeres) la app estima el % de grasa si no lo tienes.</p>
         </fieldset>
-      </div>
+      </div>}
       <div className="card">
         <div className="field">
           <label htmlFor="medir-nota">Nota (opcional)</label>

@@ -11,6 +11,10 @@ const TRAZOS = {
   editar: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4',
   // Muesca del molde con una línea: "esta semana".
   semana: 'M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3',
+  // Báscula: plataforma con su visor.
+  bascula: 'M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 9h6M12 9l1.5-1.5',
+  // Cinta métrica enrollada con su punta.
+  cinta: 'M12 5a7 7 0 1 0 0 14h8M12 9a3 3 0 1 0 0 6M20 16v6M16 19v3',
 } as const
 
 export function Icono({ nombre, className = '' }: { nombre: keyof typeof TRAZOS; className?: string }) {
