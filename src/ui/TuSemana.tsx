@@ -4,6 +4,7 @@ import { fechaLegible, formatear, hoyIso } from '../domain/numbers'
 import { informeSemanal, type InformeSemanal } from '../domain/semana'
 import type { Medicion, Persona } from '../domain/types'
 import { listarMediciones } from '../storage/db'
+import { Composicion } from './Composicion'
 import { Consumo } from './Consumo'
 import { textoCambio } from './Cinta'
 import { Icono, Muesca } from './Icono'
@@ -160,37 +161,12 @@ export function TarjetaSemana({ persona, mediciones, onVerInforme }: { persona: 
 }
 
 /** Barras apiladas de grasa y masa magra por medición (las últimas 12). */
+/** Grasa y masa magra por medición: las mismas barras del panel de peso, del mismo tamaño en el teléfono y en el PC. */
 function Barras({ barras }: { barras: InformeSemanal['barras'] }) {
   const vistas = barras.slice(-12)
-  const max = Math.max(...vistas.map((b) => b.grasaKg + b.magraKg))
-  const ancho = 30
-  const alto = 150
-  const w = vistas.length * ancho
   const descripcion =
     'Grasa y masa magra por medición: ' + vistas.map((b) => `${ddmm(b.fecha)}, ${formatear(b.grasaKg)} kg de grasa y ${formatear(b.magraKg)} kg de masa magra`).join('; ')
-  return (
-    <figure className="barras">
-      <svg viewBox={`0 0 ${w} ${alto + 18}`} role="img" aria-label={descripcion} preserveAspectRatio="xMidYMax meet">
-        {vistas.map((b, i) => {
-          const hMagra = (b.magraKg / max) * alto
-          const hGrasa = (b.grasaKg / max) * alto
-          const x = i * ancho + 6
-          return (
-            <g key={b.fecha}>
-              <rect x={x} y={alto - hMagra} width={ancho - 12} height={hMagra} rx={3} className="b-magra" />
-              <rect x={x} y={alto - hMagra - hGrasa} width={ancho - 12} height={Math.max(0, hGrasa - 2)} rx={3} className="b-grasa" />
-              <text x={x + (ancho - 12) / 2} y={alto + 13} textAnchor="middle" className="b-fecha">
-                {ddmm(b.fecha)}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-      <figcaption className="leyenda small">
-        <span className="ley grasa">Grasa</span> <span className="ley magra">Masa magra</span>
-      </figcaption>
-    </figure>
-  )
+  return <Composicion barras={vistas} descripcion={descripcion} />
 }
 
 /** Pantalla "Tu semana" con el informe completo. */

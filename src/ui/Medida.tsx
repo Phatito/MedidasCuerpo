@@ -12,6 +12,7 @@ import { listarMediciones } from '../storage/db'
 import { etiqueta, GUIA_ESTADOS, Mensajes, Tarjeta, TARJETA, textoMeta } from './Cifra'
 import { Consumo } from './Consumo'
 import { Muesca } from './Icono'
+import { Composicion } from './Composicion'
 import { ExplorarCuerpo } from './ExplorarCuerpo'
 import { GraficoVivo, MiniCurva } from './GraficoVivo'
 import { informeSemanal } from '../domain/semana'
@@ -28,29 +29,6 @@ const TONO: Partial<Record<Metrica, 'bajar' | 'subir' | 'neutro'>> = {
   grasaPct: 'bajar', grasaKg: 'bajar', grasaVisceral: 'bajar', musculoKg: 'subir', musculoTotalKg: 'subir', pesoSinGrasaKg: 'subir', aguaPct: 'subir', proteinaPct: 'subir',
 }
 
-/** Barras apiladas: grasa abajo, masa magra arriba, por pesada. */
-function Composicion({ barras }: { barras: { fecha: string; grasaKg: number; magraKg: number }[] }) {
-  const max = Math.max(...barras.map((b) => b.grasaKg + b.magraKg))
-  const ultima = barras[barras.length - 1]
-  return (
-    <>
-      <div className="comp" role="img" aria-label={`Última pesada: ${formatear(ultima.grasaKg)} kg de grasa y ${formatear(ultima.magraKg)} kg de masa magra.`}>
-        {barras.map((b, k) => (
-          <div key={b.fecha} className="comp-col" style={{ animationDelay: `${k * 0.05}s` }}>
-            <div className="comp-barra" style={{ height: `${((b.grasaKg + b.magraKg) / max) * 100}%` }}>
-              <span className="comp-magra" style={{ flexGrow: b.magraKg }} />
-              <span className="comp-grasa" style={{ flexGrow: b.grasaKg }} />
-            </div>
-            <span className="comp-f num">{fechaLegible(b.fecha).slice(0, 5)}</span>
-          </div>
-        ))}
-      </div>
-      <p className="small num comp-leyenda">
-        <i className="comp-grasa" /> Grasa {formatear(ultima.grasaKg)} kg <i className="comp-magra" /> Masa magra {formatear(ultima.magraKg)} kg
-      </p>
-    </>
-  )
-}
 const EXTRAS: Metrica[] = ['imc', 'grasaKg', 'pesoSinGrasaKg']
 const esTarjeta = (m: Metrica): m is ClaveTarjeta => m in TARJETA
 
@@ -104,98 +82,114 @@ export function PantallaMedida({ persona, medida, onCambiar }: { persona: Person
         {nombre} · {persona.nombre}
       </h1>
 
-      {tarjeta && <Tarjeta t={tarjeta} ultimaFecha={r.ultima!.fecha} />}
-      {!tarjeta && puntos.length > 0 && (
-        <article className="tile">
-          <h3 className="k">{nombre}</h3>
-          <span className="v num">
-            {formatear(puntos[puntos.length - 1].valor)} <small>{unidad}</small>
-          </span>
-          {cuadrito?.cambio != null && (
-            <p className={`d ${cuadrito.tono}`}>
-              <Muesca cambio={cuadrito.cambio} /> {formatear(Math.abs(cuadrito.cambio))} {unidad} desde la medición anterior
-            </p>
-          )}
-          <p className="d">del {fechaLegible(puntos[puntos.length - 1].fecha)}</p>
-        </article>
-      )}
-
-      {medida === 'pesoKg' && tarjeta && (
-        <section className="card stack">
-          <p className="small num">Última pesada: {formatear(tarjeta.ultimaPesada!)} kg</p>
-          <div className="chips">
-            {imc && (
-              <button type="button" className={`chip chip-link ${imc.clasificacion ? `st-${imc.clasificacion.estado}` : ''}`} onClick={() => onCambiar('imc')}>
-                IMC {formatear(imc.valor)}
-                {imc.clasificacion && ` · ${imc.clasificacion.nombre}`}
-              </button>
-            )}
-          </div>
-          {r.meta && persona.metaPesoKg != null && (
-            <div className="meta-texto">
-              <h3 className="small">Meta: {formatear(persona.metaPesoKg)} kg</h3>
-              {r.meta.estado !== 'alcanzada' && (
-                <p className="small num">
-                  {r.meta.faltaKg < 0 ? 'Faltan por bajar' : 'Faltan por subir'} {formatear(Math.abs(r.meta.faltaKg))} kg desde tu peso de tendencia.
-                </p>
-              )}
-              <p className="muted small num">{textoMeta(r.meta)}</p>
+      {/* En pantallas anchas: el gráfico a la izquierda; la cifra, las tarjetas y lo demás a la derecha. */}
+      <div className="peso-layout">
+        <div className="pl-col pl-izq">
+          <div className="pl-grafico">
+        {puntos.length > 0 && (
+          <section className="card stack panel-grafico" aria-label="Gráfico">
+            <div className="pastillas" role="group" aria-label="Período">
+              {PERIODOS.map((p) => (
+                <button key={p.id} type="button" className="pastilla" aria-pressed={periodoVisto === p.id} onClick={() => setPeriodo(p.id)}>
+                  {p.nombre}
+                </button>
+              ))}
             </div>
-          )}
-          <Consumo persona={persona} />
-        </section>
-      )}
+            <GraficoVivo
+              puntos={puntos}
+              unidad={unidad}
+              etiqueta={nombre}
+              tendencia={tendencia}
+              meta={medida === 'pesoKg' ? persona.metaPesoKg ?? null : null}
+              tono={TONO[medida] ?? (medida === 'pesoKg' ? (persona.objetivo === 'ganar_musculo' ? 'subir' : persona.objetivo === 'bajar_grasa' ? 'bajar' : 'neutro') : 'neutro')}
+              decimales={medida === 'grasaVisceral' || medida === 'metabolismoBasalKcal' || medida === 'edadCorporal' || medida === 'frecuenciaCardiacaLpm' ? 0 : 1}
+            />
+            {medida === 'pesoKg' && puntos.length > 1 && (
+              <p className="muted small">
+                <i className="leyenda-linea" /> La tendencia es un promedio que da más importancia a las pesadas recientes y suaviza las subidas y bajadas de un día. <i className="leyenda-punto" /> Cada pesada.
+              </p>
+            )}
+            {hayEstimada && <p className="muted small">Incluye valores estimados a partir de los perímetros (fórmula de la Marina de EE. UU.), no medidos por una báscula.</p>}
+          </section>
+        )}
 
-      {puntos.length > 0 && (
-        <section className="card stack panel-grafico" aria-label="Gráfico">
-          <div className="pastillas" role="group" aria-label="Período">
-            {PERIODOS.map((p) => (
-              <button key={p.id} type="button" className="pastilla" aria-pressed={periodoVisto === p.id} onClick={() => setPeriodo(p.id)}>
-                {p.nombre}
-              </button>
-            ))}
           </div>
-          <GraficoVivo
-            puntos={puntos}
-            unidad={unidad}
-            etiqueta={nombre}
-            tendencia={tendencia}
-            meta={medida === 'pesoKg' ? persona.metaPesoKg ?? null : null}
-            tono={TONO[medida] ?? (medida === 'pesoKg' ? (persona.objetivo === 'ganar_musculo' ? 'subir' : persona.objetivo === 'bajar_grasa' ? 'bajar' : 'neutro') : 'neutro')}
-            decimales={medida === 'grasaVisceral' || medida === 'metabolismoBasalKcal' || medida === 'edadCorporal' || medida === 'frecuenciaCardiacaLpm' ? 0 : 1}
-          />
-          {medida === 'pesoKg' && puntos.length > 1 && (
-            <p className="muted small">
-              <i className="leyenda-linea" /> La tendencia es un promedio que da más importancia a las pesadas recientes y suaviza las subidas y bajadas de un día. <i className="leyenda-punto" /> Cada pesada.
-            </p>
-          )}
-          {hayEstimada && <p className="muted small">Incluye valores estimados a partir de los perímetros (fórmula de la Marina de EE. UU.), no medidos por una báscula.</p>}
+          <div className="pl-comp">
+        {composicion.length > 1 && (medida === 'pesoKg' || medida === 'grasaPct' || medida === 'grasaKg' || medida === 'pesoSinGrasaKg') && (
+          <section className="card stack" aria-labelledby="composicion-t">
+            <h3 id="composicion-t">Grasa y masa magra por pesada</h3>
+            <Composicion barras={composicion.slice(-10)} />
+          </section>
+        )}
+          </div>
+        </div>
+        <div className="pl-col pl-der">
+          <div className="pl-cifra stack">
+        {tarjeta && <Tarjeta t={tarjeta} ultimaFecha={r.ultima!.fecha} />}
+        {!tarjeta && puntos.length > 0 && (
+          <article className="tile">
+            <h3 className="k">{nombre}</h3>
+            <span className="v num">
+              {formatear(puntos[puntos.length - 1].valor)} <small>{unidad}</small>
+            </span>
+            {cuadrito?.cambio != null && (
+              <p className={`d ${cuadrito.tono}`}>
+                <Muesca cambio={cuadrito.cambio} /> {formatear(Math.abs(cuadrito.cambio))} {unidad} desde la medición anterior
+              </p>
+            )}
+            <p className="d">del {fechaLegible(puntos[puntos.length - 1].fecha)}</p>
+          </article>
+        )}
+
+          </div>
+          <div className="pl-segmentos">
+        <section aria-label="Medidas de la báscula" className="segmentos">
+          {segmentos.map((k) => {
+            const serie = serieMetrica(persona, mediciones, k, 'todo', hoy)
+            const u = serie[serie.length - 1]
+            return (
+              <button key={k} type="button" className="segmento" aria-pressed={medida === k} onClick={() => onCambiar(k)}>
+                <span className="segmento-n">{etiqueta(k).nombre}</span>
+                <span className="segmento-v num">
+                  {formatear(u.valor, k === 'grasaVisceral' || k === 'metabolismoBasalKcal' || k === 'edadCorporal' || k === 'frecuenciaCardiacaLpm' ? 0 : 1)} <small>{etiqueta(k).unidad}</small>
+                </span>
+                <MiniCurva puntos={serie.slice(-12)} />
+              </button>
+            )
+          })}
         </section>
-      )}
 
-      <section aria-label="Medidas de la báscula" className="segmentos">
-        {segmentos.map((k) => {
-          const serie = serieMetrica(persona, mediciones, k, 'todo', hoy)
-          const u = serie[serie.length - 1]
-          return (
-            <button key={k} type="button" className="segmento" aria-pressed={medida === k} onClick={() => onCambiar(k)}>
-              <span className="segmento-n">{etiqueta(k).nombre}</span>
-              <span className="segmento-v num">
-                {formatear(u.valor, k === 'grasaVisceral' || k === 'metabolismoBasalKcal' || k === 'edadCorporal' || k === 'frecuenciaCardiacaLpm' ? 0 : 1)} <small>{etiqueta(k).unidad}</small>
-              </span>
-              <MiniCurva puntos={serie.slice(-12)} />
-            </button>
-          )
-        })}
-      </section>
+          </div>
+          <div className="pl-extra stack">
+        {medida === 'pesoKg' && tarjeta && (
+          <section className="card stack">
+            <p className="small num">Última pesada: {formatear(tarjeta.ultimaPesada!)} kg</p>
+            <div className="chips">
+              {imc && (
+                <button type="button" className={`chip chip-link ${imc.clasificacion ? `st-${imc.clasificacion.estado}` : ''}`} onClick={() => onCambiar('imc')}>
+                  IMC {formatear(imc.valor)}
+                  {imc.clasificacion && ` · ${imc.clasificacion.nombre}`}
+                </button>
+              )}
+            </div>
+            {r.meta && persona.metaPesoKg != null && (
+              <div className="meta-texto">
+                <h3 className="small">Meta: {formatear(persona.metaPesoKg)} kg</h3>
+                {r.meta.estado !== 'alcanzada' && (
+                  <p className="small num">
+                    {r.meta.faltaKg < 0 ? 'Faltan por bajar' : 'Faltan por subir'} {formatear(Math.abs(r.meta.faltaKg))} kg desde tu peso de tendencia.
+                  </p>
+                )}
+                <p className="muted small num">{textoMeta(r.meta)}</p>
+              </div>
+            )}
+            <Consumo persona={persona} />
+          </section>
+        )}
 
-      {composicion.length > 1 && (medida === 'pesoKg' || medida === 'grasaPct' || medida === 'grasaKg' || medida === 'pesoSinGrasaKg') && (
-        <section className="card stack" aria-labelledby="composicion-t">
-          <h3 id="composicion-t">Grasa y masa magra por pesada</h3>
-          <Composicion barras={composicion.slice(-10)} />
-        </section>
-      )}
-
+          </div>
+        </div>
+      </div>
       {puntos.length === 0 && <p className="muted">Todavía no hay datos de {nombre.toLowerCase()}.</p>}
 
       <Mensajes mensajes={mensajes} titulo="Qué indica" />

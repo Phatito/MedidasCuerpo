@@ -1,4 +1,5 @@
-import { useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import type React from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { diasEntre, fechaLegible, formatear } from '../domain/numbers'
 
 export interface Punto {
@@ -22,8 +23,22 @@ interface Props {
 
 const VENTANA = 4
 
-const ANCHO = 360
-const ALTO = 210
+/**
+ * El lienzo mide lo mismo que en pantalla (1 unidad = 1 px): así el texto y los puntos no crecen en un PC
+ * ni se achican en un teléfono; solo cambia cuánto espacio hay para la línea.
+ */
+function useAncho(): [React.RefObject<HTMLDivElement>, number] {
+  const caja = useRef<HTMLDivElement>(null)
+  const [ancho, setAncho] = useState(360)
+  useEffect(() => {
+    const el = caja.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(([e]) => setAncho(Math.max(260, Math.round(e.contentRect.width))))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [caja, ancho]
+}
 const M = { izq: 8, der: 8, arriba: 34, abajo: 24 }
 
 /**
@@ -32,6 +47,8 @@ const M = { izq: 8, der: 8, arriba: 34, abajo: 24 }
  */
 export function GraficoVivo({ puntos, unidad, etiqueta, tendencia, meta, tono = 'neutro', decimales = 1 }: Props) {
   const id = useId().replace(/:/g, '')
+  const [caja, ANCHO] = useAncho()
+  const ALTO = Math.round(Math.min(300, Math.max(190, ANCHO * 0.42)))
   const lienzo = useRef<SVGSVGElement>(null)
   const [elegido, setElegido] = useState<number | null>(null)
   // Cada serie nueva redibuja la línea (la clave cambia).
@@ -69,7 +86,7 @@ export function GraficoVivo({ puntos, unidad, etiqueta, tendencia, meta, tono = 
     // Tres líneas de guía con valores redondos.
     const marcas = [0.2, 0.5, 0.8].map((f) => min + (max - min) * f)
     return { x, y, curva, marcas, base: ALTO - M.abajo }
-  }, [puntos, tendencia, meta])
+  }, [puntos, tendencia, meta, ANCHO, ALTO])
 
   if (!g) return null
   // Sin tendencia (todo menos el peso), el promedio de las últimas 4 mediciones suaviza el ruido.
@@ -118,7 +135,7 @@ export function GraficoVivo({ puntos, unidad, etiqueta, tendencia, meta, tono = 
   const area = puntos.length > 1 ? `${g.curva(puntos)} L${g.x(ultimo.fecha).toFixed(1)},${g.base} L${g.x(puntos[0].fecha).toFixed(1)},${g.base} Z` : ''
 
   return (
-    <div className="gv">
+    <div className="gv" ref={caja}>
       <svg
         ref={lienzo}
         className="gv-lienzo"
