@@ -27,9 +27,9 @@ Las medidas con cinta (perímetros) dicen mejor que la báscula cómo va la comp
 
 `leerCinta(persona, mediciones, desde?)` compara la última medición con perímetros contra una base (la anterior, hace ~4 semanas o la primera) y devuelve:
 
-- `cambios`: por medida, valor, diferencia en cm y si es relevante (|Δ| ≥ 0,5 cm; menos se trata como "sin cambio", puede ser cómo se tomó la medida). Brazos y muslos usan el promedio de los lados cuando hay los dos.
+- `cambios`: por medida, valor y diferencia en cm. **Todo cambio cuenta, aunque sea mínimo** (lo pidió el dueño: "hasta lo mínimo importa"): cualquier diferencia de 0,1 cm o más se muestra y entra en el veredicto. Los cambios menores de 0,5 cm se marcan como **leves** en el texto ("bajó levemente"), sin descartarlos. Solo 0,0 es "sin cambio". Brazos y muslos usan el promedio de los lados cuando hay los dos.
 - `veredicto`, en este orden de prioridad:
-  - `pierde-musculo`: brazos o muslos bajan (≥ 0,5 cm) mientras el peso baja → atención.
+  - `pierde-musculo`: brazos o muslos bajan (≥ 0,1 cm) mientras el peso baja → atención.
   - `recomposicion`: el peso se mantiene (±0,5 kg), la cintura baja y brazos o muslos no bajan.
   - `pierde-grasa`: cintura o cadera bajan y brazos y muslos se mantienen o suben.
   - `gana-grasa`: la cintura sube.
@@ -54,7 +54,7 @@ Cada veredicto trae un título, un texto y una acción (o ninguna). Ejemplo: `pi
 ### Ver mejor los cambios (figura y panel de la cinta)
 
 - Bajo la figura, un selector **"Comparar con: anterior · hace 4 semanas · inicio"**.
-- En la figura, el cambio de cada medida se ve más grande y con color según lo que significa: favorable (cintura, cadera, pecho o cuello bajan; brazos o muslos suben sin que suba la cintura), atención (lo contrario, o brazos y muslos que bajan con el peso) o neutro (menos de 0,5 cm).
+- En la figura, el cambio de cada medida se ve más grande y con color según lo que significa: favorable (cintura, cadera, pecho o cuello bajan; brazos o muslos suben sin que suba la cintura), atención (lo contrario, o brazos y muslos que bajan con el peso) o neutro (0,0 cm); los cambios leves (< 0,5 cm) se muestran igual, con el mismo color y un trazo más suave.
 - Nuevo panel **"Cinta"**: una fila por medida con el valor actual, el cambio en cm, el color de su significado y una mini línea con su historia. La fila abre la pantalla de esa medida, que ya existe.
 
 ```
