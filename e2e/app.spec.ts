@@ -68,13 +68,18 @@ async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Famili
     return perfiles(page).getByRole('menuitem', { name: 'Administrar familia…' }).click()
   }
   await irAFicha(page)
-  if (destino === 'Medir') return page.getByRole('main').getByRole('button', { name: /Registrar medición/ }).first().click()
+  // "Medir" en las pruebas es el formulario completo (peso y cinta juntos), el mismo de editar una fecha.
+  if (destino === 'Medir') {
+    const id = new URL(page.url()).hash.split('/')[2]
+    const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+    return page.goto(`./#/p/${id}/registrar?fecha=${hoy}`)
+  }
   return page.getByRole('button', { name: 'Todas las mediciones' }).click()
 }
 
 test('registrar, actualizar y validar una medición', async ({ page }) => {
   await agregarAna(page)
-  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await ir(page, 'Medir')
   await page.getByLabel('Peso (kg)').fill('72,5')
   await page.getByLabel('Cintura (cm)').fill('88')
   await page.getByRole('button', { name: 'Guardar medición' }).click()
@@ -110,11 +115,20 @@ test('registrar, actualizar y validar una medición', async ({ page }) => {
 
 test('el formulario exige el peso', async ({ page }) => {
   await agregarAna(page)
-  await page.getByRole('button', { name: 'Registrar medición' }).click()
-  await page.getByLabel('Cintura (cm)').fill('88')
+  // La báscula a mano pide solo el peso, y es obligatorio.
+  await abrirPeso(page)
+  await expect(page.getByLabel('Cintura (cm)')).toHaveCount(0)
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.getByText('El peso es obligatorio', { exact: true })).toBeVisible()
+  // En el formulario completo basta el peso o alguna medida con cinta.
+  await ir(page, 'Medir')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Escribe el peso o alguna medida con cinta', { exact: true })).toBeVisible()
+  await page.getByLabel('Cintura (cm)').fill('88')
+  await page.getByRole('button', { name: 'Guardar medición' }).click()
+  await expect(page.getByText('Medición guardada')).toBeVisible()
 })
+
 
 function haceDias(n: number): string {
   const d = new Date()
@@ -161,6 +175,13 @@ test('con una sola medición la evolución invita a seguir', async ({ page }) =>
 
 const CSV_EXCEL = fileURLToPath(new URL('./fixtures/excel.csv', import.meta.url))
 
+/** Registrar → Báscula → Solo peso (la medición nueva, con su borrador). */
+async function abrirPeso(page: Page) {
+  await irAFicha(page)
+  await page.getByRole('main').getByRole('button', { name: /Registrar medición/ }).first().click()
+  await page.getByRole('tab', { name: /Solo peso/ }).click()
+}
+
 async function importarCsv(page: Page) {
   await ir(page, 'Datos')
   await page.getByLabel('Archivo CSV').setInputFiles(CSV_EXCEL)
@@ -171,18 +192,18 @@ test('importar un CSV de Excel en español', async ({ page }) => {
   await importarCsv(page)
   await expect(page.getByLabel('Columna para Peso')).toHaveValue('1')
   await expect(page.getByLabel('Columna para Grasa corporal')).toHaveValue('2')
-  await expect(page.getByText('3 nuevas, 0 reemplazan, 1 omitida')).toBeVisible()
-  await expect(page.getByText('Fila 4: Falta el peso')).toBeVisible()
+  // La fila sin peso trae cintura: se importa como medición de solo cinta.
+  await expect(page.getByText(/4 nuevas, 0 reemplazan/)).toBeVisible()
   await page.getByRole('button', { name: 'Confirmar importación' }).click()
-  await expect(page.getByText('Se importaron 3 mediciones para Ana.')).toBeVisible()
+  await expect(page.getByText('Se importaron 4 mediciones para Ana.')).toBeVisible()
   await ir(page, 'Historial')
-  await expect(filas(page)).toHaveCount(3)
+  await expect(filas(page)).toHaveCount(4)
   await expect(filas(page).first()).toContainText('26/10/2025')
   await expect(filas(page).first()).toContainText('72,6')
 
   // Importar de nuevo avisa que reemplaza.
   await importarCsv(page)
-  await expect(page.getByText('0 nuevas, 3 reemplazan, 1 omitida')).toBeVisible()
+  await expect(page.getByText(/0 nuevas, 4 reemplazan/)).toBeVisible()
 })
 
 test('respaldo: descargar, rechazar un archivo ajeno y restaurar', async ({ page }) => {
@@ -249,7 +270,7 @@ test('es instalable: tiene manifiesto y service worker', async ({ page, request 
 
 test('cambiar la fecha en Medir no borra lo ya escrito', async ({ page }) => {
   await agregarAna(page)
-  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await ir(page, 'Medir')
   await page.getByLabel('Peso (kg)').fill('72,5')
   await page.getByLabel('Cintura (cm)').fill('88')
   await page.getByLabel('Fecha').fill(haceDias(1))
@@ -266,12 +287,12 @@ test('cambiar la fecha en Medir no borra lo ya escrito', async ({ page }) => {
 test('una pantalla Medir que quedó abierta pasa al día de hoy al volver a ella', async ({ page }) => {
   await page.clock.setFixedTime(new Date(2026, 10, 4, 10, 0))
   await agregarAna(page)
-  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await abrirPeso(page)
   await page.getByLabel('Peso (kg)').fill('72,5')
   await page.getByRole('button', { name: 'Guardar medición' }).click()
   await expect(page.getByText('Medición guardada')).toBeVisible()
   // Guardar vuelve a la ficha; se abre Registrar otra vez y se deja abierto.
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
 
   // Una semana después la ventana sigue abierta y la persona vuelve a ella.
@@ -330,7 +351,7 @@ test('con cuatro mediciones ya se ve el promedio de las últimas 4', async ({ pa
 
 test('si el navegador no puede guardar, se avisa y no se dice que se guardó', async ({ page }) => {
   await agregarAna(page)
-  await page.getByRole('button', { name: 'Registrar medición' }).click()
+  await ir(page, 'Medir')
   await page.getByLabel('Peso (kg)').fill('72,5')
   await page.evaluate(() => {
     IDBObjectStore.prototype.put = () => {
@@ -386,15 +407,15 @@ test('cambiar de persona en Registrar no arrastra lo escrito', async ({ page }) 
   await agregarAna(page)
   await agregarPersona(page, 'Beto')
   await elegirPerfil(page, 'Ana')
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await page.getByLabel('Peso (kg)').fill('72,5')
   await elegirPerfil(page, 'Beto')
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await expect(page.getByRole('heading', { name: /Registrar medición · Beto/ })).toBeVisible()
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('')
   // Lo escrito para Ana no se pierde: vuelve al regresar a ella.
   await elegirPerfil(page, 'Ana')
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
   await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeVisible()
   await page.getByRole('button', { name: 'Guardar medición' }).click()
@@ -402,7 +423,7 @@ test('cambiar de persona en Registrar no arrastra lo escrito', async ({ page }) 
   // Una vez guardado ya no hay borrador que recuperar.
   await elegirPerfil(page, 'Beto')
   await elegirPerfil(page, 'Ana')
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await expect(page.getByText('Recuperamos lo que habías escrito sin guardar.')).toBeHidden()
 })
 
@@ -605,7 +626,7 @@ test('el peso se lee por su tendencia', async ({ page }) => {
   for (const [dias, peso] of [[14, '74'], [7, '72'], [0, '74']] as const) await medir(page, haceDias(dias), peso, '88')
   await ir(page, 'Ficha')
   // 74 → 72 → 74 con pesadas semanales deja la tendencia en 73,5: la subida puntual se suaviza.
-  await expect(page.locator('.hero .hero-v')).toContainText('73,5')
+  await expect(page.locator('.hero .peso-col:not(.ultimo) .hero-v')).toContainText('73,5')
   await page.locator('.peso-boton').click()
   await expect(page.getByText('Última pesada: 74,0 kg')).toBeVisible()
   await expect(page.locator('svg.chart path.trend')).toHaveCount(1)
@@ -776,15 +797,20 @@ test('la ficha no tiene desplazamiento horizontal a 400 px', async ({ page }) =>
 
 // ---------- Registrar medición ----------
 
-test('registrar se abre aparte con tres formas de cargar', async ({ page }) => {
+test('registrar separa la báscula de las medidas con cinta', async ({ page }) => {
   await agregarAna(page)
-  await ir(page, 'Medir')
+  await page.getByRole('main').getByRole('button', { name: /Registrar medición/ }).first().click()
   await expect(page.getByRole('heading', { name: 'Registrar medición · Ana' })).toBeVisible()
   const pestanas = page.getByRole('tablist', { name: 'Cómo cargar' })
-  await expect(pestanas.getByRole('tab')).toHaveText([/Escribir/, /Captura de Xiaomi Home/, /Archivo/])
-  await expect(pestanas.getByRole('tab', { name: /Escribir/ })).toHaveAttribute('aria-selected', 'true')
-  await pestanas.getByRole('tab', { name: /Captura de Xiaomi Home/ }).click()
+  await expect(pestanas.getByRole('tab')).toHaveText([/Captura de Xiaomi Home/, /Solo peso/, /Archivo/])
+  // La captura es lo primero.
+  await expect(pestanas.getByRole('tab', { name: /Captura de Xiaomi Home/ })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByLabel('Elegir la captura de Xiaomi Home')).toBeVisible()
+  await pestanas.getByRole('tab', { name: /Solo peso/ }).click()
+  await expect(page.getByLabel('Peso (kg)')).toBeVisible()
+  await expect(page.getByLabel('Grasa corporal (%)')).toBeHidden()
+  await page.getByRole('button', { name: /Medidas con cinta/ }).click()
+  await expect(page.getByRole('heading', { name: 'Medidas con cinta · Ana' })).toBeVisible()
 })
 
 test('guardar vuelve a la ficha con el aviso', async ({ page }) => {
@@ -862,7 +888,7 @@ test('Editar en Todas las mediciones abre Registrar en esa fecha', async ({ page
   await ir(page, 'Historial')
   await expect(page.getByRole('heading', { name: 'Todas las mediciones · Ana' })).toBeVisible()
   await page.getByRole('button', { name: 'Editar' }).click()
-  await expect(page.getByRole('heading', { name: 'Registrar medición · Ana' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Editar medición · Ana' })).toBeVisible()
   await expect(page.getByLabel('Fecha')).toHaveValue(haceDias(7))
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('72,5')
 })
@@ -946,14 +972,14 @@ test('el aviso de guardado vive en una región que ya existía', async ({ page }
 test('editar una medición antigua no borra el borrador de la nueva', async ({ page }) => {
   await agregarAna(page)
   await medir(page, haceDias(7), '72,5', '88')
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await page.getByLabel('Peso (kg)').fill('70')
   await page.getByRole('button', { name: 'Volver a la ficha' }).click()
   await ir(page, 'Historial')
   await page.getByRole('button', { name: 'Editar' }).click()
   await page.getByLabel('Cintura (cm)').fill('87')
   await page.getByRole('button', { name: /Actualizar medición|Guardar medición/ }).click()
-  await ir(page, 'Medir')
+  await abrirPeso(page)
   await expect(page.getByLabel('Peso (kg)')).toHaveValue('70')
 })
 
@@ -1526,4 +1552,39 @@ test('la ficha dice lo que muestra la cinta y compara con el inicio', async ({ p
   await page.getByRole('button', { name: /Tu semana/ }).click()
   await expect(page.getByRole('heading', { name: 'Lo que dice la cinta' })).toBeVisible()
   await expect(page.getByText(/bajó levemente 0,1 cm/).first()).toBeVisible()
+})
+
+test('medidas con cinta paso a paso, sin pesarse ese día', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 860 })
+  await agregarAna(page)
+  await medir(page, haceDias(7), '72', '90')
+  await abrirPeso(page)
+  await page.getByRole('button', { name: /Medidas con cinta/ }).click()
+  await page.getByRole('button', { name: 'Empezar' }).click()
+  await expect(page.getByRole('heading', { name: 'Cuello', level: 1 })).toBeFocused()
+  await expect(page.getByRole('img', { name: /Cómo medir: cuello/ })).toBeVisible()
+  await page.getByLabel('Cuello en centímetros').fill('36')
+  await page.keyboard.press('Enter')
+  await page.getByRole('button', { name: 'Saltar' }).click()
+  // Atrás vuelve un paso.
+  await page.getByRole('button', { name: 'Atrás' }).click()
+  await expect(page.getByRole('heading', { name: 'Pecho', level: 1 })).toBeVisible()
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Saltar' }).click()
+  await expect(page.getByRole('heading', { name: 'Cintura', level: 1 })).toBeVisible()
+  await expect(page.getByText('La vez pasada: 90,0 cm')).toBeVisible()
+  await page.getByLabel('Cintura en centímetros').fill('89,9')
+  // Hasta el cambio mínimo se ve.
+  await expect(page.getByText(/0,1 cm \(leve\)/)).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(400)
+  await page.keyboard.press('Enter')
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Saltar' }).click()
+  await expect(page.getByRole('button', { name: 'Cintura: 89,9 cm. Cambiar' })).toBeVisible()
+  await page.getByRole('button', { name: 'Guardar medidas' }).click()
+  await expect(page.getByText(/Medidas del .* guardadas/)).toBeVisible()
+  const panel = page.getByRole('region', { name: 'Lo que dice la cinta' })
+  await expect(panel.getByRole('button', { name: /Cintura 89,9 cm, bajó levemente 0,1 cm/ })).toBeVisible()
+  // La ficha muestra el último peso tomado junto al de tendencia.
+  await expect(page.locator('.peso-col.ultimo')).toContainText('72,0')
+  await ir(page, 'Historial')
+  await expect(filas(page).first()).toContainText('–')
 })
