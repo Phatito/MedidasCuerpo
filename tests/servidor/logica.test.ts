@@ -164,8 +164,19 @@ describe('leer una captura con IA', () => {
       { leerCaptura: lector },
     )
 
-  test('exige una sesión', async () => {
-    expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, undefined, async () => ({}))).status).toBe(401)
+  test('sin sesión también lee, con un límite diario por conexión', async () => {
+    const lector = async () => ({ pesoKg: 80 })
+    for (let i = 0; i < 15; i++) expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, undefined, lector)).status).toBe(200)
+    const r = await conIA('POST', '/leer-captura', { imagenes: [imagen] }, undefined, lector)
+    expect(r.status).toBe(429)
+    // Al día siguiente vuelve a poder.
+    ahora += 24 * 60 * MIN
+    expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, undefined, lector)).status).toBe(200)
+  })
+  test('con sesión el límite es mayor', async () => {
+    const token = await cuentaConSesion()
+    const lector = async () => ({ pesoKg: 80 })
+    for (let i = 0; i < 20; i++) expect((await conIA('POST', '/leer-captura', { imagenes: [imagen] }, token, lector)).status).toBe(200)
   })
   test('sin la clave configurada avisa que no está disponible', async () => {
     const token = await cuentaConSesion()

@@ -22,3 +22,10 @@ CREATE TABLE IF NOT EXISTS piezas (
   PRIMARY KEY (usuario, id)
 );
 CREATE INDEX IF NOT EXISTS piezas_version ON piezas (usuario, version);
+-- Cuántas lecturas con IA se hicieron por día (por cuenta, por huella anónima de la conexión y en total). Sin imágenes ni datos.
+CREATE TABLE IF NOT EXISTS uso_ia (
+  clave TEXT NOT NULL,
+  dia TEXT NOT NULL,
+  n INTEGER NOT NULL,
+  PRIMARY KEY (clave, dia)
+);

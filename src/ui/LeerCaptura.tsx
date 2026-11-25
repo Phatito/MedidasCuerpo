@@ -25,6 +25,16 @@ function lectorYaUsado(): boolean {
   }
 }
 
+const LIMITE_LECTOR_MS = 120_000
+const LIMITE_IA_MS = 60_000
+class LectorLento extends Error {}
+function conLimite<T>(promesa: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolver, rechazar) => {
+    const t = setTimeout(() => rechazar(new LectorLento('el lector tardó demasiado')), ms)
+    promesa.then((v) => (clearTimeout(t), resolver(v)), (e) => (clearTimeout(t), rechazar(e)))
+  })
+}
+
 export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) {
   const [leyendo, setLeyendo] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +58,7 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       let conIA: LecturaCaptura | null = null
       if (await puedeLeerConIA()) {
         setConIA(true)
-        conIA = await leerConIA(imagenes).catch(() => null)
+        conIA = await conLimite(leerConIA(imagenes), LIMITE_IA_MS).catch(() => null)
         setConIA(false)
       }
       if (conIA) {
@@ -58,7 +68,8 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       // Varias capturas del mismo informe (por ejemplo, una por cada parte) se leen una tras otra y se juntan.
       const lecturas: LecturaCaptura[] = []
       for (const [i, imagen] of imagenes.entries()) {
-        const { lineas, ancho } = await reconocerImagen(imagen, (f) => vigente.current && setLeyendo((i + f) / imagenes.length))
+        // En algunos teléfonos el lector local se queda pegado: si pasa el tiempo límite, se avisa en vez de esperar para siempre.
+        const { lineas, ancho } = await conLimite(reconocerImagen(imagen, (f) => vigente.current && setLeyendo((i + f) / imagenes.length)), LIMITE_LECTOR_MS)
         lecturas.push(leerCapturaXiaomi(lineas, ancho))
       }
       try {
@@ -73,7 +84,9 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
     } catch (e) {
       if (!vigente.current) return
       setError(
-        e instanceof ImagenChica
+        e instanceof LectorLento
+          ? 'El lector del teléfono tardó demasiado. Revisa tu conexión a internet e inténtalo de nuevo: con conexión, la captura se lee con IA en segundos.'
+          : e instanceof ImagenChica
           ? `Esta imagen es muy pequeña (${e.ancho} × ${e.alto} px) para leer las letras chicas del informe. Suele pasar al mandarla por WhatsApp como foto, que la achica. Pásala sin comprimir (por WhatsApp como documento, por correo o con cable), o haz varias capturas normales del informe y elígelas juntas.`
           : e instanceof ImagenIlegible
             ? ERROR
@@ -106,8 +119,8 @@ export function LeerCaptura({ puedeLeer, onLectura, onLeyendo, pegada }: Props) 
       <h3>Captura de Xiaomi Home</h3>
       <p className="muted small">
         En Xiaomi Home comparte el informe de tu pesada y elige <b>Guardar en Archivos</b>; luego aquí toca el botón y elige <b>Elegir archivo</b> (en
-        Android, <b>Archivos</b>). También sirven varias capturas normales del informe elegidas juntas. Con tu cuenta iniciada, la captura se envía a la
-        IA de Google (Gemini) a través de tu servidor para leerla, y no se guarda; sin cuenta se lee aquí mismo y no sale de tu dispositivo.
+        Android, <b>Archivos</b>). También sirven varias capturas normales del informe elegidas juntas. Con conexión, la captura se envía a la IA de
+        Google (Gemini) a través del servidor de Mesura para leerla, y no se guarda; sin conexión se lee aquí mismo y no sale de tu dispositivo.
       </p>
       <div className="row">
         <label className="btn primary grande archivo-btn">

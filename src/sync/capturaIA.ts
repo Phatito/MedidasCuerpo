@@ -7,9 +7,9 @@ const ANCHO_MAXIMO = 1280
 const ALTO_MAXIMO = 14000
 const MAX_BASE64 = 3_800_000
 
-/** Hay IA para leer capturas solo con la cuenta iniciada y conexión. */
+/** Hay IA para leer capturas con conexión (con o sin cuenta; con cuenta el límite diario es mayor). */
 export async function puedeLeerConIA(): Promise<boolean> {
-  return hayServidor() && navigator.onLine && (await leerSesion()) != null
+  return hayServidor() && navigator.onLine
 }
 
 /**
@@ -18,9 +18,8 @@ export async function puedeLeerConIA(): Promise<boolean> {
  */
 export async function leerConIA(imagenes: Blob[]): Promise<LecturaCaptura | null> {
   const sesion = await leerSesion()
-  if (!sesion) return null
   const preparadas = await Promise.all(imagenes.map(aJpeg))
-  const r = await llamar<{ lectura: unknown }>('POST', '/leer-captura', { cuerpo: { imagenes: preparadas }, token: sesion.token })
+  const r = await llamar<{ lectura: unknown }>('POST', '/leer-captura', { cuerpo: { imagenes: preparadas }, token: sesion?.token })
   return lecturaDesdeIA(r.lectura)
 }
 

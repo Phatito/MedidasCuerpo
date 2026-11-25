@@ -26,6 +26,8 @@ export interface Almacen {
   subirPiezas(usuario: string, piezas: Pieza[]): Promise<string[]>
   piezasDesde(usuario: string, desde: number, limite: number): Promise<(Pieza & { version: number })[]>
   borrarUsuario(usuario: string): Promise<void>
+  /** Suma un uso de la lectura con IA a `clave` en `dia` (AAAA-MM-DD) y devuelve el total del día. */
+  sumarUso(clave: string, dia: string): Promise<number>
 }
 
 export class AlmacenMemoria implements Almacen {
@@ -33,6 +35,14 @@ export class AlmacenMemoria implements Almacen {
   private sesiones = new Map<string, { usuario: string; vence: number }>()
   private piezas = new Map<string, Map<string, Pieza & { version: number }>>()
   private versiones = new Map<string, number>()
+  private usos = new Map<string, number>()
+
+  async sumarUso(clave: string, dia: string) {
+    const k = `${dia}|${clave}`
+    const n = (this.usos.get(k) ?? 0) + 1
+    this.usos.set(k, n)
+    return n
+  }
 
   async usuario(usuario: string) {
     return this.usuarios.get(usuario) ?? null

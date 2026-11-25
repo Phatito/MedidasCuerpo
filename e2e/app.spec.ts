@@ -45,6 +45,12 @@ async function irAFicha(page: Page) {
   await abrirPerfiles(page)
   await perfiles(page).locator('[aria-current="true"]').click()
 }
+// Por defecto, las pruebas leen las capturas con el lector local: se corta la IA del servidor de pruebas.
+// La prueba de la IA la vuelve a permitir.
+test.beforeEach(async ({ page }) => {
+  await page.route('**/leer-captura', (r) => r.abort())
+})
+
 async function ir(page: Page, destino: 'Ficha' | 'Medir' | 'Historial' | 'Familia' | 'Datos' | 'Evolución' | 'Cifras') {
   if (destino === 'Ficha') return irAFicha(page)
   // El gráfico vive en la pantalla de cada medida: se entra por el peso.
@@ -983,7 +989,9 @@ test('lee la captura de Xiaomi Home y rellena Registrar sin guardar', async ({ p
   test.setTimeout(120_000)
   const ajenas: string[] = []
   page.on('request', (r) => {
-    if (!r.url().startsWith('http://localhost:4173/') && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) ajenas.push(r.url())
+    // La única salida permitida es la lectura con IA del propio servidor de Mesura (aquí cortada, para usar el lector local).
+    const propia = r.url().startsWith('http://localhost:8787/leer-captura')
+    if (!propia && !r.url().startsWith('http://localhost:4173/') && !r.url().startsWith('data:') && !r.url().startsWith('blob:')) ajenas.push(r.url())
   })
   await agregarAna(page)
   await ir(page, 'Medir')
@@ -1480,10 +1488,10 @@ test('se pueden elegir varias capturas del mismo informe y se juntan', async ({ 
   await expect(page.getByLabel('Metabolismo basal (kcal)')).not.toHaveValue('')
 })
 
-test('con la cuenta iniciada, la captura se lee con IA a través del servidor', async ({ page }) => {
+test('con conexión, la captura se lee con IA a través del servidor, sin necesidad de cuenta', async ({ page }) => {
   test.setTimeout(60_000)
+  await page.unroute('**/leer-captura')
   await agregarAna(page)
-  await crearCuentaE2E(page, `ia${Date.now() % 100000}`)
   await ir(page, 'Medir')
   // Una imagen chica, que el lector local no puede leer: la IA (falsa en el servidor de prueba) sí.
   await leerCaptura(page, fileURLToPath(new URL('./fixtures/captura-xiaomi-whatsapp.jpg', import.meta.url)))

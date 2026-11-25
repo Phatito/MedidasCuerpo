@@ -16,6 +16,10 @@ const MAX_CUERPO_CAPTURA = 18 * 1024 * 1024
 const MAX_IMAGENES = 4
 const MAX_IMAGEN = 4 * 1024 * 1024
 const TIPOS_IMAGEN = new Set(['image/jpeg', 'image/png', 'image/webp'])
+// Límites diarios de la lectura con IA, para que nadie agote la clave de Gemini.
+const LIMITE_ANONIMO = 15
+const LIMITE_CUENTA = 40
+const LIMITE_TOTAL = 300
 // Subida: 40 piezas por llamada (una consulta cada una) para no pasar el límite de 50 consultas por petición del plan gratuito de D1.
 export const MAX_SUBIDA = 40
 // Bajada: una sola consulta, de a 500.
@@ -131,6 +135,36 @@ export async function manejar(req: Request, almacen: Almacen, ahora: number, ser
       return json(200, { token }, origen)
     }
 
+    if (ruta === '/leer-captura' && req.method === 'POST') {
+      if (!servicios.leerCaptura) return json(503, { error: 'La lectura con IA no está configurada' }, origen)
+      const c = await leerJson(req, MAX_CUERPO_CAPTURA)
+      if (!c.ok) return vacia(c.estado, origen)
+      const imagenes = ((c.dato ?? {}) as { imagenes?: unknown }).imagenes
+      const validas =
+        Array.isArray(imagenes) &&
+        imagenes.length >= 1 &&
+        imagenes.length <= MAX_IMAGENES &&
+        imagenes.every((i: ImagenCaptura) => TIPOS_IMAGEN.has(i?.tipo) && typeof i?.datos === 'string' && i.datos.length <= MAX_IMAGEN && bytesDe(i.datos) > 0)
+      if (!validas) return json(400, { error: 'Se esperaban de 1 a 4 imágenes JPG, PNG o WebP' }, origen)
+      // Con cuenta, el límite es por cuenta; sin cuenta, por una huella anónima de la conexión (nunca se guarda la dirección).
+      const quien = await usuarioDeToken(req, almacen, ahora)
+      const dia = new Date(ahora).toISOString().slice(0, 10)
+      const ip = req.headers.get('CF-Connecting-IP') ?? 'local'
+      const clave = quien ? `cuenta:${quien.usuario}` : `anonimo:${(await sha256('mesura-ia|' + ip)).slice(0, 22)}`
+      const usos = await almacen.sumarUso(clave, dia)
+      const total = await almacen.sumarUso('total', dia)
+      if (usos > (quien ? LIMITE_CUENTA : LIMITE_ANONIMO) || total > LIMITE_TOTAL) {
+        return json(429, { error: 'Se alcanzó el límite de lecturas con IA de hoy. Mañana vuelve a funcionar; mientras, se usa el lector del teléfono.' }, origen)
+      }
+      try {
+        const lectura = await servicios.leerCaptura((imagenes as ImagenCaptura[]).map(({ tipo, datos }) => ({ tipo, datos })))
+        return json(200, { lectura }, origen)
+      } catch (e) {
+        // El detalle (sin la clave) sirve para diagnosticar: modelo inexistente, clave inválida, cuota agotada.
+        return json(502, { error: 'No se pudo leer la captura con IA', detalle: String((e as Error)?.message ?? e).slice(0, 300) }, origen)
+      }
+    }
+
     // De aquí en adelante, todo exige una sesión.
     const quien = await usuarioDeToken(req, almacen, ahora)
     if (!quien) return json(401, { error: 'Sesión no válida' }, origen)
@@ -171,26 +205,6 @@ export async function manejar(req: Request, almacen: Almacen, ahora: number, ser
         },
         origen,
       )
-    }
-
-    if (ruta === '/leer-captura' && req.method === 'POST') {
-      if (!servicios.leerCaptura) return json(503, { error: 'La lectura con IA no está configurada' }, origen)
-      const c = await leerJson(req, MAX_CUERPO_CAPTURA)
-      if (!c.ok) return vacia(c.estado, origen)
-      const imagenes = ((c.dato ?? {}) as { imagenes?: unknown }).imagenes
-      const validas =
-        Array.isArray(imagenes) &&
-        imagenes.length >= 1 &&
-        imagenes.length <= MAX_IMAGENES &&
-        imagenes.every((i: ImagenCaptura) => TIPOS_IMAGEN.has(i?.tipo) && typeof i?.datos === 'string' && i.datos.length <= MAX_IMAGEN && bytesDe(i.datos) > 0)
-      if (!validas) return json(400, { error: 'Se esperaban de 1 a 4 imágenes JPG, PNG o WebP' }, origen)
-      try {
-        const lectura = await servicios.leerCaptura((imagenes as ImagenCaptura[]).map(({ tipo, datos }) => ({ tipo, datos })))
-        return json(200, { lectura }, origen)
-      } catch (e) {
-        // El detalle (sin la clave) sirve para diagnosticar: modelo inexistente, clave inválida, cuota agotada.
-        return json(502, { error: 'No se pudo leer la captura con IA', detalle: String((e as Error)?.message ?? e).slice(0, 300) }, origen)
-      }
     }
 
     if (ruta === '/cuenta' && req.method === 'DELETE') {

@@ -30,6 +30,14 @@ export class AlmacenD1 implements Almacen {
     this.db = db
   }
 
+  async sumarUso(clave: string, dia: string): Promise<number> {
+    const f = await this.db
+      .prepare('INSERT INTO uso_ia (clave, dia, n) VALUES (?, ?, 1) ON CONFLICT (clave, dia) DO UPDATE SET n = n + 1 RETURNING n')
+      .bind(clave, dia)
+      .first<{ n: number }>()
+    return f?.n ?? 1
+  }
+
   async usuario(usuario: string): Promise<Usuario | null> {
     const f = await this.db.prepare('SELECT * FROM usuarios WHERE usuario = ?').bind(usuario).first<FilaUsuario>()
     return f ? { usuario: f.usuario, sal: f.sal, hashAcceso: f.hash_acceso, fallos: f.fallos, bloqueadoHasta: f.bloqueado_hasta, creado: f.creado } : null
