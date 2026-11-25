@@ -956,7 +956,7 @@ button.registro-tipo > .icono:last-child { width: 18px; height: 18px; color: var
 @keyframes subir { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* Pestañas: abajo y fijas en el teléfono; bajo el encabezado en el PC. */
-.pestanas { position: fixed; inset: auto 0 0 0; z-index: 40; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--edge); padding-bottom: env(safe-area-inset-bottom); }
+.pestanas { position: fixed; inset: auto 0 0 0; z-index: 30; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--edge); padding-bottom: env(safe-area-inset-bottom); }
 .pestanas-fila { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 640px; margin: 0 auto; }
 .pestana {
   position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
@@ -988,3 +988,5 @@ main.con-pestanas { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .pestana-mas-texto { font-size: 0.95rem; }
   main.con-pestanas { padding-bottom: 32px; }
 }
+/* El encabezado (con el menú de perfiles) va sobre las pestañas; los diálogos, sobre todo. */
+.top { position: relative; z-index: 35; }
