@@ -11,6 +11,12 @@ const TRAZOS = {
   editar: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4',
   // Muesca del molde con una línea: "esta semana".
   semana: 'M4 7h16M4 12h10M4 17h6M17 14l3 3-3 3',
+  // Flechas y señales del veredicto de la cinta.
+  baja: 'M12 5v14M6 13l6 6 6-6',
+  sube: 'M12 19V5M6 11l6-6 6 6',
+  igual: 'M6 9h12M6 15h12',
+  cambio: 'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4',
+  alerta: 'M12 4l9 16H3zM12 10v4M12 17v.5',
   // Báscula: plataforma con su visor.
   bascula: 'M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 9h6M12 9l1.5-1.5',
   // Cinta métrica enrollada con su punta.

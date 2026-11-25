@@ -1541,7 +1541,7 @@ test('la ficha dice lo que muestra la cinta y compara con el inicio', async ({ p
   await medir(page, haceDias(0), '72,8', '88,4')
   await irAFicha(page)
   const panel = page.getByRole('region', { name: 'Lo que dice la cinta' })
-  await expect(panel.getByText('Estás perdiendo grasa')).toBeVisible()
+  await expect(panel.getByText('¡Vas perdiendo grasa!')).toBeVisible()
   // Hasta el cambio mínimo se hace saber.
   const cintura = panel.getByRole('button', { name: /Cintura 88,4 cm, bajó levemente 0,1 cm/ })
   await expect(cintura).toBeVisible()

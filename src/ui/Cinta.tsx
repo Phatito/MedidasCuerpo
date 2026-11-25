@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { Veredicto as TipoVeredicto } from '../domain/cinta'
 import { NOMBRE_ZONA, sentidoCambio, valorZona, zonaDeCampo, type BaseCinta, type CambioCinta, type LecturaCinta } from '../domain/cinta'
 import type { MedidaFigura } from '../domain/ficha'
 import { fechaLegible, formatear } from '../domain/numbers'
@@ -101,16 +102,10 @@ export function CabezaCinta({ lectura, base, onBase }: CabezaProps) {
           ))}
         </div>
       </div>
-      <div className={`cinta-veredicto ${lectura.tono}`}>
-        <p className="cinta-veredicto-t">{lectura.titulo}</p>
-        <p className="small">{lectura.texto}</p>
-        {lectura.contraste && <p className={`small cinta-contraste ${lectura.contraste.coincide ? 'si' : 'no'}`}>{lectura.contraste.texto}</p>}
-        {lectura.veredicto !== 'faltan' && lectura.faltanMedidas.length > 0 && (
-          <p className="muted small">
-            Para leer mejor tu cuerpo, mide también: {lectura.faltanMedidas.map((z) => NOMBRE_ZONA[z].toLowerCase()).join(', ')}.
-          </p>
-        )}
-      </div>
+      <Veredicto lectura={lectura} />
+      {lectura.veredicto !== 'faltan' && lectura.faltanMedidas.length > 0 && (
+        <p className="muted small cinta-faltan">Para leer mejor tu cuerpo, mide también: {lectura.faltanMedidas.map((z) => NOMBRE_ZONA[z].toLowerCase()).join(', ')}.</p>
+      )}
     </>
   )
 }
@@ -141,5 +136,57 @@ export function FilasCinta({ lectura, onVerMedida }: { lectura: LecturaCinta; on
         </li>
       ))}
     </ul>
+  )
+}
+
+const SELLO: Record<TipoVeredicto, 'baja' | 'sube' | 'igual' | 'cambio' | 'alerta'> = {
+  'pierde-grasa': 'baja',
+  'gana-grasa': 'sube',
+  recomposicion: 'cambio',
+  'pierde-musculo': 'alerta',
+  'gana-musculo': 'sube',
+  estable: 'igual',
+  faltan: 'igual',
+}
+
+/**
+ * El veredicto de la cinta en corto: un sello que aparece con un pequeño rebote, el titular y una o dos frases.
+ * Con `detalle`, un botón despliega cada zona con su cambio (para quien quiere el número exacto).
+ */
+export function Veredicto({ lectura, detalle = false }: { lectura: LecturaCinta; detalle?: boolean }) {
+  const [abierto, setAbierto] = useState(false)
+  const zonas = [...lectura.cambios].sort((a, b) => Math.abs(b.cambio) - Math.abs(a.cambio))
+  return (
+    <div key={`${lectura.veredicto}-${lectura.desde}-${lectura.base}`} className={`veredicto ${lectura.tono}`}>
+      <span className="veredicto-sello" aria-hidden="true">
+        <Icono nombre={SELLO[lectura.veredicto]} />
+      </span>
+      <div className="veredicto-cuerpo">
+        <p className="veredicto-t">{lectura.titulo}</p>
+        <p className="veredicto-x">{lectura.texto}</p>
+        {lectura.contraste && (
+          <p className={`veredicto-bascula ${lectura.contraste.coincide ? 'si' : 'no'}`}>
+            <Icono nombre={lectura.contraste.coincide ? 'si' : 'alerta'} /> {lectura.contraste.texto}
+          </p>
+        )}
+        {detalle && zonas.length > 0 && (
+          <>
+            <button type="button" className="veredicto-mas" aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>
+              {abierto ? 'Ocultar zonas' : `Ver cada zona (${zonas.length})`}
+            </button>
+            {abierto && (
+              <ul className="veredicto-zonas num">
+                {zonas.map((c, k) => (
+                  <li key={c.zona} className={`cinta-cambio ${c.sentido}${c.leve ? ' leve' : ''}`} style={{ animationDelay: `${k * 0.04}s` }}>
+                    {NOMBRE_ZONA[c.zona]} {c.cambio === 0 ? '=' : <Muesca cambio={c.cambio} />} {formatear(Math.abs(c.cambio))} cm
+                    <span className="sr-only">, {textoCambio(c)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   )
 }

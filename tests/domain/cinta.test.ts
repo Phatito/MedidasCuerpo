@@ -114,3 +114,23 @@ describe('lectura de la cinta', () => {
     expect(l.faltanMedidas).toEqual(expect.arrayContaining(['brazo', 'muslo']))
   })
 })
+
+describe('mensajes cortos y amigables', () => {
+  test('cintura que sube: titular, el cambio clave con su fecha y qué hacer; el resto, nombrado sin números', () => {
+    const l = leerCinta(persona(), [
+      m('2026-10-30', { cinturaCm: 90, caderaCm: 100, pechoCm: 98, brazoCm: 32, musloCm: 55 }),
+      m('2026-11-13', { cinturaCm: 91, caderaCm: 102, pechoCm: 100, brazoCm: 32, musloCm: 57.5 }),
+    ])!
+    expect(l.titulo).toBe('Ojo con la cintura')
+    expect(l.texto).toBe('Subió 1,0 cm desde el 30/10, junto con cadera, pecho y muslos. Si no buscas subir, ajusta un poco lo que comes esta semana.')
+  })
+
+  test('pierde grasa con brazos estables', () => {
+    const l = leerCinta(persona(), [
+      m('2026-11-09', { pesoKg: 80, cinturaCm: 90, brazoCm: 34 }),
+      m('2026-11-16', { pesoKg: 79, cinturaCm: 89.3, brazoCm: 34 }),
+    ])!
+    expect(l.titulo).toBe('¡Vas perdiendo grasa!')
+    expect(l.texto).toBe('Tu cintura bajó 0,7 cm desde el 09/11 y tus brazos se mantienen. Sigue así.')
+  })
+})

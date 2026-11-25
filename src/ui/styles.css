@@ -913,3 +913,44 @@ button.registro-tipo > .icono:last-child { width: 18px; height: 18px; color: var
 }
 .comp-barra { max-width: 30px; }
 @media (min-width: 900px) { .comp { height: 130px; } }
+
+/* Veredicto de la cinta: sello animado, titular y una o dos frases. */
+.veredicto {
+  position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: 14px; border-radius: 14px; border: 1px solid var(--edge);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--costura) 10%, var(--card)), var(--card) 60%);
+}
+.veredicto.bien { background: linear-gradient(135deg, color-mix(in srgb, var(--good) 16%, var(--card)), var(--card) 62%); border-color: color-mix(in srgb, var(--good) 40%, var(--edge)); }
+.veredicto.atencion { background: linear-gradient(135deg, color-mix(in srgb, var(--warn) 16%, var(--card)), var(--card) 62%); border-color: color-mix(in srgb, var(--warn) 40%, var(--edge)); }
+.veredicto-sello {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: var(--soft); color: var(--costura); border: 2px solid currentColor;
+}
+.veredicto.bien .veredicto-sello { color: var(--good); }
+.veredicto.atencion .veredicto-sello { color: var(--warn); }
+.veredicto-sello .icono { width: 22px; height: 22px; stroke-width: 2.4; }
+.veredicto-cuerpo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.veredicto-cuerpo p { margin: 0; }
+.veredicto-t { font-size: 1.12rem; font-weight: 800; line-height: 1.25; }
+.veredicto.bien .veredicto-t { color: var(--good); }
+.veredicto.atencion .veredicto-t { color: var(--warn); }
+.veredicto-x { font-size: 0.95rem; line-height: 1.45; }
+.veredicto-bascula { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; font-size: 0.8rem; font-weight: 700; padding: 3px 10px 3px 6px; border-radius: 999px; background: var(--soft); color: var(--dim); margin-top: 4px !important; }
+.veredicto-bascula .icono { width: 14px; height: 14px; }
+.veredicto-bascula.si .icono { color: var(--good); }
+.veredicto-bascula.no { color: var(--warn); }
+.veredicto-mas { align-self: flex-start; font: inherit; font-size: 0.85rem; font-weight: 800; color: var(--costura); background: none; border: 0; padding: 10px 0 4px; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.veredicto-zonas { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.veredicto-zonas li { justify-content: flex-start; padding: 4px 10px; border-radius: 999px; background: var(--soft); font-size: 0.85rem; }
+.cinta-faltan { margin: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .veredicto-sello { animation: sello 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .veredicto-sello::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid currentColor; animation: onda 1.2s ease-out 0.35s both; }
+  .veredicto-t { animation: subir 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s both; }
+  .veredicto-x { animation: subir 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.22s both; }
+  .veredicto-bascula { animation: subir 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.32s both; }
+  .veredicto-zonas li { animation: subir 0.3s ease-out both; }
+}
+@keyframes sello { from { transform: scale(0.4) rotate(-25deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes onda { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.8); opacity: 0; } }
+@keyframes subir { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }

@@ -108,13 +108,6 @@ function plural(z: Zona, m: Medicion) {
   return l != null && (m[l.izq] != null || m[l.der] != null)
 }
 
-function frase(c: CambioCinta, ultima: Medicion): string {
-  const pl = plural(c.zona, ultima)
-  const nombre = (pl ? 'tus ' : 'tu ') + (pl ? NOMBRE_ZONA[c.zona].toLowerCase() : NOMBRE_ZONA[c.zona].toLowerCase().replace(/s$/, ''))
-  if (c.cambio === 0) return `${nombre} sin cambio`
-  const verbo = c.cambio < 0 ? (pl ? 'bajaron' : 'bajó') : pl ? 'subieron' : 'subió'
-  return `${nombre} ${verbo}${c.leve ? ' levemente' : ''} ${formatear(Math.abs(c.cambio))} cm`
-}
 
 const kg = (x: number) => `${x < 0 ? '−' : '+'}${formatear(Math.abs(x))} kg`
 
@@ -168,27 +161,64 @@ export function leerCinta(p: Persona, mediciones: Medicion[], base: BaseCinta = 
   const tono: Sentido =
     veredicto === 'pierde-grasa' || veredicto === 'recomposicion' || veredicto === 'gana-musculo' ? 'bien' : veredicto === 'pierde-musculo' || veredicto === 'gana-grasa' ? 'atencion' : 'neutro'
   const hayCambios = cambios.some((c) => c.cambio !== 0)
-  const TITULO: Record<Veredicto, string> = {
-    'pierde-grasa': extremidades.length && !bajanExt ? 'Pierdes grasa y conservas músculo' : 'Estás perdiendo grasa',
-    recomposicion: 'Recomposición: menos grasa, más músculo',
-    'pierde-musculo': 'Posible pérdida de músculo',
-    'gana-grasa': 'Tu cintura está subiendo',
-    'gana-musculo': 'Estás ganando músculo',
-    estable: hayCambios ? 'Cambios sin un patrón claro' : 'Tu cuerpo se mantiene',
-    faltan: 'Falta una segunda medición con cinta',
-  }
-  const CIERRE: Record<Veredicto, string> = {
-    'pierde-grasa': 'La cintura es la mejor señal de grasa: vas bien.',
-    recomposicion: 'El peso casi no se movió, pero tu cuerpo sí: cambias grasa por músculo.',
-    'pierde-musculo': 'Brazos o muslos bajan junto con el peso: puede ser músculo. Sube la proteína y entrena fuerza.',
-    'gana-grasa': 'La cintura es la mejor señal de grasa: si no buscas subir, revisa cuánto comes.',
-    'gana-musculo': 'Brazos o muslos suben sin que suba la cintura: buena señal de músculo.',
-    estable: hayCambios ? 'Sigue midiendo igual cada semana para ver hacia dónde va.' : 'Tus medidas no cambiaron.',
-    faltan: 'Mide tu cintura, cadera, brazos y muslos la próxima semana para comparar.',
-  }
+  // Mensaje corto: un titular cercano, el cambio que más importa (con su número y fecha) y qué hacer.
+  // El detalle de cada zona vive en las filas y tarjetas, no en el párrafo.
   const desde = ref?.fecha ?? null
-  const lista = cambios.map((c) => frase(c, ult)).join(', ')
-  const texto = veredicto === 'faltan' ? CIERRE.faltan : `Desde el ${fechaLegible(desde!).slice(0, 5)}: ${lista}. ${CIERRE[veredicto]}`
+  const dd = desde ? fechaLegible(desde).slice(0, 5) : ''
+  const cuanto = (c: CambioCinta) => `${c.leve ? 'levemente ' : ''}${formatear(Math.abs(c.cambio))} cm`
+  const nombreDe = (c: CambioCinta) => (plural(c.zona, ult) ? `tus ${NOMBRE_ZONA[c.zona].toLowerCase()}` : `tu ${NOMBRE_ZONA[c.zona].toLowerCase().replace(/s$/, '')}`)
+  const verbo = (c: CambioCinta) => (c.cambio < 0 ? (plural(c.zona, ult) ? 'bajaron' : 'bajó') : plural(c.zona, ult) ? 'subieron' : 'subió')
+  const mayor = (lista: CambioCinta[]) => [...lista].sort((x, y) => Math.abs(y.cambio) - Math.abs(x.cambio))[0]
+  const lista = (cs: CambioCinta[]) => {
+    const n = cs.map((c) => NOMBRE_ZONA[c.zona].toLowerCase())
+    return n.length <= 1 ? n.join('') : `${n.slice(0, -1).join(', ')} y ${n[n.length - 1]}`
+  }
+  const cintura = de('cintura')
+  const mismas = (signo: number, salvo: CambioCinta | undefined) => cambios.filter((c) => c !== salvo && Math.sign(c.cambio) === signo)
+  const MAYUS = (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
+
+  let titulo: string
+  let texto: string
+  switch (veredicto) {
+    case 'gana-grasa': {
+      const otras = mismas(1, cintura)
+      titulo = 'Ojo con la cintura'
+      texto = `Subió ${cuanto(cintura!)} desde el ${dd}${otras.length ? `, junto con ${lista(otras)}` : ''}. Si no buscas subir, ajusta un poco lo que comes esta semana.`
+      break
+    }
+    case 'pierde-grasa': {
+      const clave = cintura && cintura.cambio < 0 ? cintura : de('cadera')!
+      const ext = extremidades.length ? (subenExt ? ` y tus ${lista(extremidades.filter((c) => c.cambio > 0))} subieron` : ` y tus ${lista(extremidades)} se mantienen`) : ''
+      titulo = '¡Vas perdiendo grasa!'
+      texto = `${MAYUS(nombreDe(clave))} ${verbo(clave)} ${cuanto(clave)} desde el ${dd}${ext}. Sigue así.`
+      break
+    }
+    case 'recomposicion': {
+      const suben = extremidades.filter((c) => c.cambio > 0)
+      titulo = 'Cambias grasa por músculo'
+      texto = `El peso casi no se movió, pero la cintura bajó ${cuanto(cintura!)}${suben.length ? ` y tus ${lista(suben)} subieron` : ''}. Muy buena señal.`
+      break
+    }
+    case 'pierde-musculo': {
+      const c = mayor(extremidades.filter((x) => x.cambio < 0))
+      titulo = 'Cuida tu músculo'
+      texto = `${MAYUS(nombreDe(c))} ${verbo(c)} ${cuanto(c)} junto con el peso. Suma proteína y entrena fuerza esta semana.`
+      break
+    }
+    case 'gana-musculo': {
+      const c = mayor(extremidades.filter((x) => x.cambio > 0))
+      titulo = 'Estás ganando músculo'
+      texto = `${MAYUS(nombreDe(c))} ${verbo(c)} ${cuanto(c)} y la cintura no. Vas bien.`
+      break
+    }
+    case 'estable':
+      titulo = hayCambios ? 'Cambios mínimos' : 'Todo se mantiene'
+      texto = hayCambios ? `Pequeños movimientos desde el ${dd}, sin un patrón claro. Sigue midiendo cada semana.` : `Sin cambios desde el ${dd}. Sigue midiendo cada semana.`
+      break
+    default:
+      titulo = 'Falta una segunda medición con cinta'
+      texto = 'Mide cintura, cadera, brazos y muslos la próxima semana para comparar.'
+  }
 
   // Contraste con la báscula: solo con % de grasa medido (no estimado con la cinta) en las dos fechas.
   let contraste: LecturaCinta['contraste'] = null
@@ -203,11 +233,11 @@ export function leerCinta(p: Persona, mediciones: Medicion[], base: BaseCinta = 
       contraste = {
         coincide,
         texto: coincide
-          ? `La báscula coincide: grasa ${kg(dg)}, masa magra ${kg(dm)}.`
-          : `La báscula dice otra cosa (grasa ${kg(dg)}, masa magra ${kg(dm)}). Manda la cinta: el % de la báscula varía con el agua del día y la cinta mide tu cuerpo directamente.`,
+          ? `La báscula coincide (grasa ${kg(dg)}).`
+          : `La báscula dice otra cosa (grasa ${kg(dg)}): confía en la cinta, la báscula varía con el agua del día.`,
       }
     }
   }
 
-  return { fecha: ult.fecha, desde, base, cambios, veredicto, tono, titulo: TITULO[veredicto], texto, contraste, faltanMedidas, dPesoKg: r1(dPeso), dCinturaCm: dCintura }
+  return { fecha: ult.fecha, desde, base, cambios, veredicto, tono, titulo, texto, contraste, faltanMedidas, dPesoKg: r1(dPeso), dCinturaCm: dCintura }
 }
